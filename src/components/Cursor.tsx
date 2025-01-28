@@ -5,7 +5,9 @@ import gsap from 'gsap';
 
 const Cursor = () => {
     const cursorFollowerRef = useRef(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
 
     useEffect(() => {
         const checkMobile = () => {
@@ -27,8 +29,32 @@ const Cursor = () => {
 
         if (!followerElement) {
             console.warn('Follower element is not defined.');
-            return; // Prevent further execution if refs are not assigned
+            return;
         }
+
+        const resetInactivityTimer = () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+
+            // Only reset scale if not hovering
+            if (!isHovering) {
+                gsap.to(followerElement, {
+                    scale: 1,
+                    duration: 0.3,
+                });
+            }
+
+            timeoutRef.current = setTimeout(() => {
+                // Only scale to 0 if not hovering
+                if (!isHovering) {
+                    gsap.to(followerElement, {
+                        scale: 0,
+                        duration: 0.3,
+                    });
+                }
+            }, 2000);
+        };
 
         const moveCursor = (e: { clientX: number; clientY: number; }) => {
             gsap.to(followerElement, {
@@ -38,6 +64,7 @@ const Cursor = () => {
                 y: e.clientY - 10,
                 ease: 'circ.out',
             });
+            resetInactivityTimer();
         };
 
         if (!isMobile) {
@@ -45,37 +72,45 @@ const Cursor = () => {
 
             return () => {
                 window.removeEventListener('mousemove', moveCursor);
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
             };
         }
-    }, [isMobile]);
+    }, [isMobile, isHovering]);
 
     useEffect(() => {
         const cursorHovers = document.querySelectorAll('.cursor-hover');
 
-        cursorHovers.forEach((cursorHover) => {
-            cursorHover.addEventListener('mouseover', () => {
-                if (!isMobile) {
-                    gsap.to(cursorFollowerRef.current, {
-                        scale: 3,
-                        duration: 0.3,
-                    });
-                }
-            });
+        const handleMouseOver = () => {
+            if (!isMobile) {
+                setIsHovering(true);
+                gsap.to(cursorFollowerRef.current, {
+                    scale: 3,
+                    duration: 0.3,
+                });
+            }
+        };
 
-            cursorHover.addEventListener('mouseleave', () => {
-                if (!isMobile) {
-                    gsap.to(cursorFollowerRef.current, {
-                        scale: 1,
-                        duration: 0.3,
-                    });
-                }
-            });
+        const handleMouseLeave = () => {
+            if (!isMobile) {
+                setIsHovering(false);
+                gsap.to(cursorFollowerRef.current, {
+                    scale: 1,
+                    duration: 0.3,
+                });
+            }
+        };
+
+        cursorHovers.forEach((cursorHover) => {
+            cursorHover.addEventListener('mouseover', handleMouseOver);
+            cursorHover.addEventListener('mouseleave', handleMouseLeave);
         });
 
         return () => {
             cursorHovers.forEach((cursorHover) => {
-                cursorHover.removeEventListener('mouseover', () => { });
-                cursorHover.removeEventListener('mouseleave', () => { });
+                cursorHover.removeEventListener('mouseover', handleMouseOver);
+                cursorHover.removeEventListener('mouseleave', handleMouseLeave);
             });
         };
     }, [isMobile]);

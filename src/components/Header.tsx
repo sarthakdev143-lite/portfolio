@@ -10,17 +10,17 @@ const Header = () => {
                         </li>
                     </section>
                     <section className='text-black flex flex-grow justify-center gap-8'>
-                        <a href="https://github.com/sarthakdev143" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-90'>
+                        <a href="https://github.com/sarthakdev143" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-95'>
                             <li>
                                 <i className='ri-github-fill'></i>
                             </li>
                         </a>
-                        <a href="https://linkedin.com/in/sarthak-parulekar/" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-90'>
+                        <a href="https://linkedin.com/in/sarthak-parulekar/" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-95'>
                             <li>
                                 <i className='ri-linkedin-fill'></i>
                             </li>
                         </a>
-                        <a href="https://instagram.com/_sarthak.parulekar" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-90'>
+                        <a href="https://instagram.com/_sarthak.parulekar" rel="noreferrer" target='_blank' className='cursor-hover text-[2rem] text-black bg-white w-[3.75rem] h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-95'>
                             <li>
                                 <i className='ri-instagram-line'></i>
                             </li>
