@@ -90,7 +90,7 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
             img.src = imgUrl;
             promises.push(new Promise((resolve) => {
                 img.onload = () => {
-                    setLoadingProgress((_prev) => Math.min(100, (i / frames.current.maxIndex) * 100));
+                    setLoadingProgress(() => Math.min(100, (i / frames.current.maxIndex) * 100));
                     resolve(img);
                 };
             }));
