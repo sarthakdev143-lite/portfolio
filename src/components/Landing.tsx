@@ -163,12 +163,12 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
                 progress={loadingProgress}
             />
             <section className='w-full h-fit flex flex-col items-center relative after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-gradient-to-b after:from-transparent after:via-transparent after:to-[#090A0C]'>
-                <figcaption className='z-10 text-[clamp(2rem,_2vw,_3rem)] text-white'>&ldquo;Who&apos;s Shaping the Web?&rdquo;</figcaption>
+                <figcaption className='z-10 text-[clamp(1.5rem,_2vw,_3rem)] text-white'>&ldquo;Who&apos;s Shaping the Web?&rdquo;</figcaption>
                 <MyCanvas canvasRef={canvasRef} />
             </section>
             {!infinite && (
-                <div className="overflow-hidden">
-                    <h1 className='text-white whitespace-nowrap flex ml-[-12%] font-[Caveat] font-thin text-[clamp(3rem,3.5vw,3.5vw)]'>
+                <div className="nameScrollDiv overflow-hidden">
+                    <h1 className='nameScroll text-white whitespace-nowrap flex ml-[-12%] font-[Caveat] font-thin text-[clamp(3rem,3.5vw,3.5vw)]'>
                         Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar
                     </h1>
                 </div>

@@ -32,7 +32,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isLoading, progress = 0 }
                 document.body.style.width = '';
                 // Reset scroll position
                 window.scrollTo(0, 0);
-            }, 1000);
+            }, 400);
 
             return () => clearTimeout(timer);
         }
