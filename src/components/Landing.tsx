@@ -32,6 +32,7 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
     const [, setImages] = useState<HTMLImageElement[]>([]);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
+    const lenisRef = useRef<any>(null);
     const frames = useRef({ currentIndex: 0, maxIndex: 257 });
 
     const loadImages = useCallback((index: number, imgs: HTMLImageElement[]) => {
@@ -100,28 +101,35 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
         loadImages(frames.current.currentIndex, loadedImages);
         startAnimation(loadedImages);
 
-        // Finish loading
+        // Wait for a small delay before removing loading screen
+        await new Promise(resolve => setTimeout(resolve, 500));
         setIsLoading(false);
+
+        // Initialize Lenis after loading
+        if (!lenisRef.current) {
+            lenisRef.current = new Lenis({
+                duration: 3,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            });
+
+            const handleRaf = (time: number) => {
+                lenisRef.current?.raf(time);
+                requestAnimationFrame(handleRaf);
+            };
+            requestAnimationFrame(handleRaf);
+        }
     }, [loadImages, startAnimation]);
 
     useLayoutEffect(() => {
         if (!canvasRef.current) return;
 
-        const lenis = new Lenis({
-            duration: 4,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        });
-
-        const handleRaf = (time: number) => {
-            lenis.raf(time);
-            requestAnimationFrame(handleRaf);
-        };
-        requestAnimationFrame(handleRaf);
-
         preloadImgs();
 
         return () => {
             ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+            if (lenisRef.current) {
+                lenisRef.current.destroy();
+            }
         };
     }, [preloadImgs]);
 
@@ -155,7 +163,7 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
                 progress={loadingProgress}
             />
             <section className='w-full h-fit flex flex-col items-center relative after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-gradient-to-b after:from-transparent after:via-transparent after:to-[#090A0C]'>
-                <figcaption className='z-10 text-[clamp(2rem,_2vw,_3rem)] font-medium text-white'>&ldquo;Who&apos;s Shaping the Web?&rdquo;</figcaption>
+                <figcaption className='z-10 text-[clamp(2rem,_2vw,_3rem)] text-white'>&ldquo;Who&apos;s Shaping the Web?&rdquo;</figcaption>
                 <MyCanvas canvasRef={canvasRef} />
             </section>
             {!infinite && (

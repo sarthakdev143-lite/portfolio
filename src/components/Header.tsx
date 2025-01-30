@@ -1,6 +1,6 @@
 const Header = () => {
     return (
-        <header className="w-full h-fit flex justify-center sticky top-0 z-50 bg-white bg-opacity-0 mix-blend-difference transition-all duration-500 ease-in-out hover:backdrop-filter hover:backdrop-blur-lg">
+        <header className="w-full h-fit flex justify-center sticky top-0 z-50 bg-white bg-opacity-0 mix-blend-difference transition-all duration-1000 ease-in-out hover:backdrop-filter hover:backdrop-blur-md">
             <nav className="bg-transparent transition-all duration-500 ease-in-out py-6 px-12 w-full h-fit flex items-center z-10">
                 <ul className="list-none flex justify-between w-full items-center gap-6 flex-wrap">
                     <section className="flex flex-grow justify-center">
