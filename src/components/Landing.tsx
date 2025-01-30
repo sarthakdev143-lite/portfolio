@@ -32,7 +32,7 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
     const [, setImages] = useState<HTMLImageElement[]>([]);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const lenisRef = useRef<any>(null);
+    const lenisRef = useRef<Lenis | null>(null);
     const frames = useRef({ currentIndex: 0, maxIndex: 257 });
 
     const loadImages = useCallback((index: number, imgs: HTMLImageElement[]) => {

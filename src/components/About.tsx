@@ -20,7 +20,10 @@ const styles = `
 }
 `;
 
-gsap.registerPlugin(ScrollTrigger);
+// Move the registration outside of the component
+if (typeof window !== 'undefined') {
+    gsap.registerPlugin(ScrollTrigger);
+}
 
 interface Message {
     type: 'sent' | 'received';
@@ -52,22 +55,9 @@ const About = () => {
         });
 
         const animations = [
-            {
-                selector: '.sent.message',
-                from: { opacity: 0, y: 40 },
-                to: { opacity: 1, y: 0, duration: 2, ease: 'easeInOut' }
-            },
-            {
-                selector: '.seen',
-                from: { opacity: 0 },
-                to: { opacity: 1, duration: 0.3 },
-                position: '-=0.2'
-            },
-            {
-                selector: '.received.message',
-                from: { opacity: 0, y: 40 },
-                to: { opacity: 1, y: 0, duration: 1, ease: 'easeInOut', stagger: 2 }
-            }
+            { selector: '.sent.message', from: { opacity: 0, y: 40 }, to: { opacity: 1, y: 0, duration: 2, ease: 'easeInOut' } },
+            { selector: '.seen', from: { opacity: 0 }, to: { opacity: 1, duration: 0.3 }, position: '-=0.2' },
+            { selector: '.received.message', from: { opacity: 0, y: 40 }, to: { opacity: 1, y: 0, duration: 1, ease: 'easeInOut', stagger: 2 } }
         ];
 
         animations.forEach(({ selector, from, to, position }) => {
@@ -75,7 +65,7 @@ const About = () => {
         });
 
         return () => {
-            ScrollTrigger.getAll().forEach(t => t.kill());
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
             ScrollTrigger.clearScrollMemory();
         };
     }, []);
@@ -83,7 +73,10 @@ const About = () => {
     const handleDoubleClick = (id: number) => {
         setActiveHearts(prev => {
             const newHearts = new Set(prev);
-            newHearts.has(id) ? newHearts.delete(id) : newHearts.add(id);
+            if (newHearts.has(id))
+                newHearts.delete(id);
+            else
+                newHearts.add(id);
             return newHearts;
         });
     };
@@ -130,34 +123,13 @@ const About = () => {
                     >
                         {text}
                         {emoji && <span className="wave-emoji min-h-0">{emoji}</span>}
-                        <span className="
-                            hidden sm:block
-                            dbc-to-💖 
-                            text-gray-500 
-                            text-base sm:text-lg 
-                            italic 
-                            opacity-0 
-                            group-hover:opacity-100 
-                            w-fit 
-                            absolute 
-                            left-[110%] 
-                            whitespace-nowrap
-                        ">
+                        <span className="hidden sm:block text-gray-500 text-base sm:text-lg italic opacity-0 group-hover:opacity-100 w-fit absolute left-[110%] whitespace-nowrap">
                             <i className="ri-information-line w-fit" />
                             Double Click To Heart..
                         </span>
                     </div>
                     <i
-                        className={`
-                            ri-heart-3-fill heart 
-                            absolute 
-                            text-pink-600 
-                            -bottom-6 
-                            left-20 sm:left-28 
-                            w-fit 
-                            transition-all 
-                            duration-500 
-                            ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'}
+                        className={`ri-heart-3-fill heart absolute text-pink-600 -bottom-6 left-20 sm:left-28 w-fit transition-all duration-500 ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'}
                         `}
                         id={`heart${id}`}
                     />
