@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useRef, useState, useCallback, useLayoutEffect } from 'react';
+
+import React, { useRef, useState, useCallback, useLayoutEffect, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -15,9 +16,9 @@ interface MyCanvasProps {
 
 const MyCanvas: React.FC<MyCanvasProps> = ({ canvasRef }) => {
     return (
-        <div id="parent" className="w-full min-h-[600vh] relative -mt-20">
-            <figure className="w-full h-screen sticky top-0 rounded-[0.5rem]">
-                <canvas ref={canvasRef} className="w-full h-screen" />
+        <div id="parent" className="w-full min-h-[500svh] md:min-h-[600vh] relative -mt-20">
+            <figure className="w-full h-screen sticky top-0 rounded-[0.5rem] overflow-hidden">
+                <canvas ref={canvasRef} className="w-full h-full" />
             </figure>
         </div>
     );
@@ -29,7 +30,7 @@ interface LandingProps {
 
 const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [, setImages] = useState<HTMLImageElement[]>([]);
+    const [images, setImages] = useState<HTMLImageElement[]>([]);
     const [loadingProgress, setLoadingProgress] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const lenisRef = useRef<Lenis | null>(null);
@@ -63,6 +64,28 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
         context.drawImage(img, offsetX, offsetY, newWidth, newHeight);
         frames.current.currentIndex = index;
     }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const canvas = canvasRef.current;
+            if (!canvas) return;
+
+            // Update canvas dimensions
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Redraw current frame
+            if (frames.current.currentIndex >= 0) {
+                loadImages(frames.current.currentIndex, images);
+            }
+
+            // Refresh ScrollTrigger
+            ScrollTrigger.refresh();
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [loadImages, images]);
 
     const startAnimation = useCallback((imgs: HTMLImageElement[]) => {
         const tl = gsap.timeline({
@@ -162,14 +185,17 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
                 isLoading={isLoading}
                 progress={loadingProgress}
             />
-            <section className='w-full h-fit flex flex-col items-center relative after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-gradient-to-b after:from-transparent after:via-transparent after:to-[#090A0C]'>
-                <figcaption className='z-10 text-[clamp(1.5rem,_2vw,_3rem)] text-white'>&ldquo;Who&apos;s Shaping the Web?&rdquo;</figcaption>
+            <section className='w-full h-fit flex flex-col items-center relative after:absolute after:top-0 after:left-0 after:w-full after:h-full after:bg-gradient-to-b after:from-transparent after:via-transparent after:to-[#000000]'>
+                <figcaption className='z-10 text-[clamp(1.5rem,_3vw,_2rem)] px-4 text-center text-white'>
+                    &ldquo;Who&apos;s Shaping the Web?&rdquo;
+                </figcaption>
                 <MyCanvas canvasRef={canvasRef} />
             </section>
             {!infinite && (
-                <div className="nameScrollDiv overflow-hidden">
-                    <h1 className='nameScroll text-white whitespace-nowrap flex ml-[-12%] font-[Caveat] font-thin text-[clamp(3rem,3.5vw,3.5vw)]'>
-                        Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar
+                <div className="nameScrollDiv overflow-hidden px-4">
+                    <h1 className='nameScroll text-white whitespace-nowrap flex ml-[-25%] md:ml-[-12%] font-[Caveat] text-[clamp(2rem,4vw,4rem)]'>
+                        Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar •
+                        Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar
                     </h1>
                 </div>
             )}
