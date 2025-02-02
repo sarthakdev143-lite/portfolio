@@ -18,6 +18,7 @@ export default {
       boxShadow: {
         'custom-white': '0 0.5rem 1rem rgba(255, 255, 255, 0.3)',
         'custom-dual': '0.1rem 0.1rem 1.5rem grey, -0.1rem -0.1rem 1.5rem white',
+        'custom-dbc-black': "0 0.4rem 0.6rem rgb(0, 0, 0), 0 0.1rem 0.3rem rgba(0, 0, 0, 0.3)",
       },
     },
   },

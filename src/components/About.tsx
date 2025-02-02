@@ -147,11 +147,11 @@ const About = () => {
                     {text}
                     {emoji && <span className="wave-emoji min-h-0">{emoji}</span>}
                     <span className="hidden sm:block text-gray-500 text-base sm:text-lg italic opacity-0 group-hover:opacity-100 w-fit absolute top-1/2 -translate-y-1/2 left-[120%] whitespace-nowrap">
-                        <i className="ri-information-line w-fit" />
+                        <i className="ri-information-line w-fit mr-1" />
                         Double Click To Heart..
                     </span>
                     <i
-                        className={`ri-heart-3-fill heart absolute text-pink-600 -bottom-6 left-20 sm:left-28 w-fit transition-all duration-500 ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'}`}
+                        className={`ri-heart-3-fill heart absolute text-pink-600 -bottom-4 right-[50%] w-fit transition-all bg-slate-100 shadow-custom-dbc-black rounded-full text-xl px-1 duration-500 ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'}`}
                         id={`heart${id}`}
                     />
                 </div>

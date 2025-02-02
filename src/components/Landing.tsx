@@ -193,7 +193,7 @@ const Landing: React.FC<LandingProps> = ({ infinite = false }) => {
             </section>
             {!infinite && (
                 <div className="nameScrollDiv overflow-hidden px-4">
-                    <h1 className='nameScroll text-white whitespace-nowrap flex ml-[-25%] md:ml-[-12%] font-[Caveat] text-[clamp(2rem,4vw,4rem)]'>
+                    <h1 className='nameScroll text-white whitespace-nowrap flex ml-[-25%] md:ml-[-12%] font-[Caveat] text-[6vh] md:text-[4.5vw] lg:text-[3.5vw]'>
                         Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar •
                         Sarthak Parulekar • Sarthak Parulekar • Sarthak Parulekar
                     </h1>

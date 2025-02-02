@@ -9,7 +9,7 @@ const Header = () => {
                                 Sarthak Parulekar
                             </h1>
                             <h1 className='second logo whitespace-nowrap min-h-[2.6rem] grid place-items-center text-2xl sm:text-clamp transition-all duration-300 text-white font-semibold text-shadow-white-glow mix-blend-difference transform group-hover:-translate-y-[2.6rem]'>
-                                Sarthak Parulekar
+                                सार्थक परुलेकर
                             </h1>
                         </li>
                     </section>
