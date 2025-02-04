@@ -40,8 +40,8 @@ const About = () => {
     const messages: Message[] = [
         { type: 'sent', text: 'Heyy.. ', emoji: '👋' },
         { type: 'received', text: 'Hi.. ', emoji: '👋', id: 1 },
-        { type: 'received', text: 'this is Sarthak Parulekar.', id: 2 },
-        { type: 'received', text: 'a certified full stack developer.', id: 3 }
+        { type: 'received', text: `I'm Sarthak Parulekar`, id: 2 },
+        { type: 'received', text: 'A 16y/o Full Stack Developer.', id: 3 }
     ];
 
     useEffect(() => {
@@ -140,7 +140,7 @@ const About = () => {
             )}
             {type === 'received' && (
                 <div
-                    className="bg-gray-200 p-2 px-3 sm:px-4 rounded-2xl relative text-black capitalize group"
+                    className="bg-gray-200 p-2 px-3 sm:px-4 rounded-2xl relative text-black group"
                     onDoubleClick={() => id !== undefined && handleDoubleClick(id)}
                     title="Double Click To Heart"
                 >

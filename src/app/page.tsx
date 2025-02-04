@@ -2,6 +2,7 @@
 
 import About from "@/components/About";
 import Landing from "@/components/Landing";
+import Skills from "@/components/Skills";
 import { useEffect } from "react";
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
     <>
       <Landing />
       <About />
+      <Skills />
     </>
   );
 }

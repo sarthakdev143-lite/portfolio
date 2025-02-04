@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import Head from "next/head";
 import Script from "next/script";
-import { Poppins, Caveat } from "next/font/google";
+import { Poppins, Caveat, Raleway } from "next/font/google";
 
 import Cursor from "@/components/Cursor";
 import Header from "@/components/Header";
@@ -11,8 +11,9 @@ import LenisScroll from "@/components/LenisScroll";
 import "./globals.css";
 import 'remixicon/fonts/remixicon.css'
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-poppins", });
 const caveat = Caveat({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-caveat", });
+const poppins = Poppins({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], variable: "--font-poppins", });
+const raleway = Raleway({ subsets: ["latin"], weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"], variable: "--font-raleway", });
 
 export const metadata: Metadata = {
   title: "Portfolio • Sarthakdev143",
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} ${caveat.variable}`}>
+    <html lang="en" className={`${poppins.variable} ${caveat.variable} ${raleway.variable}`}>
       <Head>
         <meta name="description" content={metadata.description ?? undefined} />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
