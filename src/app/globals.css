@@ -6,6 +6,17 @@
   .text-clamp {
     font-size: clamp(1.5rem, 1.5vw, 1.8rem);
   }
+
+  .better-scrollbar {
+    &::-webkit-scrollbar {
+      width: 0.4rem;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #000;
+      border-radius: 2rem;
+    }
+  }
 }
 
 :root {

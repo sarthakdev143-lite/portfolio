@@ -8,6 +8,8 @@ import { ReactNode } from 'react';
 const LenisScroll = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         const lenis = new Lenis({
+            smoothWheel: true, 
+            syncTouch: true,              
             duration: 3.5,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         });

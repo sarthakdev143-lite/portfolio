@@ -13,6 +13,7 @@
     "@next/font": "^14.2.15",
     "@studio-freight/lenis": "^1.0.42",
     "axios": "^1.7.9",
+    "framer-motion": "^12.4.1",
     "gsap": "^3.12.7",
     "lenis": "^1.1.20",
     "lucide-react": "^0.474.0",
