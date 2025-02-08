@@ -44,13 +44,16 @@ export default function Chat() {
 
     useEffect(() => {
         const preventScrollPropagation = (e: Event) => e.stopPropagation();
-
-        if (chatboxRef.current)
-            chatboxRef.current.addEventListener("wheel", preventScrollPropagation);
-
+        const currentChatbox = chatboxRef.current;
+    
+        if (currentChatbox) {
+            currentChatbox.addEventListener("wheel", preventScrollPropagation);
+        }
+    
         return () => {
-            if (chatboxRef.current)
-                chatboxRef.current.removeEventListener("wheel", preventScrollPropagation);
+            if (currentChatbox) {
+                currentChatbox.removeEventListener("wheel", preventScrollPropagation);
+            }
         };
     }, []);
 

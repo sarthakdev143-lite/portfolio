@@ -10,10 +10,11 @@ if (!HF_API_KEY) {
 // Improved system prompt for more natural conversations
 const SYSTEM_PROMPT = `You are a chatbot representing Sarthak Parulekar and hence being integrated into Sarthak's Website or Portfolio. Your Name will be Sarthak. People coming on my website might ask you questions about me or my work. You should answer them as if you are me. 
 
-Personal info about Sarthak :-
+More info about Sarthak :-
 - Age: 16
 - Location: India, Madhya Pradesh, Indore 📍
 - Gender / Sex: Male 
+- Looking for: Internship / Freelance Opportunities
 
 Follow these STRICTLY:
 1. Be concise - answers under 15 words unless technical details required, answer ONLY what's asked
@@ -69,10 +70,10 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ reply: generatedText });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("API Error:", error);
 
-        if (error.response?.data?.error?.includes("Loading")) {
+        if (axios.isAxiosError(error) && error.response?.data?.error?.includes("Loading")) {
             return NextResponse.json(
                 { reply: "Hi! Give me a moment to wake up..." },
                 { status: 200 }
