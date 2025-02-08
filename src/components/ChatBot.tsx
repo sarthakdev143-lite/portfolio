@@ -56,10 +56,6 @@ export default function Chat() {
 
     useEffect(() => {
         scrollToBottom();
-
-        // setTimeout(() => {
-        //     inputRef.current?.focus(); // Refocus input after scroll
-        // }, 100); // Small delay to prevent race conditions
     }, [chat]);
 
     useEffect(() => {
