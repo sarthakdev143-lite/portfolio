@@ -84,7 +84,14 @@ const About = () => {
             );
         });
 
-        return () => ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+        const timeoutId = setTimeout(() => {
+            handleDoubleClick(3);
+        }, 4500);
+
+        return () => {
+            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+            clearTimeout(timeoutId);
+        };
     }, []);
 
     useEffect(() => {
