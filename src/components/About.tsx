@@ -84,13 +84,10 @@ const About = () => {
             );
         });
 
-        const timeoutId = setTimeout(() => {
-            handleDoubleClick(3);
-        }, 4500);
+        timeline.call(() => handleDoubleClick(3), []);
 
         return () => {
             ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-            clearTimeout(timeoutId);
         };
     }, []);
 
