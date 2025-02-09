@@ -45,11 +45,11 @@ export default function Chat() {
     useEffect(() => {
         const preventScrollPropagation = (e: Event) => e.stopPropagation();
         const currentChatbox = chatboxRef.current;
-    
+
         if (currentChatbox) {
             currentChatbox.addEventListener("wheel", preventScrollPropagation);
         }
-    
+
         return () => {
             if (currentChatbox) {
                 currentChatbox.removeEventListener("wheel", preventScrollPropagation);
@@ -98,6 +98,10 @@ export default function Chat() {
             }]);
         } finally {
             setIsLoading(false);
+
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
         }
     };
 
