@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <>
       <ChatBot />
-      {/* <Landing /> */}
+      <Landing />
       <About />
       <Skills />
       <Projects />
