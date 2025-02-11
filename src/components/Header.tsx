@@ -15,7 +15,7 @@ const Header = () => {
                     </section>
                     <section className='text-black flex justify-center gap-4 sm:gap-8 mt-4 sm:mt-0'>
                         <a
-                            href="https://github.com/sarthakdev143"
+                            href="https://github.com/sarthakdev143-lite"
                             rel="noreferrer"
                             target='_blank'
                             className='cursor-hover text-2xl sm:text-[2rem] text-black bg-white w-12 h-12 sm:w-[3.75rem] sm:h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-95'
@@ -25,7 +25,7 @@ const Header = () => {
                             </li>
                         </a>
                         <a
-                            href="https://linkedin.com/in/sarthak-parulekar/"
+                            href="https://linkedin.com/in/sarthak-parulekar"
                             rel="noreferrer"
                             target='_blank'
                             className='cursor-hover text-2xl sm:text-[2rem] text-black bg-white w-12 h-12 sm:w-[3.75rem] sm:h-[3.75rem] grid place-items-center rounded-full transition-all duration-300 ease-in-out shadow-custom-white hover:shadow-custom-dual hover:scale-95'

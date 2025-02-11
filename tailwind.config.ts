@@ -24,12 +24,15 @@ export default {
         'custom-dbc-black': "0 0.4rem 0.6rem rgb(0, 0, 0), 0 0.1rem 0.3rem rgba(0, 0, 0, 0.3)",
       },
       fontSize: {
-        'stylish-heading': 'clamp(8rem, 11vw + 4rem, 15rem)',
-        'stylish-subheading': 'clamp(1.5rem, 2.5vw + 0.75rem, 3rem)',
+        'stylish-heading': 'clamp(7rem, 11vw + 4rem, 15rem)',
+        'stylish-subheading': 'clamp(1.2rem, 2.5vw + 0.75rem, 3rem)',
       },
       spacing: {
         'word-space-05': '5rem',
       },
+      screens: {
+        'ss': '310px',
+      }
     },
   },
   plugins: [

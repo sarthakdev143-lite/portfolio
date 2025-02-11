@@ -174,16 +174,15 @@ const About = () => {
                 >
                     <Image
                         ref={imageRef}
-                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden absolute transition-[top] duration-500 opacity-0"
+                        className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden absolute transition-[top] duration-500 opacity-0 -top-[35px] max-sm:-top-[28.5px]`}
                         src="/media/dp.jpg"
                         alt="Profile"
                         width={64}
                         height={64}
                         priority
-                        style={{ top: '-35px' }}
                     />
 
-                    <div className="flex flex-col w-full gap-2">
+                    <div className="flex flex-col w-full sm:gap-2">
                         {messages.map((message, index) => (
                             <div
                                 key={message.id || index}
