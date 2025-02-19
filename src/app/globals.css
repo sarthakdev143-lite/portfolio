@@ -17,6 +17,16 @@
       border-radius: 2rem;
     }
   }
+
+  /* .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overflow-x: hidden;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  } */
 }
 
 :root {
@@ -32,9 +42,10 @@
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #ededed;
+  background: #0a0a0a;
   font-family: poppins;
+  overflow-x: hidden;
 
   &::-webkit-scrollbar {
     width: 0.4rem;

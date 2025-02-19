@@ -65,19 +65,6 @@ const StylishHeading: React.FC<StylishHeadingProps> = ({ source }) => {
 
     return (
         <div className={`heading-wrapper heading-wrapper-${source} flex items-center justify-center relative`} ref={headingWrapperRef}>
-            {source === 'projects' && (
-                <>
-                    <h1 id='catching-heading' className='select-none text-stylish-subheading word-space-05 text-white z-0 font-[Raleway] font-[100]'>
-                        Some <span className='stylish tracking-[0.3rem] text-[rgb(255,0,128)] font-normal text-shadow-heading-stylish'>&quot;flawless&quot;</span> Creations.
-                    </h1>
-                    <h1 className="before absolute text-stylish-heading font-light top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#222] -z-10 transition-all duration-300 ease-in-out text-shadow-glow">
-                        {'FLAWLESS'.split('').map((letter, index) => (
-                            <span key={index}>{letter}</span>
-                        ))}
-                    </h1>
-                </>
-            )}
-
             {source === 'skills' && (
                 <>
                     <h1 id='catching-heading' className='select-none text-stylish-subheading word-space-05 text-white z-0 font-[Raleway] font-[100]'>
@@ -85,6 +72,19 @@ const StylishHeading: React.FC<StylishHeadingProps> = ({ source }) => {
                     </h1>
                     <h1 className="before absolute text-stylish-heading font-light top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#222] -z-10 transition-all duration-300 ease-in-out text-shadow-glow">
                         {'SHINE'.split('').map((letter, index) => (
+                            <span key={index}>{letter}</span>
+                        ))}
+                    </h1>
+                </>
+            )}
+
+            {source === 'projects' && (
+                <>
+                    <h1 id='catching-heading' className='select-none text-stylish-subheading word-space-05 text-white z-0 font-[Raleway] font-[100]'>
+                        Some <span className='stylish tracking-[0.3rem] text-[rgb(255,0,128)] font-normal text-shadow-heading-stylish'>&quot;flawless&quot;</span> Creations.
+                    </h1>
+                    <h1 className="before absolute text-stylish-heading font-light top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#222] -z-10 transition-all duration-300 ease-in-out text-shadow-glow">
+                        {'FLAWLESS'.split('').map((letter, index) => (
                             <span key={index}>{letter}</span>
                         ))}
                     </h1>

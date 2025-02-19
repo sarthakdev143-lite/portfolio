@@ -23,10 +23,10 @@ const Projects: React.FC = () => {
     const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const projects: Project[] = [
+        { name: 'We Contractor', media: '/media/stand-by.mp4', tags: ['next.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'framer-motion'], description: 'A project that facilitates buying and selling of plots while providing features for managing contracts and transactions.', link: 'https://sarthakdev-contractor.vercel.app' },
         { name: 'Personal Diary', media: '/media/stand-by.mp4', tags: ['next.js', 'three.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'gsap'], description: 'A 3D digital diary website for users to express thoughts privately with encryption, customizable themes.', link: 'https://sarthakdev-diary.vercel.app', underDevelopment: true },
-        { name: 'We Contractor', media: '/media/stand-by.mp4', tags: ['next.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'framer-motion'], description: 'A project that facilitates buying and selling of plots while providing features for managing contracts and transactions.', link: 'https://sarthakdev-contractor.vercel.app', underDevelopment: true },
-        { name: 'Banking Simplified', media: '/media/banking-simplified.webm', tags: ['react', 'css', 'framer-motion', 'springboot', 'gsap', 'axios'], description: '', link: 'https://sarthakdev-banking.netlify.app' },
-        { name: 'Orizon Onestrong Clone', media: '/media/orizon.webm', tags: ['react', 'css'], description: 'This Project is The Clone Of <a class="italic text-gray-400" href="https://orizon.1onestrong.com/" target="_blank" rel="noopener noreferrer">orizon.1onestrong.com</a>.', link: 'https://sarthakdev-orizon.netlify.app' },
+        { name: 'Banking Simplified', media: '/media/stand-by.mp4', tags: ['react', 'css', 'framer-motion', 'springboot', 'gsap', 'axios'], description: 'A website for users to perform transactions with ease and convenience', link: 'https://sarthakdev-banking.netlify.app' },
+        { name: 'Orizon Onestrong Clone', media: '/media/orizon.webm', tags: ['react', 'css'], description: 'Clone Of <a class="italic text-gray-400" href="https://orizon.1onestrong.com/" target="_blank" rel="noopener noreferrer">orizon.1onestrong.com</a>.', link: 'https://sarthakdev-orizon.netlify.app' },
         { name: 'Window 10', media: '/media/window10.webm', tags: ['html', 'css', 'javascript'], description: 'A try to mimic the UI of Window 10 with some of its functionalities like "start menu" & "notification menu".', link: 'https://sarthakdev143.github.io/Window-10-Webpage' },
     ];
 
@@ -75,7 +75,7 @@ const Projects: React.FC = () => {
                 {projects.map((project, index) => (
                     <div
                         key={index}
-                        className="perspective-1000 w-[30rem] mx-auto flex flex-col gap-4 hover:transform-gpu"
+                        className="perspective-1000 w-[30rem] md:w-[30rem] mx-auto flex flex-col gap-4 hover:transform-gpu"
                         ref={el => { projectRefs.current[index] = el }}
                     >
                         <Link href={project.link} target="_blank" rel="noopener noreferrer">
@@ -105,7 +105,7 @@ const Projects: React.FC = () => {
                 href="https://github.com/sarthakDev143-lite?tab=repositories"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="view-all-button w-fit mx-auto text-white overflow-hidden relative shadow-xl bg-[#333] rounded-full flex items-center justify-center cursor-pointer gap-3 font-bold border-[3px] border-[#ffffff4d] text-lg px-10 py-3 hover:border-[#fff9] -mt-20 group"
+                className="view-all-button w-fit mx-auto text-white overflow-hidden relative shadow-xl bg-[#333] rounded-full flex items-center justify-center cursor-pointer gap-3 font-bold border-[3px] border-[#ffffff4d] text-lg px-10 py-3 hover:border-[#fff9] -mt-12 group"
             >
                 View All
                 <i className="icon ri-corner-down-right-line transform translate-y-0.5 transition-transform duration-300 group-hover:translate-x-1.5 group-hover:translate-y-1"></i>
