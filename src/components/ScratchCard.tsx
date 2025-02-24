@@ -101,14 +101,14 @@ const ScratchCard: React.FC<ScratchCardProps> = ({ videoSrc, textureSrc }) => {
     }, [textureSrc]);
 
     return (
-        <figure className={`relative ${isRevealed ? 'cursor-pointer' : 'cursor-crosshair'} p-2 border-2 border-[#333] outline outline-2 outline-[#888] rounded-lg min-h-[17rem] shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-2xl group`}>
+        <figure className={`relative ${isRevealed ? 'cursor-pointer' : 'cursor-crosshair'} border-2 border-[#333] outline outline-2 outline-[#888] rounded-lg h-[12rem] sm:h-[15rem] lg:h-[17rem] aspect-video shadow-lg transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-2xl group`}>
             <video
                 ref={videoRef}
                 src={videoSrc}
                 muted
                 loop
                 playsInline
-                className="rounded-lg shadow-lg absolute top-0 left-0 w-full h-full"
+                className="rounded-lg shadow-lg absolute top-0 left-0 h-full"
             />
             <canvas
                 ref={canvasRef}

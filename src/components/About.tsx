@@ -154,10 +154,11 @@ const About = () => {
                         <i className="ri-information-line w-fit mr-1" />
                         Double Click To Heart..
                     </span>
-                    <i
-                        className={`ri-heart-3-fill heart absolute text-pink-600 -bottom-4 right-[50%] w-fit transition-all bg-slate-100 shadow-custom-dbc-black rounded-full text-xl px-1 duration-500 ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'}`}
-                        id={`heart${id}`}
-                    />
+                    <span id={`heart${id}`} className={`shadow-custom-dbc-black bg-white h-6 px-[0.3rem] flex absolute -bottom-4 right-[50%] rounded-full ${!activeHearts.has(id ?? -1) ? 'scale-0' : 'scale-100'} transition-all duration-500`}>
+                        <i
+                            className={`ri-heart-2-fill text-pink-600 text-lg`}
+                        />
+                    </span>
                 </div>
             )}
         </div>

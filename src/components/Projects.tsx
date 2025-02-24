@@ -15,7 +15,7 @@ interface Project {
     tags: string[];
     description: string;
     link: string;
-    underDevelopment?: boolean;
+    mockUp?: string;
 }
 
 const Projects: React.FC = () => {
@@ -23,10 +23,10 @@ const Projects: React.FC = () => {
     const projectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const projects: Project[] = [
-        { name: 'We Contractor', media: '/media/stand-by.mp4', tags: ['next.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'framer-motion'], description: 'A project that facilitates buying and selling of plots while providing features for managing contracts and transactions.', link: 'https://sarthakdev-contractor.vercel.app' },
-        { name: 'Personal Diary', media: '/media/stand-by.mp4', tags: ['next.js', 'three.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'gsap'], description: 'A 3D digital diary website for users to express thoughts privately with encryption, customizable themes.', link: 'https://sarthakdev-diary.vercel.app', underDevelopment: true },
-        { name: 'Banking Simplified', media: '/media/stand-by.mp4', tags: ['react', 'css', 'framer-motion', 'springboot', 'gsap', 'axios'], description: 'A website for users to perform transactions with ease and convenience', link: 'https://sarthakdev-banking.netlify.app' },
-        { name: 'Orizon Onestrong Clone', media: '/media/orizon.webm', tags: ['react', 'css'], description: 'Clone Of <a class="italic text-gray-400" href="https://orizon.1onestrong.com/" target="_blank" rel="noopener noreferrer">orizon.1onestrong.com</a>.', link: 'https://sarthakdev-orizon.netlify.app' },
+        { name: 'Personal Diary', media: '/media/stand-by.mp4', tags: ['next.js', 'three.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'gsap'], description: 'A 3D digital diary website for users to express thoughts privately with encryption, customizable themes.', link: 'https://sarthakdev-diary.vercel.app', mockUp: 'under development' },
+        { name: 'Banking Simplified', media: '/media/stand-by.mp4', tags: ['react', 'css', 'gsap', 'framer-motion', 'springboot'], description: 'Simple online banking system with OTP-based account creation, basic transactions. <span class="italic text-slate-400">(something crazy is cooking)</span>', link: 'https://sarthakdev-banking.netlify.app', mockUp: 'under renovation' },
+        { name: 'We Contractor', media: '/media/contractor.mp4', tags: ['next.js', 'tailwindcss', 'jwt', 'springboot', 'mongodb', 'cloudinary', 'framer-motion'], description: 'A project that facilitates buying and selling of plots while providing features for managing contracts and transactions.', link: 'https://sarthakdev-contractor.vercel.app' },
+        { name: 'Orizon Onestrong Clone', media: '/media/orizon.webm', tags: ['react', 'css'], description: 'Clone Of <a class="italic text-slate-400" href="https://orizon.1onestrong.com/" target="_blank" rel="noopener noreferrer">orizon.1onestrong.com</a>.', link: 'https://sarthakdev-orizon.netlify.app' },
         { name: 'Window 10', media: '/media/window10.webm', tags: ['html', 'css', 'javascript'], description: 'A try to mimic the UI of Window 10 with some of its functionalities like "start menu" & "notification menu".', link: 'https://sarthakdev143.github.io/Window-10-Webpage' },
     ];
 
@@ -69,24 +69,24 @@ const Projects: React.FC = () => {
     }, []);
 
     return (
-        <section id="projects" ref={projectsRef} className="flex flex-col gap-36 mt-40 lg:mt-60">
+        <section id="projects" ref={projectsRef} className="flex flex-col sm:gap-36 gap-20 mt-40 lg:mt-60">
             <StylishHeading source={'projects'} />
-            <div className="flex flex-wrap gap-20 text-white max-w-[100rem] mx-auto">
+            <div className="flex flex-wrap gap-20 text-white max-w-[100rem] mx-auto px-4">
                 {projects.map((project, index) => (
                     <div
                         key={index}
-                        className="perspective-1000 w-[30rem] md:w-[30rem] mx-auto flex flex-col gap-4 hover:transform-gpu"
+                        className="perspective-1000 max-w-[30rem] mx-auto flex flex-col gap-4 hover:transform-gpu"
                         ref={el => { projectRefs.current[index] = el }}
                     >
-                        <Link href={project.link} target="_blank" rel="noopener noreferrer">
-                            {project.underDevelopment ? <h2 className='uppercase text-sm text-[#f0f0f0] px-3 py-1.5 rounded-lg tracking-widest bg-[#444] w-fit'>Under Development</h2> : null}
+                        <Link href={project.link} target="_blank" rel="noopener noreferrer" className='mx-auto'>
+                            {project.mockUp ? <h2 className='uppercase text-sm text-[#f0f0f0] px-3 py-1.5 rounded-lg tracking-widest bg-[#444] w-fit'>{project.mockUp}</h2> : null}
                             <ScratchCard videoSrc={project.media} textureSrc="/media/texture.avif" />
                         </Link>
                         <figcaption className="text-center flex flex-col gap-3">
                             <h1 className="text-[1.4rem] text-[#f0f0f0] uppercase tracking-wider">
                                 {project.name}
                             </h1>
-                            <p className="text-[#ccc]" dangerouslySetInnerHTML={{ __html: project.description }}></p>
+                            <p className="text-[#dadada]" dangerouslySetInnerHTML={{ __html: project.description }}></p>
                             <div className="flex justify-center gap-2 flex-wrap">
                                 {project.tags.map((tag, index) => (
                                     <span

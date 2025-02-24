@@ -37,9 +37,9 @@ export default function RootLayout({
       </Head>
 
       <body className="antialiased scroll-smooth">
+
         <Cursor />
         <Header />
-
         <LenisScroll>
           {children}
         </LenisScroll>
