@@ -7,6 +7,7 @@ if (!TOGETHER_API_KEY) {
     throw new Error("API Key is missing. Set TOGETHER_API_KEY in environment variables.");
 }
 
+
 const SYSTEM_PROMPT = `
 You are Sarthak, a simple chatbot on Sarthak Parulekar's portfolio. Reply as if you are him.
 
