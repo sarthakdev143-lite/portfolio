@@ -41,7 +41,7 @@ const About = () => {
         { type: 'sent', text: 'Heyy.. ', emoji: '👋' },
         { type: 'received', text: 'Hi.. ', emoji: '👋', id: 1 },
         { type: 'received', text: `I'm Sarthak Parulekar`, id: 2 },
-        { type: 'received', text: 'A 16y/o Full Stack Developer.', id: 3 }
+        { type: 'received', text: 'A 17y/o Full Stack Developer.', id: 3 }
     ];
 
     useEffect(() => {
