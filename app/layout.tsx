@@ -12,7 +12,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sarthak Parulekar | Creative Developer",
+  title: "Sarthak Parulekar • Creative Developer",
   description: "Building High-performance web applications and fluid interactive design.",
 };
 

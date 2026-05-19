@@ -1,97 +1,199 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
-import CircularText from "./CircularText";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Hero() {
-    const titleRef = useRef<HTMLHeadingElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const titleContainerRef = useRef<HTMLDivElement>(null);
+    const panelGridRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLDivElement>(null);
-    const footerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            const timeline = gsap.timeline();
-
-            // 1. Clean fade in for top navigation
-            timeline.fromTo(
+            // 1. Initial Intro Load Animation
+            const introTimeline = gsap.timeline();
+            introTimeline.fromTo(
                 navRef.current,
-                { y: -15, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+                { y: -20, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8, ease: "power4.out" }
+            );
+            introTimeline.fromTo(
+                ".intro-mask-line",
+                { y: "100%" },
+                { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 },
+                "-=0.5"
+            );
+            introTimeline.fromTo(
+                ".floating-panel-initial",
+                { scale: 0.8, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 1, ease: "power3.out", stagger: 0.05 },
+                "-=0.8"
             );
 
-            // 2. Smooth reveal of the masked text blocks (Fixed typo from 'stale' to 'stagger')
-            if (titleRef.current) {
-                const lines = titleRef.current.querySelectorAll(".mask-line");
-                timeline.fromTo(
-                    lines,
-                    { y: "100%" },
-                    { y: "0%", duration: 1.1, ease: "power4.out", stagger: 0.12 },
-                    "-=0.5"
-                );
-            }
+            // 2. The Crazy Scroll-Driven Kinetic Explosion
+            // We pin the entire hero container so it locks onto the screen while things fly
+            const scrollTimeline = gsap.timeline({
+                scrollTrigger: {
+                    trigger: containerRef.current,
+                    start: "top top",
+                    end: "+=150%", // How long the user has to scroll through the flying animation
+                    scrub: 1,       // Links animation smoothly to the scrollbar with physics catch-up
+                    pin: true,      // Locks the section in place
+                    invalidateOnRefresh: true,
+                }
+            });
 
-            // 3. Fade in bottom details
-            timeline.fromTo(
-                footerRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
-                "-=0.4"
-            );
-        });
+            scrollTimeline
+                // Explode the headline away into the background
+                .to(titleContainerRef.current, {
+                    scale: 2.5,
+                    opacity: 0,
+                    y: -100,
+                    rotateX: 15,
+                    transformOrigin: "center center",
+                    ease: "none"
+                }, 0)
+                // Fly Panel 1 in from Left + Rotate
+                .to(".f-panel-1", {
+                    x: "0vw",
+                    y: "0vh",
+                    rotate: -2,
+                    scale: 1,
+                    ease: "none"
+                }, 0)
+                // Fly Panel 2 in from Right
+                .to(".f-panel-2", {
+                    x: "0vw",
+                    y: "0vh",
+                    rotate: 1,
+                    scale: 1,
+                    ease: "none"
+                }, 0)
+                // Fly Panel 3 up from the bottom deep space
+                .to(".f-panel-3", {
+                    x: "0vw",
+                    y: "0vh",
+                    rotate: -1,
+                    scale: 1,
+                    ease: "none"
+                }, 0)
+                // Fly Panel 4 down from the top right corners
+                .to(".f-panel-4", {
+                    x: "0vw",
+                    y: "0vh",
+                    rotate: 3,
+                    scale: 1,
+                    ease: "none"
+                }, 0)
+                // Fade out the top navigation quietly while layout self-assembles
+                .to(navRef.current, {
+                    opacity: 0,
+                    y: -30,
+                    ease: "none"
+                }, 0);
+
+        }, containerRef);
 
         return () => ctx.revert();
     }, []);
 
     return (
-        <section className="relative h-90% flex flex-col justify-between mx-auto w-full pt-12 font-sans overflow-hidden">
-
-            {/* TOP NAVIGATION HEADER */}
-            <div ref={navRef} className="opacity-0 flex justify-between items-center w-full px-12 z-10 text-sm tracking-tight text-gray-400">
+        <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
+            
+            {/* TOP FIXED NAVIGATION TIMELINE */}
+            <div ref={navRef} className="absolute top-0 left-0 w-full flex justify-between items-center px-12 pt-12 z-50 text-sm tracking-tight text-gray-400">
                 <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span>Available</span>
+                    <span className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse" />
+                    <span className="font-mono text-xs uppercase tracking-widest text-[#f3f3f3]">[ Engine Mode Active ]</span>
                 </div>
-                <div className="flex gap-8 font-mono">
-                    <span>[ INDIA ]</span>
-                </div>
+                <div className="flex gap-8 font-mono text-xs">[ INDIA ]</div>
             </div>
 
-            {/* ASYMMETRIC MAIN HEADLINE */}
-            <div className="w-full my-auto flex flex-col items-start justify-center mt-12">
-                <h1 ref={titleRef} className="text-6xl md:text-[6vw] w-[90%] mx-auto font-light tracking-tighter leading-[0.9] uppercase">
-                    <div className="overflow-hidden block h-fit py-1">
-                        <span className="mask-line block will-change-transform">Disruptive</span>
+            {/* THE GIANT KINETIC HEADLINE (COLLAPSES & FLIES AWAY) */}
+            <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
+                <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
+                    <div className="overflow-hidden block py-2">
+                        <span className="intro-mask-line block will-change-transform">DISRUPTIVE</span>
                     </div>
-                    <div className="overflow-hidden block h-fit py-1 md:pl-[12vw]">
-                        <span className="mask-line block will-change-transform text-transparent bg-clip-text bg-linear-to-r from-gray-400 to-[#f3f3f3]">
-                            Architect &
+                    <div className="overflow-hidden block py-2">
+                        <span className="intro-mask-line block will-change-transform text-transparent bg-clip-text bg-gradient-to-r from-gray-500 via-gray-300 to-white">
+                            ARCHITECT
                         </span>
-                    </div>
-                    <div className="overflow-hidden block h-fit py-1">
-                        <span className="mask-line block will-change-transform">Developer.</span>
                     </div>
                 </h1>
             </div>
 
-            {/* FOOTER METRICS & MAGNETIC ACTION */}
-            <div ref={footerRef} className="w-[90%] mx-auto opacity-0 flex flex-col sm:flex-row justify-between items-start sm:items-end pb-20 gap-8 z-10">
-                <div className="max-w-sm text-gray-400 font-light text-base md:text-lg leading-relaxed">
-                    <p>Crafting high-performance web applications, digital systems, and fluid interactive physics interfaces.</p>
+            {/* THE FLYING ARRANGEMENT PANELS */}
+            {/* These elements start completely scattered out of bounds, skewed, and oversized, then fly perfectly into structure on scroll */}
+            <div ref={panelGridRef} className="absolute inset-0 w-full h-full pointer-events-none z-20 px-8 py-24 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                
+                {/* PANEL 1: SYSTEM CAPABILITY STACK (Flies from deep left window boundary) */}
+                <div className="f-panel-1 bg-[#16161a] border border-white/5 rounded-2xl p-8 md:col-span-4 h-[55vh] flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
+                    <div className="flex justify-between items-start border-b border-white/5 pb-4">
+                        <span className="font-mono text-xs text-[#ccff00]">[ CORE CORE ]</span>
+                        <span className="font-mono text-xs text-gray-500">01 // STRUCT</span>
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-light tracking-tight mb-2 uppercase text-white">SYSTEM ARCHITECTURE</h3>
+                        <p className="text-sm text-gray-400 font-light leading-relaxed">Developing deterministic client states, responsive WebGL sandboxes, and highly automated cloud node topologies.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                        {["TypeScript", "Next.js", "GSAP Matrix", "WebGL"].map((t) => (
+                            <span key={t} className="font-mono text-[10px] bg-white/5 px-2 py-1 rounded text-gray-300">{t}</span>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="sm:pr-12">
-                    {/* <CircularText text="SCROLL*DOWN*PLS*" /> */}
-                    {/* <MagneticButton>
-                        <button className="bg-[#ccff00] magnetic-target group relative w-32 h-32 md:w-36 md:h-36 rounded-full border border-[#f3f3f3]/20 text-black text-sm font-medium tracking-tight overflow-hidden flex items-center justify-center shadow-xl">
-                            <span className="relative z-10 pointer-events-none block">
-                                Scroll Down ↓
-                            </span>
-                        </button>
-                    </MagneticButton> */}
+                {/* PANEL 2: INTERACTIVE KINETIC DISPLAY CAPULE (Flies from deep right window boundary) */}
+                <div className="f-panel-2 bg-[#ccff00] text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-[35deg] scale-125 pointer-events-auto shadow-2xl">
+                    <div className="flex justify-between items-start border-b border-black/10 pb-4">
+                        <span className="font-mono text-xs font-bold">[ PHYSICAL INTENT ]</span>
+                        <span className="font-mono text-xs opacity-60">02 // KINETICS</span>
+                    </div>
+                    <div className="my-auto">
+                        <h2 className="text-4xl font-black tracking-tighter uppercase leading-[0.9]">
+                            BREAKING THE PLATFORM RIGIDITY.
+                        </h2>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                        <p className="text-xs font-medium max-w-[200px]">Why build conventional boxes when layouts can move like fluid software assets?</p>
+                        <span className="text-2xl">✦</span>
+                    </div>
                 </div>
+
+                {/* COMBINED SUB-CONTAINERS FOR RIGHT SIDE PANEL 3 & 4 */}
+                <div className="md:col-span-3 h-[60vh] flex flex-col gap-6 justify-between">
+                    
+                    {/* PANEL 3: PERFORMANCE METRICS DISPLAY (Flies straight up from below screen viewport) */}
+                    <div className="f-panel-3 bg-[#16161a] border border-white/5 rounded-2xl p-6 h-[48%] flex flex-col justify-between transform translate-y-[150vh] rotate-[-15deg] pointer-events-auto shadow-2xl">
+                        <div className="flex justify-between items-center">
+                            <span className="font-mono text-[10px] text-gray-500">[ PERFORMANCE RUN ]</span>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                        </div>
+                        <div className="py-2">
+                            <div className="text-5xl font-mono tracking-tighter text-white font-bold">99<span className="text-xs text-[#ccff00]">FPS</span></div>
+                            <p className="text-xs text-gray-400 mt-1">Consistent paint performance across demanding layout canvas manipulation sweeps.</p>
+                        </div>
+                    </div>
+
+                    {/* PANEL 4: CALL TO ACTION CONSOLE BUTTON (Flies down diagonally from top right boundary) */}
+                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-[45deg] scale-150 pointer-events-auto shadow-2xl group hover:border-[#ccff00] transition-colors duration-300">
+                        <p className="font-mono text-[10px] text-gray-500 mb-4 tracking-widest uppercase">[ ACCESS CORE TERMINAL ]</p>
+                        <MagneticButton>
+                            <button className="bg-white text-black font-mono text-xs font-bold py-3 px-6 rounded-full group-hover:bg-[#ccff00] group-hover:text-black transition-colors duration-300">
+                                INITIALIZE MATRIX_
+                            </button>
+                        </MagneticButton>
+                    </div>
+
+                </div>
+
             </div>
 
-        </section>
+        </div>
     );
 }
