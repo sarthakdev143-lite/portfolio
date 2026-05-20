@@ -1,142 +1,280 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import MagneticButton from "./MagneticButton";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
-    { title: "UnderCorre", category: "3D Physics / FPS Engine", tech: "Three.js, Rapier.js", color: "#8C8C8C", },
-    { title: "FairFlow", category: "OfflineFirst System", tech: "React, PWA", color: "#EFE8D3", },
-    { title: "Orchestrator", category: "AI Workflow Engine", tech: "Chrome API, Node.js", color: "#706D63", },
+    {
+        id: "01",
+        title: "INTERVIEW HACKER",
+        tagline: "CONTEXT INJECTION ENGINE",
+        desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
+        tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
+        link: "https://github.com/sarthakdev143-lite/interview-hacker",
+        bg: "#131316",
+        accent: "#ccff00"
+    },
+    {
+        id: "02",
+        title: "YOUTUBE AUTOMATION",
+        tagline: "HEADLESS CONTENT PIPELINE",
+        desc: "An automated, bulk content generation and deployment matrix. Coordinates headless video asset processing, metadata optimization cascades, and automated publishing pipelines to completely eliminate manual rendering constraints.",
+        tech: ["Node.js", "FFmpeg Engine", "Puppeteer", "Next.js"],
+        link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
+        bg: "#1c1c22",
+        accent: "#ffffff"
+    }
 ];
 
 export default function ProjectGallery() {
-    const [activeProject, setActiveProject] = useState(0);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
 
-    const modalRef = useRef<HTMLDivElement>(null);
-    const cursorRef = useRef<HTMLDivElement>(null);
+    // useEffect(() => {
+    //     const track = trackRef.current;
+    //     const container = scrollContainerRef.current;
+    //     if (!track || !container) return;
+
+    //     const ctx = gsap.context(() => {
+    //         // Calculate total horizontal distance to travel
+    //         const totalPanels = projects.length + 1; // Projects + The Final Terminal Panel
+    //         const scrollTween = gsap.to(track, {
+    //             x: () => -(track.scrollWidth - window.innerWidth),
+    //             ease: "none",
+    //             scrollTrigger: {
+    //                 trigger: container,
+    //                 pin: true,
+    //                 scrub: 1,
+    //                 start: "top top",
+    //                 end: () => `+=${track.scrollWidth}`,
+    //                 invalidateOnRefresh: true,
+    //             }
+    //         });
+
+    //         // Spatial scale distortion warp on the individual cards as they pass through the viewport
+    //         gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+    //             gsap.fromTo(
+    //                 panel.querySelector(".panel-content"),
+    //                 { scale: 0.9, rotateY: 15, opacity: 0.6 },
+    //                 {
+    //                     scale: 1,
+    //                     rotateY: 0,
+    //                     opacity: 1,
+    //                     ease: "power2.out",
+    //                     scrollTrigger: {
+    //                         trigger: panel,
+    //                         containerAnimation: scrollTween,
+    //                         start: "left right-=20%",
+    //                         end: "center center",
+    //                         scrub: true,
+    //                     }
+    //                 }
+    //             );
+    //         });
+
+    //         // Black Hole Void expansion for the final section
+    //         gsap.fromTo(
+    //             ".void-bg",
+    //             { scale: 0.3, borderRadius: "500px", opacity: 0 },
+    //             {
+    //                 scale: 1,
+    //                 borderRadius: "0px",
+    //                 opacity: 1,
+    //                 ease: "none",
+    //                 scrollTrigger: {
+    //                     trigger: ".void-panel",
+    //                     containerAnimation: scrollTween,
+    //                     start: "left right",
+    //                     end: "left left",
+    //                     scrub: true,
+    //                 }
+    //             }
+    //         );
+
+    //     }, container);
+
+    //     return () => ctx.revert();
+    // }, []);
 
     useEffect(() => {
-        if (!modalRef.current || !cursorRef.current) return;
+        const track = trackRef.current;
+        const container = scrollContainerRef.current;
+        if (!track || !container) return;
 
-        // Smooth GSAP mouse tracking
-        const moveModalX = gsap.quickTo(modalRef.current, "x", { duration: 0.8, ease: "power3.out", });
-        const moveModalY = gsap.quickTo(modalRef.current, "y", { duration: 0.8, ease: "power3.out", });
-        const moveCursorX = gsap.quickTo(cursorRef.current, "x", { duration: 0.5, ease: "power3.out", });
-        const moveCursorY = gsap.quickTo(cursorRef.current, "y", { duration: 0.5, ease: "power3.out", });
+        const ctx = gsap.context(() => {
+            let mm = gsap.matchMedia();
 
-        const handleMouseMove = (e: MouseEvent) => {
-            moveModalX(e.clientX);
-            moveModalY(e.clientY);
+            // 💻 DESKTOP: Horizontal Scroll Matrix
+            mm.add("(min-width: 768px)", () => {
+                const totalScrollDistance = track.scrollWidth - window.innerWidth;
 
-            moveCursorX(e.clientX);
-            moveCursorY(e.clientY);
-        };
+                const scrollTween = gsap.to(track, {
+                    x: () => -totalScrollDistance,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: container,
+                        pin: true,
+                        scrub: 1,
+                        start: "top top",
+                        end: () => `+=${track.scrollWidth}`,
+                        invalidateOnRefresh: true,
+                    }
+                });
 
-        window.addEventListener("mousemove", handleMouseMove);
+                // Spatial distortion on individual cards
+                gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+                    gsap.fromTo(panel.querySelector(".panel-content"),
+                        { scale: 0.9, rotateY: 15, opacity: 0.6 },
+                        {
+                            scale: 1, rotateY: 0, opacity: 1, ease: "power2.out",
+                            scrollTrigger: {
+                                trigger: panel,
+                                containerAnimation: scrollTween,
+                                start: "left right-=20%",
+                                end: "center center",
+                                scrub: true,
+                            }
+                        }
+                    );
+                });
 
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove);
-        };
+                // The Black Hole Footer 
+                gsap.fromTo(".void-bg",
+                    { scale: 0.3, borderRadius: "500px", opacity: 0 },
+                    {
+                        scale: 1, borderRadius: "0px", opacity: 1, ease: "none",
+                        scrollTrigger: {
+                            trigger: ".void-panel",
+                            containerAnimation: scrollTween,
+                            start: "left right",
+                            end: "left left",
+                            scrub: true,
+                        }
+                    }
+                );
+            });
+
+            // 📱 MOBILE: Standard vertical flow
+            mm.add("(max-width: 767px)", () => {
+                // Ensure the track doesn't try to stretch off-screen on phones
+                gsap.set(track, { width: "100%", x: 0 });
+                gsap.set(".project-panel", { width: "100%", height: "auto" });
+                gsap.set(".void-panel", { width: "100%", height: "100vh" });
+
+                // Simple slide-up reveals for the cards as you scroll down
+                gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+                    gsap.fromTo(panel.querySelector(".panel-content"),
+                        { opacity: 0, y: 50 },
+                        {
+                            opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
+                            scrollTrigger: {
+                                trigger: panel,
+                                start: "top 85%",
+                            }
+                        }
+                    );
+                });
+            });
+
+        }, container);
+
+        return () => ctx.revert();
     }, []);
 
-    const handleMouseEnter = (index: number) => {
-        setActiveProject(index);
-
-        gsap.to(modalRef.current, {
-            opacity: 1,
-            scale: 1,
-            autoAlpha: 1,
-            duration: 0.35,
-            ease: "power3.out",
-        });
-
-        gsap.to(cursorRef.current, {
-            opacity: 1,
-            scale: 1,
-            autoAlpha: 1,
-            duration: 0.35,
-            ease: "power3.out",
-        });
-    };
-
-    const handleMouseLeave = () => {
-        gsap.to(modalRef.current, {
-            opacity: 0,
-            scale: 0.75,
-            autoAlpha: 0,
-            duration: 0.3,
-            ease: "power3.inOut",
-        });
-
-        gsap.to(cursorRef.current, {
-            opacity: 0,
-            scale: 0.75,
-            autoAlpha: 0,
-            duration: 0.3,
-            ease: "power3.inOut",
-        });
-    };
-
     return (
-        <section
-            className="relative w-full max-w-6xl mx-auto text-white min-h-screen"
-        >
-            <div className="border-t border-white/10"
-                onMouseLeave={handleMouseLeave}
-            >
-                {projects.map((project, index) => (
-                    <div
-                        key={index}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        className="group flex items-center justify-between border-b border-white/10 px-8 py-12 cursor-pointer transition-colors duration-500 hover:bg-[#1a1a1c]"
+        <div ref={scrollContainerRef} className="relative w-full h-screen bg-[#0f0f11] overflow-hidden">
+            <div ref={trackRef} className="relative md:absolute top-0 left-0 h-full flex flex-col md:flex-row items-center will-change-transform md:w-[calc((var(--projects-count)+1)*100vw)] w-full">
+
+                {/* PROJECT LAYOUT CAPSULES */}
+                {projects.map((project) => (
+                    <section
+                        key={project.id}
+                        className="project-panel w-full min-h-screen md:w-screen md:h-screen flex items-center justify-center px-8 md:px-24 shrink-0 perspective-1000 select-none"
+                        style={{ backgroundColor: project.bg }}
                     >
-                        <h2 className="text-6xl font-light tracking-tight transition-transform duration-500 group-hover:-translate-x-3">
-                            {project.title}
-                        </h2>
+                        <div className="panel-content w-full max-w-6xl h-[70vh] bg-black/40 border border-white/5 rounded-3xl p-8 md:p-16 flex flex-col justify-between transform-style-3d shadow-2xl backdrop-blur-sm">
 
-                        <div className="text-right transition-transform duration-500 group-hover:translate-x-3">
-                            <p className="text-xl font-medium">
-                                {project.category}
-                            </p>
+                            {/* Card Top Information Data Header */}
+                            <div className="flex justify-between items-start border-b border-white/5 pb-6">
+                                <div className="flex items-center gap-4">
+                                    <span className="font-mono text-sm text-gray-500">[{project.id}]</span>
+                                    <h4 className="font-mono text-xs tracking-widest uppercase" style={{ color: project.accent }}>
+                                        // {project.tagline}
+                                    </h4>
+                                </div>
+                                <span className="font-mono text-xs text-gray-600 tracking-tighter">STATUS: PRODUCTION_READY</span>
+                            </div>
 
-                            <p className="mt-1 font-mono text-sm text-gray-500">
-                                {project.tech}
-                            </p>
+                            {/* Center Identity Core */}
+                            <div className="my-auto max-w-4xl">
+                                <h2 className="text-4xl md:text-7xl font-black tracking-tighter text-white uppercase mb-6 leading-none">
+                                    {project.title}
+                                </h2>
+                                <p className="text-base md:text-lg text-gray-400 font-light leading-relaxed max-w-2xl">
+                                    {project.desc}
+                                </p>
+                            </div>
+
+                            {/* Footer Integration & CTA Row */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pt-6 border-t border-white/5">
+                                <div className="flex flex-wrap gap-2">
+                                    {project.tech.map((t) => (
+                                        <span key={t} className="font-mono text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-md text-gray-300">
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <MagneticButton>
+                                    <a
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="magnetic-target group h-14 px-8 rounded-full flex items-center justify-center text-xs font-mono font-bold tracking-wider transition-all duration-300 shadow-lg border"
+                                        style={{
+                                            backgroundColor: project.accent === "#ffffff" ? "#ffffff" : "transparent",
+                                            color: project.accent === "#ffffff" ? "#000000" : project.accent,
+                                            borderColor: project.accent === "#ffffff" ? "transparent" : `${project.accent}30`
+                                        }}
+                                    >
+                                        INSPECT_REPOS_ →
+                                    </a>
+                                </MagneticButton>
+                            </div>
+
                         </div>
-                    </div>
+                    </section>
                 ))}
-            </div>
 
-            <div
-                ref={modalRef}
-                className="fixed top-0 left-0 w-100 h-75 overflow-hidden rounded-2xl pointer-events-none z-40 scale-75 opacity-0 -translate-x-1/2 -translate-y-1/2 shadow-2xl"
-            >
-                <div
-                    className="w-full h-full transition-transform duration-500 ease-in-out"
-                    style={{
-                        transform: `translateY(-${activeProject * 100}%)`,
-                    }}
-                >
-                    {projects.map((project, index) => (
-                        <div
-                            key={index}
-                            className="w-full h-75 shrink-0 flex items-center justify-center text-3xl font-bold text-black"
-                            style={{
-                                backgroundColor: project.color,
-                            }}
-                        >
-                            {project.title} Preview
-                        </div>
-                    ))}
-                </div>
-            </div>
+                {/* THE VOID / BLACK HOLE CLOSING TERMINAL FOOTER */}
+                <section className="void-panel w-screen h-screen relative flex items-center justify-center shrink-0 overflow-hidden bg-[#0f0f11]">
+                    {/* Expanding background layer triggered directly by horizontal scroll tracking */}
+                    <div className="void-bg absolute inset-0 bg-[#ccff00] z-0" />
 
-            <div
-                ref={cursorRef}
-                className="fixed top-0 left-0 w-20 h-20 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center pointer-events-none z-50 scale-75 opacity-0 -translate-x-1/2 -translate-y-1/2 shadow-xl"
-            >
-                View
+                    <div className="relative z-10 text-center text-black px-6 max-w-3xl flex flex-col items-center">
+                        <span className="font-mono text-xs tracking-[0.3em] font-bold uppercase mb-4 text-black/60">[ END OF PIPELINE ]</span>
+                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter uppercase leading-[0.85] mb-8">
+                            LET'S EXECUTE SOMETHING.
+                        </h2>
+                        <p className="text-sm md:text-base font-medium max-w-md mb-12 text-black/80">
+                            Have an engine architecture configuration, infrastructure optimization problem, or highly responsive UI workspace layout that needs assembly?
+                        </p>
+
+                        <MagneticButton>
+                            <a
+                                href="mailto:your-email@domain.com"
+                                className="magnetic-target bg-black text-[#ccff00] font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase"
+                            >
+                                INITIALIZE_HANDSHAKE_
+                            </a>
+                        </MagneticButton>
+                    </div>
+                </section>
+
             </div>
-        </section>
+        </div>
     );
 }

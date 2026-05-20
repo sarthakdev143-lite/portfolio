@@ -12,115 +12,165 @@ export default function Hero() {
     const panelGridRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLDivElement>(null);
 
+    // useEffect(() => {
+    //     const ctx = gsap.context(() => {
+    //         // 1. Initial Intro Load Animation
+    //         const introTimeline = gsap.timeline();
+    //         introTimeline.fromTo(
+    //             navRef.current,
+    //             { y: -20, opacity: 0 },
+    //             { y: 0, opacity: 1, duration: 0.8, ease: "power4.out" }
+    //         );
+    //         introTimeline.fromTo(
+    //             ".intro-mask-line",
+    //             { y: "110%" },
+    //             { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 },
+    //             "-=0.5"
+    //         );
+    //         introTimeline.fromTo(
+    //             ".floating-panel-initial",
+    //             { scale: 0.8, opacity: 0 },
+    //             { scale: 1, opacity: 1, duration: 1, ease: "power3.out", stagger: 0.05 },
+    //             "-=0.8"
+    //         );
+
+    //         // 2. The Crazy Scroll-Driven Kinetic Explosion
+    //         // We pin the entire hero container so it locks onto the screen while things fly
+    //         const scrollTimeline = gsap.timeline({
+    //             scrollTrigger: {
+    //                 trigger: containerRef.current,
+    //                 start: "top top",
+    //                 end: "+=150%", // How long the user has to scroll through the flying animation
+    //                 scrub: 1,       // Links animation smoothly to the scrollbar with physics catch-up
+    //                 pin: true,      // Locks the section in place
+    //                 invalidateOnRefresh: true,
+    //             }
+    //         });
+
+    //         scrollTimeline
+    //             // Explode the headline away into the background
+    //             .to(titleContainerRef.current, {
+    //                 scale: 2.5,
+    //                 opacity: 0,
+    //                 y: -100,
+    //                 rotateX: 15,
+    //                 transformOrigin: "center center",
+    //                 ease: "none"
+    //             }, 0)
+    //             // Fly Panel 1 in from Left + Rotate
+    //             .to(".f-panel-1", {
+    //                 x: "0vw",
+    //                 y: "0vh",
+    //                 rotate: -2,
+    //                 scale: 1,
+    //                 ease: "none"
+    //             }, 0)
+    //             // Fly Panel 2 in from Right
+    //             .to(".f-panel-2", {
+    //                 x: "0vw",
+    //                 y: "0vh",
+    //                 rotate: 1,
+    //                 scale: 1,
+    //                 ease: "none"
+    //             }, 0)
+    //             // Fly Panel 3 up from the bottom deep space
+    //             .to(".f-panel-3", {
+    //                 x: "0vw",
+    //                 y: "0vh",
+    //                 rotate: -1,
+    //                 scale: 1,
+    //                 ease: "none"
+    //             }, 0)
+    //             // Fly Panel 4 down from the top right corners
+    //             .to(".f-panel-4", {
+    //                 x: "0vw",
+    //                 y: "0vh",
+    //                 rotate: 3,
+    //                 scale: 1,
+    //                 ease: "none"
+    //             }, 0)
+    //             // Fade out the top navigation quietly while layout self-assembles
+    //             .to(navRef.current, {
+    //                 opacity: 0,
+    //                 y: -30,
+    //                 ease: "none"
+    //             }, 0);
+
+    //     }, containerRef);
+
+    //     return () => ctx.revert();
+    // }, []);
+
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // 1. Initial Intro Load Animation
-            const introTimeline = gsap.timeline();
-            introTimeline.fromTo(
-                navRef.current,
-                { y: -20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.8, ease: "power4.out" }
-            );
-            introTimeline.fromTo(
-                ".intro-mask-line",
-                { y: "100%" },
-                { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 },
-                "-=0.5"
-            );
-            introTimeline.fromTo(
-                ".floating-panel-initial",
-                { scale: 0.8, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 1, ease: "power3.out", stagger: 0.05 },
-                "-=0.8"
-            );
+            let mm = gsap.matchMedia();
 
-            // 2. The Crazy Scroll-Driven Kinetic Explosion
-            // We pin the entire hero container so it locks onto the screen while things fly
-            const scrollTimeline = gsap.timeline({
-                scrollTrigger: {
-                    trigger: containerRef.current,
-                    start: "top top",
-                    end: "+=150%", // How long the user has to scroll through the flying animation
-                    scrub: 1,       // Links animation smoothly to the scrollbar with physics catch-up
-                    pin: true,      // Locks the section in place
-                    invalidateOnRefresh: true,
-                }
+            // 💻 DESKTOP: Full kinetic explosion and pinning
+            mm.add("(min-width: 768px)", () => {
+                // 1. Initial Intro
+                const introTimeline = gsap.timeline();
+                introTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power4.out" })
+                             .to(".intro-mask-line", { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 }, "-=0.5")
+                             .to(".floating-panel-initial", { scale: 1, opacity: 1, duration: 1, ease: "power3.out", stagger: 0.05 }, "-=0.8");
+
+                // 2. The Flying Deconstruction
+                const scrollTimeline = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: containerRef.current,
+                        start: "top top",
+                        end: "+=150%", 
+                        scrub: 1,       
+                        pin: true,      
+                        invalidateOnRefresh: true,
+                    }
+                });
+
+                scrollTimeline
+                    .to(titleContainerRef.current, { scale: 2.5, opacity: 0, y: -100, rotateX: 15, transformOrigin: "center center", ease: "none" }, 0)
+                    .to(".f-panel-1", { x: "0vw", y: "0vh", rotate: -2, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-2", { x: "0vw", y: "0vh", rotate: 1, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-3", { x: "0vw", y: "0vh", rotate: -1, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-4", { x: "0vw", y: "0vh", rotate: 3, scale: 1, ease: "none" }, 0)
+                    .to(navRef.current, { opacity: 0, y: -30, ease: "none" }, 0);
             });
 
-            scrollTimeline
-                // Explode the headline away into the background
-                .to(titleContainerRef.current, {
-                    scale: 2.5,
-                    opacity: 0,
-                    y: -100,
-                    rotateX: 15,
-                    transformOrigin: "center center",
-                    ease: "none"
-                }, 0)
-                // Fly Panel 1 in from Left + Rotate
-                .to(".f-panel-1", {
-                    x: "0vw",
-                    y: "0vh",
-                    rotate: -2,
-                    scale: 1,
-                    ease: "none"
-                }, 0)
-                // Fly Panel 2 in from Right
-                .to(".f-panel-2", {
-                    x: "0vw",
-                    y: "0vh",
-                    rotate: 1,
-                    scale: 1,
-                    ease: "none"
-                }, 0)
-                // Fly Panel 3 up from the bottom deep space
-                .to(".f-panel-3", {
-                    x: "0vw",
-                    y: "0vh",
-                    rotate: -1,
-                    scale: 1,
-                    ease: "none"
-                }, 0)
-                // Fly Panel 4 down from the top right corners
-                .to(".f-panel-4", {
-                    x: "0vw",
-                    y: "0vh",
-                    rotate: 3,
-                    scale: 1,
-                    ease: "none"
-                }, 0)
-                // Fade out the top navigation quietly while layout self-assembles
-                .to(navRef.current, {
-                    opacity: 0,
-                    y: -30,
-                    ease: "none"
-                }, 0);
+            // 📱 MOBILE: Clean static fade-ins, no scroll-jacking
+            mm.add("(max-width: 767px)", () => {
+                const mobileTimeline = gsap.timeline();
+                // Just smoothly bring everything into view immediately
+                mobileTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" })
+                              .to(".intro-mask-line", { y: "0%", duration: 1, ease: "power3.out", stagger: 0.1 }, "-=0.4")
+                              // Bring the panels in straight, overriding the scattered transforms
+                              .to(".floating-panel-initial", { 
+                                  x: 0, y: 0, rotate: 0, scale: 1, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power2.out" 
+                              }, "-=0.2");
+            });
 
-        }, containerRef);
+        }, containerRef); // Scopes all queries like ".f-panel-1" exclusively to this component
 
         return () => ctx.revert();
     }, []);
 
     return (
         <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
-            
+
             {/* TOP FIXED NAVIGATION TIMELINE */}
-            <div ref={navRef} className="absolute top-0 left-0 w-full flex justify-between items-center px-12 pt-12 z-50 text-sm tracking-tight text-gray-400">
-                <div className="flex items-center gap-2">
+            <div ref={navRef} className="opacity-0 -translate-y-5 absolute top-0 left-0 w-full flex justify-between items-center px-12 pt-12 z-50 text-sm tracking-tight text-gray-400">
+                <div className="flex items-center gap-2 floating-panel-initial opacity-0 scale-[0.8]">
                     <span className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse" />
                     <span className="font-mono text-xs uppercase tracking-widest text-[#f3f3f3]">[ Engine Mode Active ]</span>
                 </div>
-                <div className="flex gap-8 font-mono text-xs">[ INDIA ]</div>
+                <div className="flex gap-8 font-mono text-xs floating-panel-initial opacity-0 scale-[0.8]">[ INDIA ]</div>
             </div>
 
             {/* THE GIANT KINETIC HEADLINE (COLLAPSES & FLIES AWAY) */}
             <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
                 <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
                     <div className="overflow-hidden block py-2">
-                        <span className="intro-mask-line block will-change-transform">DISRUPTIVE</span>
+                        <span className="intro-mask-line block will-change-transform translate-y-[110%]">DISRUPTIVE</span>
                     </div>
                     <div className="overflow-hidden block py-2">
-                        <span className="intro-mask-line block will-change-transform text-transparent bg-clip-text bg-gradient-to-r from-gray-500 via-gray-300 to-white">
+                        <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%] bg-clip-text bg-linear-to-r from-gray-500 via-gray-300 to-white">
                             ARCHITECT
                         </span>
                     </div>
@@ -130,7 +180,7 @@ export default function Hero() {
             {/* THE FLYING ARRANGEMENT PANELS */}
             {/* These elements start completely scattered out of bounds, skewed, and oversized, then fly perfectly into structure on scroll */}
             <div ref={panelGridRef} className="absolute inset-0 w-full h-full pointer-events-none z-20 px-8 py-24 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                
+
                 {/* PANEL 1: SYSTEM CAPABILITY STACK (Flies from deep left window boundary) */}
                 <div className="f-panel-1 bg-[#16161a] border border-white/5 rounded-2xl p-8 md:col-span-4 h-[55vh] flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
                     <div className="flex justify-between items-start border-b border-white/5 pb-4">
@@ -149,7 +199,7 @@ export default function Hero() {
                 </div>
 
                 {/* PANEL 2: INTERACTIVE KINETIC DISPLAY CAPULE (Flies from deep right window boundary) */}
-                <div className="f-panel-2 bg-[#ccff00] text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-[35deg] scale-125 pointer-events-auto shadow-2xl">
+                <div className="f-panel-2 bg-[#ccff00] text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
                     <div className="flex justify-between items-start border-b border-black/10 pb-4">
                         <span className="font-mono text-xs font-bold">[ PHYSICAL INTENT ]</span>
                         <span className="font-mono text-xs opacity-60">02 // KINETICS</span>
@@ -160,14 +210,14 @@ export default function Hero() {
                         </h2>
                     </div>
                     <div className="flex justify-between items-center pt-2">
-                        <p className="text-xs font-medium max-w-[200px]">Why build conventional boxes when layouts can move like fluid software assets?</p>
+                        <p className="text-xs font-medium max-w-50">Why build conventional boxes when layouts can move like fluid software assets?</p>
                         <span className="text-2xl">✦</span>
                     </div>
                 </div>
 
                 {/* COMBINED SUB-CONTAINERS FOR RIGHT SIDE PANEL 3 & 4 */}
                 <div className="md:col-span-3 h-[60vh] flex flex-col gap-6 justify-between">
-                    
+
                     {/* PANEL 3: PERFORMANCE METRICS DISPLAY (Flies straight up from below screen viewport) */}
                     <div className="f-panel-3 bg-[#16161a] border border-white/5 rounded-2xl p-6 h-[48%] flex flex-col justify-between transform translate-y-[150vh] rotate-[-15deg] pointer-events-auto shadow-2xl">
                         <div className="flex justify-between items-center">
@@ -181,7 +231,7 @@ export default function Hero() {
                     </div>
 
                     {/* PANEL 4: CALL TO ACTION CONSOLE BUTTON (Flies down diagonally from top right boundary) */}
-                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-[45deg] scale-150 pointer-events-auto shadow-2xl group hover:border-[#ccff00] transition-colors duration-300">
+                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-45 scale-150 pointer-events-auto shadow-2xl group hover:border-[#ccff00] transition-colors duration-300">
                         <p className="font-mono text-[10px] text-gray-500 mb-4 tracking-widest uppercase">[ ACCESS CORE TERMINAL ]</p>
                         <MagneticButton>
                             <button className="bg-white text-black font-mono text-xs font-bold py-3 px-6 rounded-full group-hover:bg-[#ccff00] group-hover:text-black transition-colors duration-300">
