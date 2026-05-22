@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
+import Terminal from "./Terminal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -32,6 +33,7 @@ const projects = [
 export default function ProjectGallery() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false);
 
     // useEffect(() => {
     //     const track = trackRef.current;
@@ -263,18 +265,17 @@ export default function ProjectGallery() {
                             Have an engine architecture configuration, infrastructure optimization problem, or highly responsive UI workspace layout that needs assembly?
                         </p>
 
-                        <MagneticButton>
-                            <a
-                                href="mailto:your-email@domain.com"
-                                className="magnetic-target bg-black text-[#ccff00] font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase"
-                            >
-                                INITIALIZE_HANDSHAKE_
-                            </a>
-                        </MagneticButton>
+                        <button
+                            onClick={() => setIsTerminalOpen(true)}
+                            className="magnetic-target bg-black text-[#ccff00] font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase cursor-pointer"
+                        >
+                            INITIALIZE_HANDSHAKE_
+                        </button>
                     </div>
                 </section>
 
             </div>
+            {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
         </div>
     );
 }
