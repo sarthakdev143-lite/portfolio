@@ -214,10 +214,13 @@ export default function Terminal({ onClose }: TerminalProps) {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={(e) => { e.stopPropagation(); handleCopyEmail(); }}
-                            className="group flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
-                            title="Copy Email instantly"
+                            aria-label={copied ? "Email copied" : "Copy email address"}
+                            className="group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
                         >
-                            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors" />}
+                            {copied
+                                ? <Check className="w-3.5 h-3.5 text-green-400" aria-hidden="true" />
+                                : <Copy className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors" aria-hidden="true" />
+                            }
                             <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 group-hover:text-white transition-colors">
                                 {copied ? "Copied" : "Copy Email"}
                             </span>
@@ -225,10 +228,11 @@ export default function Terminal({ onClose }: TerminalProps) {
 
                         <button
                             onClick={(e) => { e.stopPropagation(); onClose(); }}
-                            className="p-1.5 rounded hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors"
+                            className="p-1.5 cursor-pointer rounded hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors"
+                            aria-label="Close terminal"
                             title="Close (Esc)"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-4 h-4" aria-hidden="true" />
                         </button>
                     </div>
                 </div>

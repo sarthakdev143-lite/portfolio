@@ -28,7 +28,6 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const textPathRef = useRef<SVGTextPathElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const [spacing, setSpacing] = useState(0);
-  const [offset, setOffset] = useState(0);
   const uid = useId();
   const pathId = `curve-${uid}`;
   const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
@@ -55,29 +54,8 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
     if (textPathRef.current) {
       const initial = -spacing;
       textPathRef.current.setAttribute('startOffset', initial + 'px');
-      setOffset(initial);
     }
   }, [spacing]);
-
-  // useEffect(() => {
-  //   if (!spacing || !ready) return;
-  //   let frame = 0;
-  //   const step = () => {
-  //     if (!dragRef.current && textPathRef.current) {
-  //       const delta = dirRef.current === 'right' ? speed : -speed;
-  //       const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
-  //       let newOffset = currentOffset + delta;
-  //       const wrapPoint = spacing;
-  //       if (newOffset <= -wrapPoint) newOffset += wrapPoint;
-  //       if (newOffset > 0) newOffset -= wrapPoint;
-  //       textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-  //       setOffset(newOffset);
-  //     }
-  //     frame = requestAnimationFrame(step);
-  //   };
-  //   frame = requestAnimationFrame(step);
-  //   return () => cancelAnimationFrame(frame);
-  // }, [spacing, speed, ready]);
 
   useEffect(() => {
     if (!spacing || !ready) return;
@@ -85,29 +63,23 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
     const step = () => {
       if (textPathRef.current) {
-        let delta = 0;
-
-        if (dragRef.current) {
-          // Slowly decay momentum memory while cursor is active but motionless
-          velRef.current *= 0.88;
-        } else {
-          // Identify target baseline trajectory speed based on system flags
-          const targetSpeed = dirRef.current === 'right' ? speed : -speed;
-
-          // Gradually bleed off external velocity into baseline parameters over time
+        if (!dragRef.current) {
+          const targetSpeed = dirRef.current === "right" ? speed : -speed;
           velRef.current += (targetSpeed - velRef.current) * 0.05;
-          delta = velRef.current;
 
-          const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
-          let newOffset = currentOffset + delta;
+          const currentOffset = parseFloat(
+            textPathRef.current.getAttribute("startOffset") || "0"
+          );
+          let newOffset = currentOffset + velRef.current;
           const wrapPoint = spacing;
 
-          // Handle wrapping seamlessly across tracking boundaries
           if (newOffset <= -wrapPoint) newOffset += wrapPoint;
           if (newOffset > 0) newOffset -= wrapPoint;
 
-          textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-          setOffset(newOffset);
+          // ✅ Only write to the DOM — no setState, no re-render
+          textPathRef.current.setAttribute("startOffset", newOffset + "px");
+        } else {
+          velRef.current *= 0.88;
         }
       }
       frame = requestAnimationFrame(step);
@@ -136,7 +108,6 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
     if (newOffset <= -wrapPoint) newOffset += wrapPoint;
     if (newOffset > 0) newOffset -= wrapPoint;
     textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-    setOffset(newOffset);
   };
 
   const endDrag = () => {
@@ -168,7 +139,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
         </defs>
         {ready && (
           <text xmlSpace="preserve" className={`fill-white ${className ?? ''}`}>
-            <textPath ref={textPathRef} href={`#${pathId}`} startOffset={offset + 'px'} xmlSpace="preserve">
+            <textPath ref={textPathRef} href={`#${pathId}`} xmlSpace="preserve">
               {totalText}
             </textPath>
           </text>

@@ -31,15 +31,20 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 }) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
-  // Parse children into safe typographic blocks
   const splitText = useMemo(() => {
-    const text = typeof children === 'string' ? children : '';
-    return text.split(/(\s+)/).map((word, index) => {
+    if (typeof children !== "string") {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[ScrollReveal] children must be a plain string. Received:", typeof children);
+      }
+      return children; 
+    }
+
+    return children.split(/(\s+)/).map((word, index) => {
       if (word.match(/^\s+$/)) return word;
       return (
-        <span 
-          key={index} 
-          className="word inline-block origin-center will-change-[transform,opacity,filter]" 
+        <span
+          key={index}
+          className="word inline-block origin-center will-change-[transform,opacity,filter]"
           style={{ opacity: baseOpacity }}
         >
           {word}

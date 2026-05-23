@@ -5,29 +5,9 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
 import Terminal from "./Terminal";
 import { AnimatePresence } from "motion/react";
+import { PROJECTS } from "@/lib/config";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const projects = [
-    {
-        id: "01",
-        title: "INTERVIEW HACKER",
-        tagline: "CONTEXT INJECTION ENGINE",
-        desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
-        tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
-        link: "https://github.com/sarthakdev143-lite/interview-hacker",
-        accent: "#ccff00"
-    },
-    {
-        id: "02",
-        title: "YOUTUBE AUTOMATION",
-        tagline: "HEADLESS CONTENT PIPELINE",
-        desc: "An automated, bulk content generation and deployment matrix. Coordinates headless video asset processing, metadata optimization cascades, and automated publishing pipelines to completely eliminate manual rendering constraints.",
-        tech: ["Node.js", "FFmpeg Engine", "Puppeteer", "Next.js"],
-        link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
-        accent: "#ffffff"
-    }
-];
 
 export default function ProjectGallery() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -120,11 +100,11 @@ export default function ProjectGallery() {
     }, []);
 
     return (
-        <div ref={scrollContainerRef} className="relative w-full h-screen bg-[#0f0f11] overflow-hidden">
+        <div ref={scrollContainerRef} className="relative w-full h-screen bg-[#0f0f11] overflow-hidden" style={{ "--projects-count": PROJECTS.length } as React.CSSProperties}>
             <div ref={trackRef} className="relative md:absolute top-0 left-0 h-full flex flex-col md:flex-row items-center will-change-transform md:w-[calc((var(--projects-count)+1)*100vw)] w-full">
 
                 {/* PROJECT LAYOUT CAPSULES */}
-                {projects.map((project) => (
+                {PROJECTS.map((project) => (
                     <section
                         key={project.id}
                         className="project-panel w-full min-h-screen md:w-screen md:h-screen flex items-center justify-center px-8 md:px-24 shrink-0 perspective-1000 select-none"

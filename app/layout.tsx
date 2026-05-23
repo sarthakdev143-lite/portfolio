@@ -6,7 +6,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import HUD from "@/components/HUD";
 import Noise from "@/components/Noise";
-import Preloader from "@/components/Preloader";
+// import Preloader from "@/components/Preloader";
 import { SITE_CONFIG } from "@/lib/config";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -48,7 +48,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </noscript>
         <SmoothScroll>
-          <Preloader />
           <Noise />
           <HUD />
           <main>{children}</main>
