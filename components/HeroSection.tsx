@@ -64,16 +64,6 @@ export default function Hero() {
 
     return (
         <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
-
-            {/* TOP FIXED NAVIGATION TIMELINE */}
-            {/* <div ref={navRef} className="opacity-0 -translate-y-5 absolute top-0 left-0 w-full flex justify-between items-center px-12 pt-12 z-50 text-sm tracking-tight text-gray-400">
-                <div className="flex items-center gap-2 floating-panel-initial opacity-0 scale-[0.8]">
-                    <span className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse" />
-                    <span className="font-mono text-xs uppercase tracking-widest text-[#f3f3f3]">[ Engine Mode Active ]</span>
-                </div>
-                <div className="flex gap-8 font-mono text-xs floating-panel-initial opacity-0 scale-[0.8]">[ INDIA ]</div>
-            </div> */}
-
             {/* THE GIANT KINETIC HEADLINE (COLLAPSES & FLIES AWAY) */}
             <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
                 <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
@@ -95,7 +85,7 @@ export default function Hero() {
                 {/* PANEL 1: SYSTEM CAPABILITY STACK (Flies from deep left window boundary) */}
                 <div className="f-panel-1 bg-[#16161a] border border-white/5 rounded-2xl p-8 md:col-span-4 h-[55vh] flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
                     <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                        <span className="font-mono text-xs text-[#ccff00]">[ CORE CORE ]</span>
+                        <span className="font-mono text-xs text-[#ccff00]">[ CORE ]</span>
                         <span className="font-mono text-xs text-gray-500">01 // STRUCT</span>
                     </div>
                     <div>

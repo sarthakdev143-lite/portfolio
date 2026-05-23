@@ -12,26 +12,34 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
+    // Initialize the smooth scrolling engine
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
     });
 
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
     lenis.on("scroll", ScrollTrigger.update);
 
-    const tickerCallback = (time: number) => {
+    gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
-    };
+    });
 
-    gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(tickerCallback);
+      gsap.ticker.remove((time) => {
+        lenis.raf(time * 1000);
+      });
     };
   }, []);
 

@@ -1,0 +1,1606 @@
+================================================================================
+CODE EXPORT - Generated on 23/5/2026, 5:21:46 pm
+Total files: 16
+================================================================================
+
+
+================================================================================
+FILE: components\BlurText.tsx
+================================================================================
+
+"use client";
+
+import { motion, Transition, Easing } from 'motion/react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+
+type BlurTextProps = {
+  text?: string;
+  delay?: number;
+  className?: string;
+  animateBy?: 'words' | 'letters';
+  direction?: 'top' | 'bottom';
+  threshold?: number;
+  rootMargin?: string;
+  animationFrom?: Record<string, string | number>;
+  animationTo?: Array<Record<string, string | number>>;
+  easing?: Easing | Easing[];
+  onAnimationComplete?: () => void;
+  stepDuration?: number;
+};
+
+const buildKeyframes = (
+  from: Record<string, string | number>,
+  steps: Array<Record<string, string | number>>
+): Record<string, Array<string | number>> => {
+  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
+
+  const keyframes: Record<string, Array<string | number>> = {};
+  keys.forEach(k => {
+    keyframes[k] = [from[k], ...steps.map(s => s[k])];
+  });
+  return keyframes;
+};
+
+const BlurText: React.FC<BlurTextProps> = ({
+  text = '',
+  delay = 200,
+  className = '',
+  animateBy = 'words',
+  direction = 'top',
+  threshold = 0.1,
+  rootMargin = '0px',
+  animationFrom,
+  animationTo,
+  easing = (t: number) => t,
+  onAnimationComplete,
+  stepDuration = 0.35
+}) => {
+  const elements = animateBy === 'words' ? text.split(' ') : text.split('');
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.unobserve(ref.current as Element);
+        }
+      },
+      { threshold, rootMargin }
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [threshold, rootMargin]);
+
+  const defaultFrom = useMemo(
+    () =>
+      direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
+    [direction]
+  );
+
+  const defaultTo = useMemo(
+    () => [
+      {
+        filter: 'blur(5px)',
+        opacity: 0.5,
+        y: direction === 'top' ? 5 : -5
+      },
+      { filter: 'blur(0px)', opacity: 1, y: 0 }
+    ],
+    [direction]
+  );
+
+  const fromSnapshot = animationFrom ?? defaultFrom;
+  const toSnapshots = animationTo ?? defaultTo;
+
+  const stepCount = toSnapshots.length + 1;
+  const totalDuration = stepDuration * (stepCount - 1);
+  const times = Array.from({ length: stepCount }, (_, i) => (stepCount === 1 ? 0 : i / (stepCount - 1)));
+
+  return (
+    <p ref={ref} className={`blur-text ${className} flex flex-wrap`}>
+      {elements.map((segment, index) => {
+        const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
+
+        const spanTransition: Transition = {
+          duration: totalDuration,
+          times,
+          delay: (index * delay) / 1000,
+          ease: easing
+        };
+
+        return (
+          <motion.span
+            key={index}
+            initial={fromSnapshot}
+            animate={inView ? animateKeyframes : fromSnapshot}
+            transition={spanTransition}
+            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
+            style={{
+              display: 'inline-block',
+              willChange: 'transform, filter, opacity'
+            }}
+          >
+            {segment === ' ' ? '\u00A0' : segment}
+            {animateBy === 'words' && index < elements.length - 1 && '\u00A0'}
+          </motion.span>
+        );
+      })}
+    </p>
+  );
+};
+
+export default BlurText;
+
+
+================================================================================
+FILE: components\BuildPipeline.tsx
+================================================================================
+
+// components/BuildPipeline.tsx
+"use client";
+
+import { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ScrollReveal from "./ScrollReveal";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const steps = [
+  {
+    title: "DISCOVERY",
+    code: "scope = analyze(problem, constraints)",
+    desc: "Deconstructing objectives, mapping user flows.",
+  },
+  {
+    title: "ARCHITECTURE",
+    code: "layout = grid.compose(react, motion)",
+    desc: "Designing component trees and animation choreography.",
+  },
+  {
+    title: "PROTOTYPE",
+    code: "prototype.boot(); animate(scene)",
+    desc: "High-fidelity motion shells with real physics.",
+  },
+  {
+    title: "DEPLOY",
+    code: "deploy --prod --edge",
+    desc: "Optimizing and shipping to the metal.",
+  },
+];
+
+export default function BuildPipeline() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const traceLineRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Draw the circuit trace line
+      gsap.fromTo(
+        traceLineRef.current,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 60%",
+            end: "bottom bottom",
+            scrub: 1,
+          },
+        }
+      );
+
+      // Each step card glitch reveal
+      gsap.utils.toArray<HTMLElement>(".pipeline-step").forEach((step) => {
+        const card = step.querySelector(".step-card");
+        if (!card) return;
+
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 30, skewY: 2, filter: "blur(4px)" },
+          {
+            opacity: 1,
+            y: 0,
+            skewY: 0,
+            filter: "blur(0px)",
+            duration: 1,
+            ease: "power4.out",
+            scrollTrigger: {
+              trigger: step,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative min-h-screen bg-[#0f0f11] py-24 px-6 flex flex-col items-center overflow-hidden"
+    >
+      <div className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: "linear-gradient(#ccff00 1px, transparent 1px), linear-gradient(to right, #ccff00 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      <div className="relative z-10 max-w-6xl w-full">
+        <ScrollReveal containerClassName="mb-24 text-center">
+          <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase text-transparent bg-clip-text bg-linear-to-r from-[#ccff00] to-white">
+            Build Pipeline
+          </h2>
+        </ScrollReveal>
+
+        <div className="relative flex flex-col gap-20 md:gap-32">
+          {/* Glowing trace line */}
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2">
+            <div className="w-full h-full bg-[#ccff00]/30">
+              <div
+                ref={traceLineRef}
+                className="w-full h-full bg-linear-to-b from-[#ccff00] via-[#ccff00]/80 to-transparent origin-top"
+                style={{ boxShadow: "0 0 20px #ccff00, 0 0 40px #ccff0060" }}
+              />
+            </div>
+          </div>
+
+          {steps.map((step, i) => (
+            <div
+              key={step.title}
+              className={`pipeline-step flex items-center gap-6 md:gap-12 ${
+                i % 2 === 0 ? "flex-row md:flex-row" : "flex-row md:flex-row-reverse"
+              }`}
+            >
+              {/* Circuit node */}
+              <div className="relative shrink-0 z-10">
+                <div className="w-8 h-8 rounded-full bg-[#0f0f11] border-2 border-[#ccff00] shadow-[0_0_15px_#ccff00] flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse" />
+                </div>
+              </div>
+
+              {/* Card */}
+              <div className={`step-card w-full max-w-xl bg-black/40 border border-white/5 backdrop-blur-lg rounded-2xl p-6 md:p-8 transition-all duration-500 hover:border-[#ccff00]/30 ${
+                i % 2 === 0 ? "text-left" : "md:text-right"
+              }`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="font-mono text-xs text-[#ccff00] tracking-widest">
+                    {`0${i + 1}`}
+                  </span>
+                  <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase">
+                    {step.title}
+                  </h3>
+                </div>
+                <pre className="font-mono text-xs md:text-sm bg-black/60 border border-[#ccff00]/20 rounded-lg p-4 mb-4 text-[#ccff00] overflow-x-auto">
+                  {step.code}
+                </pre>
+                <p className="text-gray-400 text-sm leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+================================================================================
+FILE: components\CurvedLoop.tsx
+================================================================================
+
+"use client";
+
+import { useRef, useEffect, useState, useMemo, useId, FC, PointerEvent } from 'react';
+
+interface CurvedLoopProps {
+  marqueeText?: string;
+  speed?: number;
+  className?: string;
+  curveAmount?: number;
+  direction?: 'left' | 'right';
+  interactive?: boolean;
+}
+
+const CurvedLoop: FC<CurvedLoopProps> = ({
+  marqueeText = '',
+  speed = 2,
+  className,
+  curveAmount = 400,
+  direction = 'left',
+  interactive = false
+}) => {
+  const text = useMemo(() => {
+    const hasTrailing = /\s|\u00A0$/.test(marqueeText);
+    return (hasTrailing ? marqueeText.replace(/\s+$/, '') : marqueeText) + '\u00A0';
+  }, [marqueeText]);
+
+  const measureRef = useRef<SVGTextElement | null>(null);
+  const textPathRef = useRef<SVGTextPathElement | null>(null);
+  const pathRef = useRef<SVGPathElement | null>(null);
+  const [spacing, setSpacing] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const uid = useId();
+  const pathId = `curve-${uid}`;
+  const pathD = `M-100,40 Q500,${40 + curveAmount} 1540,40`;
+
+  const dragRef = useRef(false);
+  const lastXRef = useRef(0);
+  const dirRef = useRef<'left' | 'right'>(direction);
+  const velRef = useRef(0);
+
+  const textLength = spacing;
+  const totalText = textLength
+    ? Array(Math.ceil(1800 / textLength) + 2)
+      .fill(text)
+      .join('')
+    : text;
+  const ready = spacing > 0;
+
+  useEffect(() => {
+    if (measureRef.current) setSpacing(measureRef.current.getComputedTextLength());
+  }, [text, className]);
+
+  useEffect(() => {
+    if (!spacing) return;
+    if (textPathRef.current) {
+      const initial = -spacing;
+      textPathRef.current.setAttribute('startOffset', initial + 'px');
+      setOffset(initial);
+    }
+  }, [spacing]);
+
+  useEffect(() => {
+    if (!spacing || !ready) return;
+    let frame = 0;
+    const step = () => {
+      if (!dragRef.current && textPathRef.current) {
+        const delta = dirRef.current === 'right' ? speed : -speed;
+        const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+        let newOffset = currentOffset + delta;
+        const wrapPoint = spacing;
+        if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+        if (newOffset > 0) newOffset -= wrapPoint;
+        textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+        setOffset(newOffset);
+      }
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [spacing, speed, ready]);
+
+  const onPointerDown = (e: PointerEvent) => {
+    if (!interactive) return;
+    dragRef.current = true;
+    lastXRef.current = e.clientX;
+    velRef.current = 0;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (!interactive || !dragRef.current || !textPathRef.current) return;
+    const dx = e.clientX - lastXRef.current;
+    lastXRef.current = e.clientX;
+    velRef.current = dx;
+    const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+    let newOffset = currentOffset + dx;
+    const wrapPoint = spacing;
+    if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+    if (newOffset > 0) newOffset -= wrapPoint;
+    textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+    setOffset(newOffset);
+  };
+
+  const endDrag = () => {
+    if (!interactive) return;
+    dragRef.current = false;
+    dirRef.current = velRef.current > 0 ? 'right' : 'left';
+  };
+
+  const cursorStyle = interactive ? (dragRef.current ? 'grabbing' : 'grab') : 'auto';
+
+  return (
+    <div
+      className="flex items-center justify-center w-full"
+      style={{ visibility: ready ? 'visible' : 'hidden', cursor: cursorStyle }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerLeave={endDrag}
+    >
+      <svg
+        className="select-none w-full overflow-visible block aspect-100/12 text-[6rem] font-bold uppercase leading-none"
+        viewBox="0 0 1440 120"
+      >
+        <text ref={measureRef} xmlSpace="preserve" style={{ visibility: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+          {text}
+        </text>
+        <defs>
+          <path ref={pathRef} id={pathId} d={pathD} fill="none" stroke="transparent" />
+        </defs>
+        {ready && (
+          <text xmlSpace="preserve" className={`fill-white ${className ?? ''}`}>
+            <textPath ref={textPathRef} href={`#${pathId}`} startOffset={offset + 'px'} xmlSpace="preserve">
+              {totalText}
+            </textPath>
+          </text>
+        )}
+      </svg>
+    </div>
+  );
+};
+
+export default CurvedLoop;
+
+
+================================================================================
+FILE: components\HeroSection.tsx
+================================================================================
+
+"use client";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import MagneticButton from "./MagneticButton";
+
+gsap.registerPlugin(ScrollTrigger);
+
+export default function Hero() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const titleContainerRef = useRef<HTMLDivElement>(null);
+    const panelGridRef = useRef<HTMLDivElement>(null);
+    const navRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            let mm = gsap.matchMedia();
+
+            // 💻 DESKTOP: Full kinetic explosion and pinning
+            mm.add("(min-width: 768px)", () => {
+                // 1. Initial Intro
+                const introTimeline = gsap.timeline();
+                introTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power4.out" })
+                    .to(".intro-mask-line", { y: "0%", duration: 1.2, ease: "power4.out", stagger: 0.1 }, "-=0.5")
+                    .to(".floating-panel-initial", { scale: 1, opacity: 1, duration: 1, ease: "power3.out", stagger: 0.05 }, "-=0.8");
+
+                // 2. The Flying Deconstruction
+                const scrollTimeline = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: containerRef.current,
+                        start: "top top",
+                        end: "+=150%",
+                        scrub: 1,
+                        pin: true,
+                        invalidateOnRefresh: true,
+                    }
+                });
+
+                scrollTimeline
+                    .to(titleContainerRef.current, { scale: 2.5, opacity: 0, y: -100, rotateX: 15, transformOrigin: "center center", ease: "none" }, 0)
+                    .to(".f-panel-1", { x: "0vw", y: "0vh", rotate: -2, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-2", { x: "0vw", y: "0vh", rotate: 1, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-3", { x: "0vw", y: "0vh", rotate: -1, scale: 1, ease: "none" }, 0)
+                    .to(".f-panel-4", { x: "0vw", y: "0vh", rotate: 3, scale: 1, ease: "none" }, 0)
+                    .to(navRef.current, { opacity: 0, y: -30, ease: "none" }, 0);
+            });
+
+            // 📱 MOBILE: Clean static fade-ins, no scroll-jacking
+            mm.add("(max-width: 767px)", () => {
+                const mobileTimeline = gsap.timeline();
+                // Just smoothly bring everything into view immediately
+                mobileTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" })
+                    .to(".intro-mask-line", { y: "0%", duration: 1, ease: "power3.out", stagger: 0.1 }, "-=0.4")
+                    // Bring the panels in straight, overriding the scattered transforms
+                    .to(".floating-panel-initial", {
+                        x: 0, y: 0, rotate: 0, scale: 1, opacity: 1, duration: 0.8, stagger: 0.1, ease: "power2.out"
+                    }, "-=0.2");
+            });
+
+        }, containerRef); // Scopes all queries like ".f-panel-1" exclusively to this component
+
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
+            {/* THE GIANT KINETIC HEADLINE (COLLAPSES & FLIES AWAY) */}
+            <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
+                <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
+                    <div className="overflow-hidden block py-2">
+                        <span className="intro-mask-line block will-change-transform translate-y-[110%]">DISRUPTIVE</span>
+                    </div>
+                    <div className="overflow-hidden block py-2">
+                        <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%] bg-clip-text bg-linear-to-r from-gray-500 via-gray-300 to-white">
+                            ARCHITECT
+                        </span>
+                    </div>
+                </h1>
+            </div>
+
+            {/* THE FLYING ARRANGEMENT PANELS */}
+            {/* These elements start completely scattered out of bounds, skewed, and oversized, then fly perfectly into structure on scroll */}
+            <div ref={panelGridRef} className="absolute inset-0 w-full h-full pointer-events-none z-20 px-8 py-24 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+                {/* PANEL 1: SYSTEM CAPABILITY STACK (Flies from deep left window boundary) */}
+                <div className="f-panel-1 bg-[#16161a] border border-white/5 rounded-2xl p-8 md:col-span-4 h-[55vh] flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
+                    <div className="flex justify-between items-start border-b border-white/5 pb-4">
+                        <span className="font-mono text-xs text-[#ccff00]">[ CORE ]</span>
+                        <span className="font-mono text-xs text-gray-500">01 // STRUCT</span>
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-light tracking-tight mb-2 uppercase text-white">SYSTEM ARCHITECTURE</h3>
+                        <p className="text-sm text-gray-400 font-light leading-relaxed">Developing deterministic client states, responsive WebGL sandboxes, and highly automated cloud node topologies.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                        {["TypeScript", "Next.js", "GSAP Matrix", "WebGL"].map((t) => (
+                            <span key={t} className="font-mono text-[10px] bg-white/5 px-2 py-1 rounded text-gray-300">{t}</span>
+                        ))}
+                    </div>
+                </div>
+
+                {/* PANEL 2: INTERACTIVE KINETIC DISPLAY CAPULE (Flies from deep right window boundary) */}
+                <div className="f-panel-2 bg-[#ccff00] text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
+                    <div className="flex justify-between items-start border-b border-black/10 pb-4">
+                        <span className="font-mono text-xs font-bold">[ PHYSICAL INTENT ]</span>
+                        <span className="font-mono text-xs opacity-60">02 // KINETICS</span>
+                    </div>
+                    <div className="my-auto">
+                        <h2 className="text-4xl font-black tracking-tighter uppercase leading-[0.9]">
+                            BREAKING THE PLATFORM RIGIDITY.
+                        </h2>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                        <p className="text-xs font-medium max-w-50">Why build conventional boxes when layouts can move like fluid software assets?</p>
+                        <span className="text-2xl">✦</span>
+                    </div>
+                </div>
+
+                {/* COMBINED SUB-CONTAINERS FOR RIGHT SIDE PANEL 3 & 4 */}
+                <div className="md:col-span-3 h-[60vh] flex flex-col gap-6 justify-between">
+
+                    {/* PANEL 3: PERFORMANCE METRICS DISPLAY (Flies straight up from below screen viewport) */}
+                    <div className="f-panel-3 bg-[#16161a] border border-white/5 rounded-2xl p-6 h-[48%] flex flex-col justify-between transform translate-y-[150vh] rotate-[-15deg] pointer-events-auto shadow-2xl">
+                        <div className="flex justify-between items-center">
+                            <span className="font-mono text-[10px] text-gray-500">[ PERFORMANCE RUN ]</span>
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                        </div>
+                        <div className="py-2">
+                            <div className="text-5xl font-mono tracking-tighter text-white font-bold">99<span className="text-xs text-[#ccff00]">FPS</span></div>
+                            <p className="text-xs text-gray-400 mt-1">Consistent paint performance across demanding layout canvas manipulation sweeps.</p>
+                        </div>
+                    </div>
+
+                    {/* PANEL 4: CALL TO ACTION CONSOLE BUTTON (Flies down diagonally from top right boundary) */}
+                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-45 scale-150 pointer-events-auto shadow-2xl group hover:border-[#ccff00] transition-colors duration-300">
+                        <p className="font-mono text-[10px] text-gray-500 mb-4 tracking-widest uppercase">[ ACCESS CORE TERMINAL ]</p>
+                        <MagneticButton>
+                            <button className="bg-white text-black font-mono text-xs font-bold py-3 px-6 rounded-full group-hover:bg-[#ccff00] group-hover:text-black transition-colors duration-300">
+                                INITIALIZE MATRIX_
+                            </button>
+                        </MagneticButton>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    );
+}
+
+================================================================================
+FILE: components\HUD.tsx
+================================================================================
+
+export default function HUD() {
+
+    return (
+        <div className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 pt-8 z-50 pointer-events-none mix-blend-difference text-[#f3f3f3] uppercase font-mono text-[10px] md:text-xs tracking-widest">
+
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <span>offline</span>
+                </div>
+            </div>
+
+        </div>
+    );
+}
+
+================================================================================
+FILE: components\MagneticButton.tsx
+================================================================================
+
+"use client";
+import React, { useRef, useEffect } from "react";
+import gsap from "gsap";
+
+interface MagneticButtonProps {
+    children: React.ReactElement;
+}
+
+export default function MagneticButton({ children }: MagneticButtonProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Target both the outer element and its text/icon child independently
+        const innerElement = container.querySelector(".magnetic-target") || container.firstElementChild;
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const { clientX, clientY } = e;
+            const { left, top, width, height } = container.getBoundingClientRect();
+
+            const centerX = left + width / 2;
+            const centerY = top + height / 2;
+
+            const distanceX = clientX - centerX;
+            const distanceY = clientY - centerY;
+
+            // The outer container pulls towards the mouse with solid weight
+            gsap.to(container, {
+                x: distanceX * 0.45,
+                y: distanceY * 0.45,
+                duration: 0.8,
+                ease: "power3.out",
+            });
+
+            // The inner element shifts less, creating a 3D depth effect (parallax)
+            if (innerElement) {
+                gsap.to(innerElement, {
+                    x: distanceX * 0.15,
+                    y: distanceY * 0.15,
+                    duration: 1.5,
+                    ease: "power3.out",
+                });
+            }
+        };
+
+        const handleMouseLeave = () => {
+            // Snaps the container back with a crisp, fluid spring
+            gsap.to(container, {
+                x: 0,
+                y: 0,
+                duration: 1.8,
+                ease: "elastic.out(1, 0.3)",
+            });
+
+            // Snaps the inner child back safely
+            if (innerElement) {
+                gsap.to(innerElement, {
+                    x: 0,
+                    y: 0,
+                    duration: 2.8,
+                    ease: "elastic.out(1, 0.3)",
+                });
+            }
+        };
+
+        container.addEventListener("mousemove", handleMouseMove);
+        container.addEventListener("mouseleave", handleMouseLeave);
+
+        return () => {
+            container.removeEventListener("mousemove", handleMouseMove);
+            container.removeEventListener("mouseleave", handleMouseLeave);
+        };
+    }, []);
+
+    return (
+        <div ref={containerRef} className="inline-block transition-transform duration-100 cursor-pointer">
+            {children}
+        </div>
+    );
+}
+
+================================================================================
+FILE: components\Noise.tsx
+================================================================================
+
+const Noise = () => {
+    return (
+        <div
+            className="pointer-events-none fixed inset-0 z-50 opacity-[0.04]"
+            style={{
+                // A tiny 50x50 noise tile base64 that repeats infinitely
+                backgroundImage: `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyAAMAAAAe3DNGAAAANElEQVRYR2P4z8AARjIsm7QEw0gMBoNGA6HRIHw0EBqNBoNGA6HRIHw0EBqNBoNGA6GxDAwAn7X8EbWe0bIAAAAASUVORK5CYII=")`,
+                backgroundRepeat: 'repeat',
+            }}
+        />
+    );
+};
+
+export default Noise;
+
+================================================================================
+FILE: components\Preloader.tsx
+================================================================================
+
+"use client";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+
+export default function Preloader() {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const counterRef = useRef<HTMLDivElement>(null);
+    const [isComplete, setIsComplete] = useState(false);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    setIsComplete(true);
+                    // Dispatch a custom event so page components know it's safe to animate
+                    window.dispatchEvent(new Event("bootComplete"));
+                }
+            });
+
+            // Fake terminal boot sequence counter
+            tl.to(counterRef.current, {
+                innerHTML: 100,
+                duration: 2,
+                snap: { innerHTML: 1 },
+                ease: "power4.inOut",
+            })
+                // The split screen shatter effect
+                .to(".preloader-split-top", {
+                    yPercent: -100,
+                    duration: 0.8,
+                    ease: "power4.inOut"
+                }, "+=0.2")
+                .to(".preloader-split-bottom", {
+                    yPercent: 100,
+                    duration: 0.8,
+                    ease: "power4.inOut"
+                }, "<")
+                .to(containerRef.current, {
+                    autoAlpha: 0,
+                    duration: 0.1
+                });
+        });
+
+        return () => ctx.revert();
+    }, []);
+
+    if (isComplete) return null;
+
+    return (
+        <div ref={containerRef} className="fixed inset-0 z-100 pointer-events-none flex flex-col uppercase font-mono text-xs tracking-widest text-[#ccff00]">
+            {/* Top Half */}
+            <div className="preloader-split-top absolute top-0 left-0 w-full h-1/2 bg-[#0a0a0c] border-b border-white/5 flex items-end px-8 pb-4">
+                <span>INITIALIZING SYSTEM_</span>
+            </div>
+
+            {/* Bottom Half with Counter */}
+            <div className="preloader-split-bottom absolute bottom-0 left-0 w-full h-1/2 bg-[#0a0a0c] flex items-start px-8 pt-4 justify-between">
+                <span>LOADING DOM MATRIX</span>
+                <div className="text-6xl font-black tracking-tighter text-[#f3f3f3]">
+                    <span ref={counterRef}>0</span>%
+                </div>
+            </div>
+        </div>
+    );
+}
+
+================================================================================
+FILE: components\ProjectGallery.tsx
+================================================================================
+
+"use client";
+import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import MagneticButton from "./MagneticButton";
+import Terminal from "./Terminal";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const projects = [
+    {
+        id: "01",
+        title: "INTERVIEW HACKER",
+        tagline: "CONTEXT INJECTION ENGINE",
+        desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
+        tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
+        link: "https://github.com/sarthakdev143-lite/interview-hacker",
+        bg: "#131316",
+        accent: "#ccff00"
+    },
+    {
+        id: "02",
+        title: "YOUTUBE AUTOMATION",
+        tagline: "HEADLESS CONTENT PIPELINE",
+        desc: "An automated, bulk content generation and deployment matrix. Coordinates headless video asset processing, metadata optimization cascades, and automated publishing pipelines to completely eliminate manual rendering constraints.",
+        tech: ["Node.js", "FFmpeg Engine", "Puppeteer", "Next.js"],
+        link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
+        bg: "#1c1c22",
+        accent: "#ffffff"
+    }
+];
+
+export default function ProjectGallery() {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+
+    // useEffect(() => {
+    //     const track = trackRef.current;
+    //     const container = scrollContainerRef.current;
+    //     if (!track || !container) return;
+
+    //     const ctx = gsap.context(() => {
+    //         // Calculate total horizontal distance to travel
+    //         const totalPanels = projects.length + 1; // Projects + The Final Terminal Panel
+    //         const scrollTween = gsap.to(track, {
+    //             x: () => -(track.scrollWidth - window.innerWidth),
+    //             ease: "none",
+    //             scrollTrigger: {
+    //                 trigger: container,
+    //                 pin: true,
+    //                 scrub: 1,
+    //                 start: "top top",
+    //                 end: () => `+=${track.scrollWidth}`,
+    //                 invalidateOnRefresh: true,
+    //             }
+    //         });
+
+    //         // Spatial scale distortion warp on the individual cards as they pass through the viewport
+    //         gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+    //             gsap.fromTo(
+    //                 panel.querySelector(".panel-content"),
+    //                 { scale: 0.9, rotateY: 15, opacity: 0.6 },
+    //                 {
+    //                     scale: 1,
+    //                     rotateY: 0,
+    //                     opacity: 1,
+    //                     ease: "power2.out",
+    //                     scrollTrigger: {
+    //                         trigger: panel,
+    //                         containerAnimation: scrollTween,
+    //                         start: "left right-=20%",
+    //                         end: "center center",
+    //                         scrub: true,
+    //                     }
+    //                 }
+    //             );
+    //         });
+
+    //         // Black Hole Void expansion for the final section
+    //         gsap.fromTo(
+    //             ".void-bg",
+    //             { scale: 0.3, borderRadius: "500px", opacity: 0 },
+    //             {
+    //                 scale: 1,
+    //                 borderRadius: "0px",
+    //                 opacity: 1,
+    //                 ease: "none",
+    //                 scrollTrigger: {
+    //                     trigger: ".void-panel",
+    //                     containerAnimation: scrollTween,
+    //                     start: "left right",
+    //                     end: "left left",
+    //                     scrub: true,
+    //                 }
+    //             }
+    //         );
+
+    //     }, container);
+
+    //     return () => ctx.revert();
+    // }, []);
+
+    useEffect(() => {
+        const track = trackRef.current;
+        const container = scrollContainerRef.current;
+        if (!track || !container) return;
+
+        const ctx = gsap.context(() => {
+            let mm = gsap.matchMedia();
+
+            // 💻 DESKTOP: Horizontal Scroll Matrix
+            mm.add("(min-width: 768px)", () => {
+                const totalScrollDistance = track.scrollWidth - window.innerWidth;
+
+                const scrollTween = gsap.to(track, {
+                    x: () => -totalScrollDistance,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: container,
+                        pin: true,
+                        scrub: 1,
+                        start: "top top",
+                        end: () => `+=${track.scrollWidth}`,
+                        invalidateOnRefresh: true,
+                    }
+                });
+
+                // Spatial distortion on individual cards
+                gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+                    gsap.fromTo(panel.querySelector(".panel-content"),
+                        { scale: 0.9, rotateY: 15, opacity: 0.6 },
+                        {
+                            scale: 1, rotateY: 0, opacity: 1, ease: "power2.out",
+                            scrollTrigger: {
+                                trigger: panel,
+                                containerAnimation: scrollTween,
+                                start: "left right-=20%",
+                                end: "center center",
+                                scrub: true,
+                            }
+                        }
+                    );
+                });
+
+                // The Black Hole Footer 
+                gsap.fromTo(".void-bg",
+                    { scale: 0.3, borderRadius: "500px", opacity: 0 },
+                    {
+                        scale: 1, borderRadius: "0px", opacity: 1, ease: "none",
+                        scrollTrigger: {
+                            trigger: ".void-panel",
+                            containerAnimation: scrollTween,
+                            start: "left right",
+                            end: "left left",
+                            scrub: true,
+                        }
+                    }
+                );
+            });
+
+            // 📱 MOBILE: Standard vertical flow
+            mm.add("(max-width: 767px)", () => {
+                // Ensure the track doesn't try to stretch off-screen on phones
+                gsap.set(track, { width: "100%", x: 0 });
+                gsap.set(".project-panel", { width: "100%", height: "auto" });
+                gsap.set(".void-panel", { width: "100%", height: "100vh" });
+
+                // Simple slide-up reveals for the cards as you scroll down
+                gsap.utils.toArray(".project-panel").forEach((panel: any) => {
+                    gsap.fromTo(panel.querySelector(".panel-content"),
+                        { opacity: 0, y: 50 },
+                        {
+                            opacity: 1, y: 0, duration: 0.8, ease: "power3.out",
+                            scrollTrigger: {
+                                trigger: panel,
+                                start: "top 85%",
+                            }
+                        }
+                    );
+                });
+            });
+
+        }, container);
+
+        return () => ctx.revert();
+    }, []);
+
+    return (
+        <div ref={scrollContainerRef} className="relative w-full h-screen bg-[#0f0f11] overflow-hidden">
+            <div ref={trackRef} className="relative md:absolute top-0 left-0 h-full flex flex-col md:flex-row items-center will-change-transform md:w-[calc((var(--projects-count)+1)*100vw)] w-full">
+
+                {/* PROJECT LAYOUT CAPSULES */}
+                {projects.map((project) => (
+                    <section
+                        key={project.id}
+                        className="project-panel w-full min-h-screen md:w-screen md:h-screen flex items-center justify-center px-8 md:px-24 shrink-0 perspective-1000 select-none"
+                        style={{ backgroundColor: project.bg }}
+                    >
+                        <div className="panel-content w-full max-w-6xl h-[70vh] bg-black/40 border border-white/5 rounded-3xl p-8 md:p-16 flex flex-col justify-between transform-style-3d shadow-2xl backdrop-blur-sm">
+
+                            {/* Card Top Information Data Header */}
+                            <div className="flex justify-between items-start border-b border-white/5 pb-6">
+                                <div className="flex items-center gap-4">
+                                    <span className="font-mono text-sm text-gray-500">[{project.id}]</span>
+                                    <h4 className="font-mono text-xs tracking-widest uppercase" style={{ color: project.accent }}>
+                                        // {project.tagline}
+                                    </h4>
+                                </div>
+                                <span className="font-mono text-xs text-gray-600 tracking-tighter">STATUS: PRODUCTION_READY</span>
+                            </div>
+
+                            {/* Center Identity Core */}
+                            <div className="my-auto max-w-4xl">
+                                <h2 className="text-4xl md:text-7xl font-black tracking-tighter text-white uppercase mb-6 leading-none">
+                                    {project.title}
+                                </h2>
+                                <p className="text-base md:text-lg text-gray-400 font-light leading-relaxed max-w-2xl">
+                                    {project.desc}
+                                </p>
+                            </div>
+
+                            {/* Footer Integration & CTA Row */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pt-6 border-t border-white/5">
+                                <div className="flex flex-wrap gap-2">
+                                    {project.tech.map((t) => (
+                                        <span key={t} className="font-mono text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-md text-gray-300">
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <MagneticButton>
+                                    <a
+                                        href={project.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="magnetic-target group h-14 px-8 rounded-full flex items-center justify-center text-xs font-mono font-bold tracking-wider transition-all duration-300 shadow-lg border"
+                                        style={{
+                                            backgroundColor: project.accent === "#ffffff" ? "#ffffff" : "transparent",
+                                            color: project.accent === "#ffffff" ? "#000000" : project.accent,
+                                            borderColor: project.accent === "#ffffff" ? "transparent" : `${project.accent}30`
+                                        }}
+                                    >
+                                        INSPECT_REPOS_ →
+                                    </a>
+                                </MagneticButton>
+                            </div>
+
+                        </div>
+                    </section>
+                ))}
+
+                {/* THE VOID / BLACK HOLE CLOSING TERMINAL FOOTER */}
+                <section className="void-panel w-screen h-screen relative flex items-center justify-center shrink-0 overflow-hidden bg-[#0f0f11]">
+                    {/* Expanding background layer triggered directly by horizontal scroll tracking */}
+                    <div className="void-bg absolute inset-0 bg-[#ccff00] z-0" />
+
+                    <div className="relative z-10 text-center text-black px-6 max-w-3xl flex flex-col items-center">
+                        <span className="font-mono text-xs tracking-[0.3em] font-bold uppercase mb-4 text-black/60">[ END OF PIPELINE ]</span>
+                        <h2 className="text-5xl md:text-8xl font-black tracking-tighter uppercase leading-[0.85] mb-8">
+                            LET'S EXECUTE SOMETHING.
+                        </h2>
+                        <p className="text-sm md:text-base font-medium max-w-md mb-12 text-black/80">
+                            Have an engine architecture configuration, infrastructure optimization problem, or highly responsive UI workspace layout that needs assembly?
+                        </p>
+
+                        <button
+                            onClick={() => setIsTerminalOpen(true)}
+                            className="magnetic-target bg-black text-[#ccff00] font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase cursor-pointer"
+                        >
+                            INITIALIZE_HANDSHAKE_
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+            {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+        </div>
+    );
+}
+
+================================================================================
+FILE: components\ScrollReveal.tsx
+================================================================================
+
+"use client";
+
+import React, { useEffect, useRef, useMemo, ReactNode, RefObject } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
+interface ScrollRevealProps {
+  children: ReactNode;
+  scrollContainerRef?: RefObject<HTMLElement>;
+  enableBlur?: boolean;
+  baseOpacity?: number;
+  baseRotation?: number;
+  blurStrength?: number;
+  containerClassName?: string;
+  textClassName?: string;
+  rotationEnd?: string;
+  wordAnimationEnd?: string;
+}
+
+const ScrollReveal: React.FC<ScrollRevealProps> = ({
+  children,
+  scrollContainerRef,
+  enableBlur = true,
+  baseOpacity = 0.1,
+  baseRotation = 3,
+  blurStrength = 4,
+  containerClassName = '',
+  textClassName = '',
+  rotationEnd = 'bottom bottom',
+  wordAnimationEnd = 'bottom bottom'
+}) => {
+  const containerRef = useRef<HTMLHeadingElement>(null);
+
+  const splitText = useMemo(() => {
+    const text = typeof children === 'string' ? children : '';
+    return text.split(/(\s+)/).map((word, index) => {
+      if (word.match(/^\s+$/)) return word;
+      return (
+        <span className="inline-block word" key={index}>
+          {word}
+        </span>
+      );
+    });
+  }, [children]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
+
+    gsap.fromTo(
+      el,
+      { transformOrigin: '0% 50%', rotate: baseRotation },
+      {
+        ease: 'none',
+        rotate: 0,
+        scrollTrigger: {
+          trigger: el,
+          scroller,
+          start: 'top bottom',
+          end: rotationEnd,
+          scrub: true
+        }
+      }
+    );
+
+    const wordElements = el.querySelectorAll<HTMLElement>('.word');
+
+    gsap.fromTo(
+      wordElements,
+      { opacity: baseOpacity, willChange: 'opacity' },
+      {
+        ease: 'none',
+        opacity: 1,
+        stagger: 0.05,
+        scrollTrigger: {
+          trigger: el,
+          scroller,
+          start: 'top bottom-=20%',
+          end: wordAnimationEnd,
+          scrub: true,
+        }
+      }
+    );
+
+    if (enableBlur) {
+      gsap.fromTo(
+        wordElements,
+        { filter: `blur(${blurStrength}px)` },
+        {
+          ease: 'none',
+          filter: 'blur(0px)',
+          stagger: 0.05,
+          scrollTrigger: {
+            trigger: el,
+            scroller,
+            start: 'top bottom-=20%',
+            end: wordAnimationEnd,
+            scrub: true
+          }
+        }
+      );
+    }
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
+
+  return (
+    <h2 ref={containerRef} className={`my-5 ${containerClassName}`}>
+      <p className={`text-[clamp(1.6rem,4vw,3rem)] leading-normal ${textClassName}`}>{splitText}</p>
+    </h2>
+  );
+};
+
+export default ScrollReveal;
+
+
+================================================================================
+FILE: components\SmoothScroll.tsx
+================================================================================
+
+"use client";
+import React, { useEffect } from "react";
+import Lenis from "@studio-freight/lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+interface SmoothScrollProps {
+  children: React.ReactNode;
+}
+
+export default function SmoothScroll({ children }: SmoothScrollProps) {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+    });
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const tickerCallback = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(tickerCallback);
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      lenis.destroy();
+      gsap.ticker.remove(tickerCallback);
+    };
+  }, []);
+
+  return <>{children}</>;
+}
+
+================================================================================
+FILE: components\Terminal.tsx
+================================================================================
+
+"use client";
+import { useState, useEffect, useRef } from "react";
+
+interface TerminalProps {
+    onClose: () => void;
+}
+
+export default function Terminal({ onClose }: TerminalProps) {
+    const [input, setInput] = useState("");
+    const [history, setHistory] = useState<string[]>([
+        "Sarthak_Engine [Version 1.0.4]",
+        "(c) 2026 SP. All rights reserved.",
+        " ",
+        "Type your message to send an email. Type 'EXIT' to close session.",
+        " "
+    ]);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Keep input focused so typing always works
+    useEffect(() => {
+        inputRef.current?.focus();
+    }, []);
+
+    // Auto-scroll to bottom of terminal
+    useEffect(() => {
+        if (containerRef.current) {
+            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [history]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            const cmd = input.trim();
+            setInput("");
+
+            if (cmd.toUpperCase() === "EXIT") {
+                onClose();
+                return;
+            }
+
+            if (cmd !== "") {
+                setHistory(prev => [...prev, `C:\\GUEST\\USR> ${cmd}`, "Executing handshake protocol...", "Redirecting to secure mail client..."]);
+
+                // Simulate processing time before opening mail client
+                setTimeout(() => {
+                    window.location.href = `mailto:your-email@example.com?subject=Incoming Transmission&body=${encodeURIComponent(cmd)}`;
+                    setTimeout(() => onClose(), 1000);
+                }, 800);
+            }
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-12 bg-black/80 backdrop-blur-sm">
+            <div
+                className="w-full max-w-4xl h-[60vh] bg-[#0a0a0c] border border-white/10 rounded-lg shadow-2xl flex flex-col font-mono text-sm overflow-hidden text-[#ccff00]"
+                onClick={() => inputRef.current?.focus()}
+            >
+                {/* Terminal Header */}
+                <div className="flex justify-between items-center bg-white/5 px-4 py-2 border-b border-white/10 text-gray-400 text-xs">
+                    <span>TERMINAL // COM_LINK</span>
+                    <button onClick={onClose} className="hover:text-white transition-colors">[ X ] CLOSE</button>
+                </div>
+
+                {/* Terminal Body */}
+                <div ref={containerRef} className="flex-1 p-6 overflow-y-auto">
+                    {history.map((line, i) => (
+                        <div key={i} className="mb-1">{line}</div>
+                    ))}
+
+                    <div className="flex items-center mt-2">
+                        <span className="mr-2">C:\GUEST\USR&gt;</span>
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            className="flex-1 bg-transparent border-none outline-none text-[#ccff00] caret-[#ccff00]"
+                            spellCheck="false"
+                            autoComplete="off"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+================================================================================
+FILE: app\globals.css
+================================================================================
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+================================================================================
+FILE: app\layout.tsx
+================================================================================
+
+import type { Metadata } from "next";
+import { JetBrains_Mono, Geist } from "next/font/google";
+import SmoothScroll from "@/components/SmoothScroll"; 
+import "./globals.css";
+import { cn } from "@/lib/utils";
+import HUD from "@/components/HUD";
+import Noise from "@/components/Noise";
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+
+export const metadata: Metadata = {
+  title: "Sarthak Parulekar • Creative Software Engineer",
+  description: "Crafting high-performance web applications and fluid interactive physics interfaces.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={cn(jetbrainsMono.variable, "font-sans", geist.variable)}>
+      <body className="antialiased bg-[#0f0f11] text-[#f3f3f3]">
+        <HUD />
+        <Noise />
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
+      </body>
+    </html>
+  );
+}
+
+================================================================================
+FILE: app\page.tsx
+================================================================================
+
+import Hero from "@/components/HeroSection";
+import CurvedLoop from "@/components/CurvedLoop";
+import ScrollReveal from "@/components/ScrollReveal";
+import MagneticButton from "@/components/MagneticButton";
+import ProjectGallery from "@/components/ProjectGallery";
+import BuildPipeline from "@/components/BuildPipeline";
+
+export default function Home() {
+  return (
+    <main className="bg-[#0f0f11] text-[#f3f3f3] min-h-screen font-sans selection:bg-[#ccff00] selection:text-black overflow-x-hidden">
+
+      {/* 1. KINETIC DECONSTRUCTION HERO BLOCK */}
+      <Hero />
+
+      {/* 2. HYPER-FAST CONTINUOUS WAVE MARQUEE SEPARATOR */}
+      <CurvedLoop marqueeText="Sarthak Parulekar ✦ CREATIVE SOFTWARE ENGINE ✦" speed={4} className="text-[#ccff00]/10 font-black" />
+
+      <BuildPipeline />
+
+      {/* 3. THE MANIFESTO CONSOLE */}
+      <section className="min-h-screen flex flex-col items-center justify-center max-w-6xl mx-auto w-full py-32 px-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-16">
+
+          <div className="max-w-2xl">
+            <ScrollReveal baseOpacity={0.05} blurStrength={8} rotationEnd="top top" wordAnimationEnd="top top+=150">
+              TYING CUSTOM INTERACTION DESIGN DIRECTLY TO PHYSICS TO MAKE APPLICATIONS FEEL UNAPOLOGETICALLY RAW, HIGH-PERFORMANCE, AND RESPONSIVE.
+            </ScrollReveal>
+          </div>
+
+          {/* Kinetic Orbit Target Cluster */}
+          <div className="relative flex items-center justify-center pt-8 md:pt-0 shrink-0 self-end md:self-center">
+            <MagneticButton>
+              <div className="w-32 h-32 md:w-36 md:h-36 rounded-full border border-white/10 hover:border-[#ccff00] bg-transparent transition-colors duration-500 flex items-center justify-center text-white font-mono text-xs uppercase tracking-wider shadow-xl cursor-pointer">
+                SYS_STATUS
+              </div>
+            </MagneticButton>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. THE SPATIAL HORIZONTAL WARP MATRIX GALLERY + CLOSING VOID */}
+      <ProjectGallery />
+
+    </main>
+  );
+}
+
+================================================================================
+FILE: package.json
+================================================================================
+
+{
+  "name": "portfolio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@studio-freight/lenis": "^1.0.42",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "gsap": "^3.15.0",
+    "lucide-react": "^1.16.0",
+    "motion": "^12.38.0",
+    "next": "16.2.6",
+    "radix-ui": "^1.4.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "shadcn": "^4.7.0",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+

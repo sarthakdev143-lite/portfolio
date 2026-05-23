@@ -59,22 +59,60 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
     }
   }, [spacing]);
 
+  // useEffect(() => {
+  //   if (!spacing || !ready) return;
+  //   let frame = 0;
+  //   const step = () => {
+  //     if (!dragRef.current && textPathRef.current) {
+  //       const delta = dirRef.current === 'right' ? speed : -speed;
+  //       const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+  //       let newOffset = currentOffset + delta;
+  //       const wrapPoint = spacing;
+  //       if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+  //       if (newOffset > 0) newOffset -= wrapPoint;
+  //       textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+  //       setOffset(newOffset);
+  //     }
+  //     frame = requestAnimationFrame(step);
+  //   };
+  //   frame = requestAnimationFrame(step);
+  //   return () => cancelAnimationFrame(frame);
+  // }, [spacing, speed, ready]);
+
   useEffect(() => {
     if (!spacing || !ready) return;
     let frame = 0;
+
     const step = () => {
-      if (!dragRef.current && textPathRef.current) {
-        const delta = dirRef.current === 'right' ? speed : -speed;
-        const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
-        let newOffset = currentOffset + delta;
-        const wrapPoint = spacing;
-        if (newOffset <= -wrapPoint) newOffset += wrapPoint;
-        if (newOffset > 0) newOffset -= wrapPoint;
-        textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-        setOffset(newOffset);
+      if (textPathRef.current) {
+        let delta = 0;
+
+        if (dragRef.current) {
+          // Slowly decay momentum memory while cursor is active but motionless
+          velRef.current *= 0.88;
+        } else {
+          // Identify target baseline trajectory speed based on system flags
+          const targetSpeed = dirRef.current === 'right' ? speed : -speed;
+
+          // Gradually bleed off external velocity into baseline parameters over time
+          velRef.current += (targetSpeed - velRef.current) * 0.05;
+          delta = velRef.current;
+
+          const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+          let newOffset = currentOffset + delta;
+          const wrapPoint = spacing;
+
+          // Handle wrapping seamlessly across tracking boundaries
+          if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+          if (newOffset > 0) newOffset -= wrapPoint;
+
+          textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+          setOffset(newOffset);
+        }
       }
       frame = requestAnimationFrame(step);
     };
+
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
   }, [spacing, speed, ready]);
@@ -111,7 +149,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   return (
     <div
-      className="flex items-center justify-center w-full"
+      className="flex items-center justify-center w-full translate-y-[-40%]"
       style={{ visibility: ready ? 'visible' : 'hidden', cursor: cursorStyle }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

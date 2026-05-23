@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
 import Terminal from "./Terminal";
+import { AnimatePresence } from "motion/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -275,7 +276,9 @@ export default function ProjectGallery() {
                 </section>
 
             </div>
-            {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+            <AnimatePresence>
+                {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+            </AnimatePresence>
         </div>
     );
 }

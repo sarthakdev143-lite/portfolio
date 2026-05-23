@@ -22,11 +22,10 @@ const buildKeyframes = (
   from: Record<string, string | number>,
   steps: Array<Record<string, string | number>>
 ): Record<string, Array<string | number>> => {
-  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
-
+  const keys = new Set([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
   const keyframes: Record<string, Array<string | number>> = {};
   keys.forEach(k => {
-    keyframes[k] = [from[k], ...steps.map(s => s[k])];
+    keyframes[k] = [from[k], ...steps.map(s => s[k] ?? from[k])];
   });
   return keyframes;
 };
@@ -41,7 +40,7 @@ const BlurText: React.FC<BlurTextProps> = ({
   rootMargin = '0px',
   animationFrom,
   animationTo,
-  easing = (t: number) => t,
+  easing = 'easeOut',
   onAnimationComplete,
   stepDuration = 0.35
 }) => {
@@ -65,18 +64,13 @@ const BlurText: React.FC<BlurTextProps> = ({
   }, [threshold, rootMargin]);
 
   const defaultFrom = useMemo(
-    () =>
-      direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
+    () => direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
     [direction]
   );
 
   const defaultTo = useMemo(
     () => [
-      {
-        filter: 'blur(5px)',
-        opacity: 0.5,
-        y: direction === 'top' ? 5 : -5
-      },
+      { filter: 'blur(5px)', opacity: 0.5, y: direction === 'top' ? 5 : -5 },
       { filter: 'blur(0px)', opacity: 1, y: 0 }
     ],
     [direction]
@@ -84,40 +78,31 @@ const BlurText: React.FC<BlurTextProps> = ({
 
   const fromSnapshot = animationFrom ?? defaultFrom;
   const toSnapshots = animationTo ?? defaultTo;
-
   const stepCount = toSnapshots.length + 1;
   const totalDuration = stepDuration * (stepCount - 1);
   const times = Array.from({ length: stepCount }, (_, i) => (stepCount === 1 ? 0 : i / (stepCount - 1)));
 
+  const animatedKeyframes = useMemo(() => buildKeyframes(fromSnapshot, toSnapshots), [fromSnapshot, toSnapshots]);
+
   return (
-    <p ref={ref} className={`blur-text ${className} flex flex-wrap`}>
-      {elements.map((segment, index) => {
-        const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
-
-        const spanTransition: Transition = {
-          duration: totalDuration,
-          times,
-          delay: (index * delay) / 1000,
-          ease: easing
-        };
-
-        return (
-          <motion.span
-            key={index}
-            initial={fromSnapshot}
-            animate={inView ? animateKeyframes : fromSnapshot}
-            transition={spanTransition}
-            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
-            style={{
-              display: 'inline-block',
-              willChange: 'transform, filter, opacity'
-            }}
-          >
-            {segment === ' ' ? '\u00A0' : segment}
-            {animateBy === 'words' && index < elements.length - 1 && '\u00A0'}
-          </motion.span>
-        );
-      })}
+    <p ref={ref} className={`blur-text ${className} flex flex-wrap gap-x-[0.25em] gap-y-[0.1em]`}>
+      {elements.map((segment, index) => (
+        <motion.span
+          key={index}
+          initial={fromSnapshot}
+          animate={inView ? animatedKeyframes : fromSnapshot}
+          transition={{
+            duration: totalDuration,
+            times: times,
+            ease: easing,
+            delay: (delay / 1000) + index * 0.05,
+          } as Transition}
+          onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
+          className="inline-block will-change-[transform,opacity,filter]"
+        >
+          {segment === '' ? '\u00A0' : segment}
+        </motion.span>
+      ))}
     </p>
   );
 };

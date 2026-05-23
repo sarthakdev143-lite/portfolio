@@ -1,14 +1,14 @@
-"use client";
-
-export default function Noise() {
+const Noise = () => {
     return (
-        <div 
-            className="fixed inset-0 pointer-events-none z-9999"
+        <div
+            className="pointer-events-none fixed inset-0 z-50 opacity-[0.04]"
             style={{
-                opacity: 0.04,
-                mixBlendMode: "overlay",
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                // A tiny 50x50 noise tile base64 that repeats infinitely
+                backgroundImage: `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyAAMAAAAe3DNGAAAANElEQVRYR2P4z8AARjIsm7QEw0gMBoNGA6HRIHw0EBqNBoNGA6HRIHw0EBqNBoNGA6GxDAwAn7X8EbWe0bIAAAAASUVORK5CYII=")`,
+                backgroundRepeat: 'repeat',
             }}
         />
     );
-}
+};
+
+export default Noise;

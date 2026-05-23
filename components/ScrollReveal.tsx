@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useMemo, ReactNode, RefObject } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useEffect, useRef, useMemo, ReactNode, RefObject } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ScrollRevealProps {
   children: ReactNode;
-  scrollContainerRef?: RefObject<HTMLElement>;
+  scrollContainerRef?: RefObject<HTMLElement | null>;
   enableBlur?: boolean;
   baseOpacity?: number;
   baseRotation?: number;
@@ -21,98 +21,77 @@ interface ScrollRevealProps {
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
-  scrollContainerRef,
   enableBlur = true,
   baseOpacity = 0.1,
   baseRotation = 3,
-  blurStrength = 4,
+  blurStrength = 8,
   containerClassName = '',
   textClassName = '',
-  rotationEnd = 'bottom bottom',
   wordAnimationEnd = 'bottom bottom'
 }) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
+  // Parse children into safe typographic blocks
   const splitText = useMemo(() => {
     const text = typeof children === 'string' ? children : '';
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^\s+$/)) return word;
       return (
-        <span className="inline-block word" key={index}>
+        <span 
+          key={index} 
+          className="word inline-block origin-center will-change-[transform,opacity,filter]" 
+          style={{ opacity: baseOpacity }}
+        >
           {word}
         </span>
       );
     });
-  }, [children]);
+  }, [children, baseOpacity]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
+    const words = el.querySelectorAll('.word');
+    if (!words.length) return;
 
-    gsap.fromTo(
-      el,
-      { transformOrigin: '0% 50%', rotate: baseRotation },
-      {
-        ease: 'none',
-        rotate: 0,
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top bottom',
-          end: rotationEnd,
-          scrub: true
-        }
-      }
-    );
-
-    const wordElements = el.querySelectorAll<HTMLElement>('.word');
-
-    gsap.fromTo(
-      wordElements,
-      { opacity: baseOpacity, willChange: 'opacity' },
-      {
-        ease: 'none',
-        opacity: 1,
-        stagger: 0.05,
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top bottom-=20%',
-          end: wordAnimationEnd,
-          scrub: true,
-        }
-      }
-    );
-
-    if (enableBlur) {
+    // Use GSAP contextual scope for clean component unmounting
+    const ctx = gsap.context(() => {
       gsap.fromTo(
-        wordElements,
-        { filter: `blur(${blurStrength}px)` },
+        words,
         {
-          ease: 'none',
+          opacity: baseOpacity,
+          rotateX: baseRotation,
+          scale: 0.96,
+          filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
+          y: 20,
+        },
+        {
+          opacity: 1,
+          rotateX: 0,
+          scale: 1,
           filter: 'blur(0px)',
-          stagger: 0.05,
+          y: 0,
+          stagger: 0.02,
+          ease: 'none',
           scrollTrigger: {
             trigger: el,
-            scroller,
-            start: 'top bottom-=20%',
-            end: wordAnimationEnd,
-            scrub: true
-          }
+            start: 'top 85%',
+            end: wordAnimationEnd || 'bottom 45%',
+            scrub: true,
+          },
         }
       );
-    }
+    });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
+    return () => ctx.revert();
+  }, [baseOpacity, baseRotation, enableBlur, blurStrength, wordAnimationEnd]);
 
   return (
-    <h2 ref={containerRef} className={`my-5 ${containerClassName}`}>
-      <p className={`text-[clamp(1.6rem,4vw,3rem)] leading-normal ${textClassName}`}>{splitText}</p>
+    <h2 ref={containerRef} className={`my-5 select-none ${containerClassName}`}>
+      <p className={`text-[clamp(1.5rem,3.8vw,3.2rem)] font-bold tracking-tight uppercase leading-relaxed font-mono text-white ${textClassName}`}>
+        {splitText}
+      </p>
     </h2>
   );
 };
