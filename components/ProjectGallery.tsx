@@ -16,7 +16,6 @@ const projects = [
         desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
         tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
         link: "https://github.com/sarthakdev143-lite/interview-hacker",
-        bg: "#131316",
         accent: "#ccff00"
     },
     {
@@ -26,7 +25,6 @@ const projects = [
         desc: "An automated, bulk content generation and deployment matrix. Coordinates headless video asset processing, metadata optimization cascades, and automated publishing pipelines to completely eliminate manual rendering constraints.",
         tech: ["Node.js", "FFmpeg Engine", "Puppeteer", "Next.js"],
         link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
-        bg: "#1c1c22",
         accent: "#ffffff"
     }
 ];
