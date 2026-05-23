@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={cn(jetbrainsMono.variable, geist.variable, "dark")}>
       <body className="antialiased bg-[#0f0f11] text-white">
         <noscript>
-          <div style={{ padding: "2rem", fontFamily: "monospace", color: "#ccff00", background: "#0f0f11" }}>
+          <div style={{ padding: "2rem", fontFamily: "monospace", color: "var(--color-brand)", background: "#0f0f11" }}>
             This portfolio requires JavaScript to run. Please enable it in your browser settings.
           </div>
         </noscript>

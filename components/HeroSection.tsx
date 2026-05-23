@@ -14,7 +14,7 @@ export default function Hero() {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            let mm = gsap.matchMedia();
+            const mm = gsap.matchMedia();
 
             // 💻 DESKTOP: Full kinetic explosion and pinning
             mm.add("(min-width: 768px)", () => {
@@ -85,7 +85,7 @@ export default function Hero() {
                 {/* PANEL 1: SYSTEM CAPABILITY STACK (Flies from deep left window boundary) */}
                 <div className="f-panel-1 bg-[#16161a] border border-white/5 rounded-2xl p-8 md:col-span-4 h-[55vh] flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
                     <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                        <span className="font-mono text-xs text-[#ccff00]">[ CORE ]</span>
+                        <span className="font-mono text-xs text-brand">[ CORE ]</span>
                         <span className="font-mono text-xs text-gray-500">01 // STRUCT</span>
                     </div>
                     <div>
@@ -100,7 +100,7 @@ export default function Hero() {
                 </div>
 
                 {/* PANEL 2: INTERACTIVE KINETIC DISPLAY CAPULE (Flies from deep right window boundary) */}
-                <div className="f-panel-2 bg-[#ccff00] text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
+                <div className="f-panel-2 bg-brand text-black rounded-2xl p-8 md:col-span-5 h-[40vh] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
                     <div className="flex justify-between items-start border-b border-black/10 pb-4">
                         <span className="font-mono text-xs font-bold">[ PHYSICAL INTENT ]</span>
                         <span className="font-mono text-xs opacity-60">02 // KINETICS</span>
@@ -126,16 +126,16 @@ export default function Hero() {
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                         </div>
                         <div className="py-2">
-                            <div className="text-5xl font-mono tracking-tighter text-white font-bold">99<span className="text-xs text-[#ccff00]">FPS</span></div>
+                            <div className="text-5xl font-mono tracking-tighter text-white font-bold">99<span className="text-xs text-brand">FPS</span></div>
                             <p className="text-xs text-gray-400 mt-1">Consistent paint performance across demanding layout canvas manipulation sweeps.</p>
                         </div>
                     </div>
 
                     {/* PANEL 4: CALL TO ACTION CONSOLE BUTTON (Flies down diagonally from top right boundary) */}
-                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-45 scale-150 pointer-events-auto shadow-2xl group hover:border-[#ccff00] transition-colors duration-300">
+                    <div className="f-panel-4 bg-zinc-900 border border-white/10 rounded-2xl p-6 h-[48%] flex flex-col items-center justify-center transform translate-x-[50vw] translate-y-[-100vh] rotate-45 scale-150 pointer-events-auto shadow-2xl group hover:border-brand transition-colors duration-300">
                         <p className="font-mono text-[10px] text-gray-500 mb-4 tracking-widest uppercase">[ ACCESS CORE TERMINAL ]</p>
                         <MagneticButton>
-                            <button className="bg-white text-black font-mono text-xs font-bold py-3 px-6 rounded-full group-hover:bg-[#ccff00] group-hover:text-black transition-colors duration-300">
+                            <button className="bg-white text-black font-mono text-xs font-bold py-3 px-6 rounded-full group-hover:bg-brand group-hover:text-black transition-colors duration-300">
                                 INITIALIZE MATRIX_
                             </button>
                         </MagneticButton>

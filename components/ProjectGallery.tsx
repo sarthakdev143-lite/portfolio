@@ -20,7 +20,7 @@ export default function ProjectGallery() {
         if (!track || !container) return;
 
         const ctx = gsap.context(() => {
-            let mm = gsap.matchMedia();
+            const mm = gsap.matchMedia();
 
             // 💻 DESKTOP: Horizontal Scroll Matrix
             mm.add("(min-width: 768px)", () => {
@@ -152,7 +152,7 @@ export default function ProjectGallery() {
                                         style={{
                                             backgroundColor: project.accent === "#ffffff" ? "#ffffff" : "transparent",
                                             color: project.accent === "#ffffff" ? "#000000" : project.accent,
-                                            borderColor: project.accent === "#ffffff" ? "transparent" : `${project.accent}30`
+                                            borderColor: project.accent === "#ffffff" ? "transparent" : "color-mix(in srgb, var(--color-brand) 19%, transparent)"
                                         }}
                                     >
                                         INSPECT_REPOS_ →
@@ -167,7 +167,7 @@ export default function ProjectGallery() {
                 {/* THE VOID / BLACK HOLE CLOSING TERMINAL FOOTER */}
                 <section className="void-panel w-screen h-screen relative flex items-center justify-center shrink-0 overflow-hidden bg-[#0f0f11]">
                     {/* Expanding background layer triggered directly by horizontal scroll tracking */}
-                    <div className="void-bg absolute inset-0 bg-[#ccff00] z-0" />
+                    <div className="void-bg absolute inset-0 bg-brand z-0" />
 
                     <div className="relative z-10 text-center text-black px-6 max-w-3xl flex flex-col items-center">
                         <span className="font-mono text-xs tracking-[0.3em] font-bold uppercase mb-4 text-black/60">[ END OF PIPELINE ]</span>
@@ -180,7 +180,7 @@ export default function ProjectGallery() {
 
                         <button
                             onClick={() => setIsTerminalOpen(true)}
-                            className="magnetic-target bg-black text-[#ccff00] font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase cursor-pointer"
+                            className="magnetic-target bg-black text-brand font-mono text-xs font-bold py-5 px-10 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl tracking-widest uppercase cursor-pointer"
                         >
                             INITIALIZE_HANDSHAKE_
                         </button>

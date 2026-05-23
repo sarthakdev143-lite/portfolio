@@ -47,7 +47,7 @@ export default function Preloader() {
     if (isComplete) return null;
 
     return (
-        <div ref={containerRef} className="fixed inset-0 z-100 pointer-events-none flex flex-col uppercase font-mono text-xs tracking-widest text-[#ccff00]">
+        <div ref={containerRef} className="fixed inset-0 z-100 pointer-events-none flex flex-col uppercase font-mono text-xs tracking-widest text-brand">
             {/* Top Half */}
             <div className="preloader-split-top absolute top-0 left-0 w-full h-1/2 bg-[#0a0a0c] border-b border-white/5 flex items-end px-8 pb-4">
                 <span>INITIALIZING SYSTEM_</span>

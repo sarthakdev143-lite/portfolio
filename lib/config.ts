@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
         github: "https://github.com/sarthakdev143-lite",
         linkedin: "https://linkedin.com/in/sarthak-parulekar",
     },
-    accent: "#ccff00",
+    accent: "var(--color-brand)",
     marqueeText: "INGENIOUS BUILDER // SARTHAK PARULEKAR // ",
 } as const;
 
@@ -60,7 +60,7 @@ export const PROJECTS = [
         desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
         tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
         link: "https://github.com/sarthakdev143-lite/interview-hacker",
-        accent: "#ccff00",
+        accent: "var(--color-brand)",
     },
     {
         id: "02",

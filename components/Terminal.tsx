@@ -260,7 +260,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex items-center gap-3 mt-2">
-                        <span className="text-[#ccff00] shrink-0">➜</span>
+                        <span className="text-brand shrink-0">➜</span>
                         <input
                             ref={inputRef}
                             type="text"
