@@ -91,8 +91,6 @@ export default function Terminal({ onClose }: TerminalProps) {
                     "Email: sarthakdev143.official@gmail.com",
                     "LinkedIn: linkedin.com/in/sarthak-parulekar",
                     "GitHub: github.com/sarthakdev143-lite",
-                    " ",
-                    "Tip: You can use the copy button in the top right header to grab the email instantly."
                 ];
                 break;
             case "stack":
@@ -144,6 +142,44 @@ export default function Terminal({ onClose }: TerminalProps) {
         navigator.clipboard.writeText("sarthakdev143.official@gmail.com");
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const renderIDEText = (text: string) => {
+        // If it's just standard text, let's parse it for common code patterns
+        const parts = text.split(/("(?:[^"\\]|\\.)*"|\[.*?\]|=>|true|false)/g);
+
+        return (
+            <>
+                {parts.map((part, index) => {
+                    if (!part) return null;
+
+                    // Strings (Green)
+                    if (part.startsWith('"') && part.endsWith('"')) {
+                        return <span key={index} className="text-[#98c379]">{part}</span>;
+                    }
+                    // Arrays/Brackets (Yellow)
+                    if (part.startsWith('[') && part.endsWith(']')) {
+                        return <span key={index} className="text-[#e5c07b]">{part}</span>;
+                    }
+                    // Booleans (Orange)
+                    if (part === 'true' || part === 'false') {
+                        return <span key={index} className="text-[#d19a66]">{part}</span>;
+                    }
+                    // Arrows/Operators (Purple)
+                    if (part === '=>') {
+                        return <span key={index} className="text-[#c678dd]">{part}</span>;
+                    }
+
+                    // Highlight specific system paths or commands in Blue
+                    if (part.includes('/usr/bin/') || part.includes('npm run')) {
+                        return <span key={index} className="text-[#61afef]">{part}</span>;
+                    }
+
+                    // Default text
+                    return <span key={index} className="text-white/80">{part}</span>;
+                })}
+            </>
+        );
     };
 
     return (
@@ -200,21 +236,21 @@ export default function Terminal({ onClose }: TerminalProps) {
                 {/* Terminal Output Screen */}
                 <div
                     ref={scrollRef}
-                    className="flex-1 p-6 overflow-y-auto font-mono text-sm md:text-base relative z-20 scrollbar-hide"
+                    className="flex-1 p-6 overflow-y-auto font-mono text-sm md:text-base relative z-20 scrollbar-ide"
                 >
                     <div className="space-y-1.5 pb-4">
                         {history.map((log) => (
                             <div key={log.id} className="flex items-start gap-3">
                                 {log.type === "input" && (
-                                    <span className="text-[#ccff00] shrink-0">➜</span>
+                                    <div className="flex gap-2 text-white/90">
+                                        <span className="text-[#61afef]">~/portfolio</span>
+                                        <span className="text-[#c678dd]">❯</span>
+                                        <span>{log.text}</span>
+                                    </div>
                                 )}
-                                <span className={`whitespace-pre-wrap ${log.type === "system" ? "text-neutral-500" :
-                                    log.type === "error" ? "text-red-400" :
-                                        log.type === "input" ? "text-white" :
-                                            "text-neutral-300"
-                                    }`}>
-                                    {log.text}
-                                </span>
+                                <div className={`pl-4 ${log.type === 'error' ? 'text-red-400' : ''}`}>
+                                    {log.type === 'error' ? log.text : renderIDEText(log.text)}
+                                </div>
                             </div>
                         ))}
                     </div>

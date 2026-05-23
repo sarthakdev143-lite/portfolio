@@ -36,72 +36,6 @@ export default function ProjectGallery() {
     const trackRef = useRef<HTMLDivElement>(null);
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
 
-    // useEffect(() => {
-    //     const track = trackRef.current;
-    //     const container = scrollContainerRef.current;
-    //     if (!track || !container) return;
-
-    //     const ctx = gsap.context(() => {
-    //         // Calculate total horizontal distance to travel
-    //         const totalPanels = projects.length + 1; // Projects + The Final Terminal Panel
-    //         const scrollTween = gsap.to(track, {
-    //             x: () => -(track.scrollWidth - window.innerWidth),
-    //             ease: "none",
-    //             scrollTrigger: {
-    //                 trigger: container,
-    //                 pin: true,
-    //                 scrub: 1,
-    //                 start: "top top",
-    //                 end: () => `+=${track.scrollWidth}`,
-    //                 invalidateOnRefresh: true,
-    //             }
-    //         });
-
-    //         // Spatial scale distortion warp on the individual cards as they pass through the viewport
-    //         gsap.utils.toArray(".project-panel").forEach((panel: any) => {
-    //             gsap.fromTo(
-    //                 panel.querySelector(".panel-content"),
-    //                 { scale: 0.9, rotateY: 15, opacity: 0.6 },
-    //                 {
-    //                     scale: 1,
-    //                     rotateY: 0,
-    //                     opacity: 1,
-    //                     ease: "power2.out",
-    //                     scrollTrigger: {
-    //                         trigger: panel,
-    //                         containerAnimation: scrollTween,
-    //                         start: "left right-=20%",
-    //                         end: "center center",
-    //                         scrub: true,
-    //                     }
-    //                 }
-    //             );
-    //         });
-
-    //         // Black Hole Void expansion for the final section
-    //         gsap.fromTo(
-    //             ".void-bg",
-    //             { scale: 0.3, borderRadius: "500px", opacity: 0 },
-    //             {
-    //                 scale: 1,
-    //                 borderRadius: "0px",
-    //                 opacity: 1,
-    //                 ease: "none",
-    //                 scrollTrigger: {
-    //                     trigger: ".void-panel",
-    //                     containerAnimation: scrollTween,
-    //                     start: "left right",
-    //                     end: "left left",
-    //                     scrub: true,
-    //                 }
-    //             }
-    //         );
-
-    //     }, container);
-
-    //     return () => ctx.revert();
-    // }, []);
-
     useEffect(() => {
         const track = trackRef.current;
         const container = scrollContainerRef.current;
@@ -196,7 +130,7 @@ export default function ProjectGallery() {
                     <section
                         key={project.id}
                         className="project-panel w-full min-h-screen md:w-screen md:h-screen flex items-center justify-center px-8 md:px-24 shrink-0 perspective-1000 select-none"
-                        style={{ backgroundColor: project.bg }}
+                        // style={{ backgroundColor: project.bg }}
                     >
                         <div className="panel-content w-full max-w-6xl h-[70vh] bg-black/40 border border-white/5 rounded-3xl p-8 md:p-16 flex flex-col justify-between transform-style-3d shadow-2xl backdrop-blur-sm">
 

@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={cn(jetbrainsMono.variable, "font-sans", geist.variable, "dark")}>
-      <body className="antialiased bg-[#0f0f11] text-white">
+      <body className="antialiased bg-[#0f0f11] text-white scrollbar-ide">
         {/* Wrap your digital pipeline inside the smooth scrolling structure */}
         <SmoothScroll>
           <Noise />

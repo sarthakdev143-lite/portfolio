@@ -4,7 +4,7 @@ const path = require('path');
 
 const componentDir = './components';
 const appDir = './app';
-const outputFile = 'component-code.txt';
+const outputFile = 'portfolio-code.txt';
 
 // Additional files to include
 const additionalFiles = [

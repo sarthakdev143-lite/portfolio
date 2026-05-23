@@ -1,5 +1,5 @@
 ================================================================================
-CODE EXPORT - Generated on 23/5/2026, 5:21:46 pm
+CODE EXPORT - Generated on 23/5/2026, 7:21:50 pm
 Total files: 16
 ================================================================================
 
@@ -32,11 +32,10 @@ const buildKeyframes = (
   from: Record<string, string | number>,
   steps: Array<Record<string, string | number>>
 ): Record<string, Array<string | number>> => {
-  const keys = new Set<string>([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
-
+  const keys = new Set([...Object.keys(from), ...steps.flatMap(s => Object.keys(s))]);
   const keyframes: Record<string, Array<string | number>> = {};
   keys.forEach(k => {
-    keyframes[k] = [from[k], ...steps.map(s => s[k])];
+    keyframes[k] = [from[k], ...steps.map(s => s[k] ?? from[k])];
   });
   return keyframes;
 };
@@ -51,7 +50,7 @@ const BlurText: React.FC<BlurTextProps> = ({
   rootMargin = '0px',
   animationFrom,
   animationTo,
-  easing = (t: number) => t,
+  easing = 'easeOut',
   onAnimationComplete,
   stepDuration = 0.35
 }) => {
@@ -75,18 +74,13 @@ const BlurText: React.FC<BlurTextProps> = ({
   }, [threshold, rootMargin]);
 
   const defaultFrom = useMemo(
-    () =>
-      direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
+    () => direction === 'top' ? { filter: 'blur(10px)', opacity: 0, y: -50 } : { filter: 'blur(10px)', opacity: 0, y: 50 },
     [direction]
   );
 
   const defaultTo = useMemo(
     () => [
-      {
-        filter: 'blur(5px)',
-        opacity: 0.5,
-        y: direction === 'top' ? 5 : -5
-      },
+      { filter: 'blur(5px)', opacity: 0.5, y: direction === 'top' ? 5 : -5 },
       { filter: 'blur(0px)', opacity: 1, y: 0 }
     ],
     [direction]
@@ -94,203 +88,36 @@ const BlurText: React.FC<BlurTextProps> = ({
 
   const fromSnapshot = animationFrom ?? defaultFrom;
   const toSnapshots = animationTo ?? defaultTo;
-
   const stepCount = toSnapshots.length + 1;
   const totalDuration = stepDuration * (stepCount - 1);
   const times = Array.from({ length: stepCount }, (_, i) => (stepCount === 1 ? 0 : i / (stepCount - 1)));
 
+  const animatedKeyframes = useMemo(() => buildKeyframes(fromSnapshot, toSnapshots), [fromSnapshot, toSnapshots]);
+
   return (
-    <p ref={ref} className={`blur-text ${className} flex flex-wrap`}>
-      {elements.map((segment, index) => {
-        const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
-
-        const spanTransition: Transition = {
-          duration: totalDuration,
-          times,
-          delay: (index * delay) / 1000,
-          ease: easing
-        };
-
-        return (
-          <motion.span
-            key={index}
-            initial={fromSnapshot}
-            animate={inView ? animateKeyframes : fromSnapshot}
-            transition={spanTransition}
-            onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
-            style={{
-              display: 'inline-block',
-              willChange: 'transform, filter, opacity'
-            }}
-          >
-            {segment === ' ' ? '\u00A0' : segment}
-            {animateBy === 'words' && index < elements.length - 1 && '\u00A0'}
-          </motion.span>
-        );
-      })}
+    <p ref={ref} className={`blur-text ${className} flex flex-wrap gap-x-[0.25em] gap-y-[0.1em]`}>
+      {elements.map((segment, index) => (
+        <motion.span
+          key={index}
+          initial={fromSnapshot}
+          animate={inView ? animatedKeyframes : fromSnapshot}
+          transition={{
+            duration: totalDuration,
+            times: times,
+            ease: easing,
+            delay: (delay / 1000) + index * 0.05,
+          } as Transition}
+          onAnimationComplete={index === elements.length - 1 ? onAnimationComplete : undefined}
+          className="inline-block will-change-[transform,opacity,filter]"
+        >
+          {segment === '' ? '\u00A0' : segment}
+        </motion.span>
+      ))}
     </p>
   );
 };
 
 export default BlurText;
-
-
-================================================================================
-FILE: components\BuildPipeline.tsx
-================================================================================
-
-// components/BuildPipeline.tsx
-"use client";
-
-import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ScrollReveal from "./ScrollReveal";
-
-gsap.registerPlugin(ScrollTrigger);
-
-const steps = [
-  {
-    title: "DISCOVERY",
-    code: "scope = analyze(problem, constraints)",
-    desc: "Deconstructing objectives, mapping user flows.",
-  },
-  {
-    title: "ARCHITECTURE",
-    code: "layout = grid.compose(react, motion)",
-    desc: "Designing component trees and animation choreography.",
-  },
-  {
-    title: "PROTOTYPE",
-    code: "prototype.boot(); animate(scene)",
-    desc: "High-fidelity motion shells with real physics.",
-  },
-  {
-    title: "DEPLOY",
-    code: "deploy --prod --edge",
-    desc: "Optimizing and shipping to the metal.",
-  },
-];
-
-export default function BuildPipeline() {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const traceLineRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Draw the circuit trace line
-      gsap.fromTo(
-        traceLineRef.current,
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 60%",
-            end: "bottom bottom",
-            scrub: 1,
-          },
-        }
-      );
-
-      // Each step card glitch reveal
-      gsap.utils.toArray<HTMLElement>(".pipeline-step").forEach((step) => {
-        const card = step.querySelector(".step-card");
-        if (!card) return;
-
-        gsap.fromTo(
-          card,
-          { opacity: 0, y: 30, skewY: 2, filter: "blur(4px)" },
-          {
-            opacity: 1,
-            y: 0,
-            skewY: 0,
-            filter: "blur(0px)",
-            duration: 1,
-            ease: "power4.out",
-            scrollTrigger: {
-              trigger: step,
-              start: "top 80%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <section
-      ref={sectionRef}
-      className="relative min-h-screen bg-[#0f0f11] py-24 px-6 flex flex-col items-center overflow-hidden"
-    >
-      <div className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: "linear-gradient(#ccff00 1px, transparent 1px), linear-gradient(to right, #ccff00 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      <div className="relative z-10 max-w-6xl w-full">
-        <ScrollReveal containerClassName="mb-24 text-center">
-          <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase text-transparent bg-clip-text bg-linear-to-r from-[#ccff00] to-white">
-            Build Pipeline
-          </h2>
-        </ScrollReveal>
-
-        <div className="relative flex flex-col gap-20 md:gap-32">
-          {/* Glowing trace line */}
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2">
-            <div className="w-full h-full bg-[#ccff00]/30">
-              <div
-                ref={traceLineRef}
-                className="w-full h-full bg-linear-to-b from-[#ccff00] via-[#ccff00]/80 to-transparent origin-top"
-                style={{ boxShadow: "0 0 20px #ccff00, 0 0 40px #ccff0060" }}
-              />
-            </div>
-          </div>
-
-          {steps.map((step, i) => (
-            <div
-              key={step.title}
-              className={`pipeline-step flex items-center gap-6 md:gap-12 ${
-                i % 2 === 0 ? "flex-row md:flex-row" : "flex-row md:flex-row-reverse"
-              }`}
-            >
-              {/* Circuit node */}
-              <div className="relative shrink-0 z-10">
-                <div className="w-8 h-8 rounded-full bg-[#0f0f11] border-2 border-[#ccff00] shadow-[0_0_15px_#ccff00] flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-[#ccff00] animate-pulse" />
-                </div>
-              </div>
-
-              {/* Card */}
-              <div className={`step-card w-full max-w-xl bg-black/40 border border-white/5 backdrop-blur-lg rounded-2xl p-6 md:p-8 transition-all duration-500 hover:border-[#ccff00]/30 ${
-                i % 2 === 0 ? "text-left" : "md:text-right"
-              }`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="font-mono text-xs text-[#ccff00] tracking-widest">
-                    {`0${i + 1}`}
-                  </span>
-                  <h3 className="text-2xl md:text-3xl font-black tracking-tighter text-white uppercase">
-                    {step.title}
-                  </h3>
-                </div>
-                <pre className="font-mono text-xs md:text-sm bg-black/60 border border-[#ccff00]/20 rounded-lg p-4 mb-4 text-[#ccff00] overflow-x-auto">
-                  {step.code}
-                </pre>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 ================================================================================
 FILE: components\CurvedLoop.tsx
@@ -357,22 +184,60 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
     }
   }, [spacing]);
 
+  // useEffect(() => {
+  //   if (!spacing || !ready) return;
+  //   let frame = 0;
+  //   const step = () => {
+  //     if (!dragRef.current && textPathRef.current) {
+  //       const delta = dirRef.current === 'right' ? speed : -speed;
+  //       const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+  //       let newOffset = currentOffset + delta;
+  //       const wrapPoint = spacing;
+  //       if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+  //       if (newOffset > 0) newOffset -= wrapPoint;
+  //       textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+  //       setOffset(newOffset);
+  //     }
+  //     frame = requestAnimationFrame(step);
+  //   };
+  //   frame = requestAnimationFrame(step);
+  //   return () => cancelAnimationFrame(frame);
+  // }, [spacing, speed, ready]);
+
   useEffect(() => {
     if (!spacing || !ready) return;
     let frame = 0;
+
     const step = () => {
-      if (!dragRef.current && textPathRef.current) {
-        const delta = dirRef.current === 'right' ? speed : -speed;
-        const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
-        let newOffset = currentOffset + delta;
-        const wrapPoint = spacing;
-        if (newOffset <= -wrapPoint) newOffset += wrapPoint;
-        if (newOffset > 0) newOffset -= wrapPoint;
-        textPathRef.current.setAttribute('startOffset', newOffset + 'px');
-        setOffset(newOffset);
+      if (textPathRef.current) {
+        let delta = 0;
+
+        if (dragRef.current) {
+          // Slowly decay momentum memory while cursor is active but motionless
+          velRef.current *= 0.88;
+        } else {
+          // Identify target baseline trajectory speed based on system flags
+          const targetSpeed = dirRef.current === 'right' ? speed : -speed;
+
+          // Gradually bleed off external velocity into baseline parameters over time
+          velRef.current += (targetSpeed - velRef.current) * 0.05;
+          delta = velRef.current;
+
+          const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
+          let newOffset = currentOffset + delta;
+          const wrapPoint = spacing;
+
+          // Handle wrapping seamlessly across tracking boundaries
+          if (newOffset <= -wrapPoint) newOffset += wrapPoint;
+          if (newOffset > 0) newOffset -= wrapPoint;
+
+          textPathRef.current.setAttribute('startOffset', newOffset + 'px');
+          setOffset(newOffset);
+        }
       }
       frame = requestAnimationFrame(step);
     };
+
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
   }, [spacing, speed, ready]);
@@ -409,7 +274,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   return (
     <div
-      className="flex items-center justify-center w-full"
+      className="flex items-center justify-center w-full translate-y-[-40%]"
       style={{ visibility: ready ? 'visible' : 'hidden', cursor: cursorStyle }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -440,6 +305,250 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
 export default CurvedLoop;
 
+
+================================================================================
+FILE: components\ExperienceShowcase.tsx
+================================================================================
+
+"use client";
+
+import React, { useRef, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+interface WorkExperience {
+  role: string;
+  company: string;
+  location: string;
+  period: string;
+  techStack: string[];
+  highlights: string[];
+}
+
+const EXPERIENCE_DATA: WorkExperience[] = [
+  {
+    role: "Full Stack Developer",
+    company: "Augment Infotech Private Limited",
+    location: "Indore",
+    period: "April 2026 — Present",
+    techStack: ["Next.js", "Spring Boot", "REST APIs", "Deployment Pipelines"],
+    highlights: [
+      "Developing and deploying production systems serving international and domestic clients.",
+      "Debugging and optimizing AI-generated code.",
+      "Mentoring and managing junior devs and interns while overseeing code reviews and Git workflows."
+    ]
+  },
+  {
+    role: "Frontend Developer Intern",
+    company: "Ravwolf private limited",
+    location: "Indore",
+    period: "October 2025 — March 2026",
+    techStack: ["Next.js", "Tailwind CSS", "API Integrations", "Git"],
+    highlights: [
+      "Built and maintained responsive UI components using Next.js and Tailwind CSS.",
+      "Implemented API integrations, reusable components, and optimized page architectures.",
+      "Collaborated with design and product teams to improve user experience and performance."
+    ]
+  },
+  {
+    role: "Head Boy | Student Leader",
+    company: "Little Wonders Convent School",
+    location: "Indore, Madhya Pradesh",
+    period: "2025 — 2026",
+    techStack: ["Leadership", "Event Coordination", "Peer Mentorship"],
+    highlights: [
+      "Elected by peers and faculty to represent the student body and lead key school initiatives.",
+      "Led school assemblies and student councils, coordinating directly with teachers and administration.",
+      "Organized student-led events and supported peer mentorship and conflict resolution."
+    ]
+  }
+];
+
+// --- Subcomponent: Premium Interactive Node ---
+const ExperienceCard = ({ exp }: { exp: WorkExperience; index: number }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
+
+  // 1. Mouse Spotlight Tracking Frame Loop
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    cardRef.current.style.setProperty("--mouse-x", `${x}px`);
+    cardRef.current.style.setProperty("--mouse-y", `${y}px`);
+  };
+
+  // 2. Local Node Entry Animation
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: cardRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      tl.fromTo(
+        pinRef.current,
+        { scale: 0, backgroundColor: "#0f0f11", borderColor: "#333" },
+        { scale: 1, backgroundColor: "#ffffff", borderColor: "#ffffff", duration: 0.4, ease: "back.out(2.5)" }
+      ).fromTo(
+        contentRef.current,
+        { opacity: 0, x: -30, filter: "blur(8px)" },
+        { opacity: 1, x: 0, filter: "blur(0px)", duration: 0.6, ease: "power3.out" },
+        "-=0.2"
+      );
+    }, cardRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div ref={cardRef} className="relative w-full group" onMouseMove={handleMouseMove}>
+      {/* Node Junction Pin */}
+      <div
+        ref={pinRef}
+        className="absolute -left-8 md:-left-16 top-4 w-3 h-3 md:w-4 md:h-4 rounded-full border-[3px] z-20 will-change-transform shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+      />
+
+      {/* Main Content Layout */}
+      <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start will-change-[transform,opacity,filter]">
+
+        {/* Timestamp & Meta Panel */}
+        <div className="lg:col-span-4 flex flex-col pt-3">
+          <span className="text-xs font-mono text-white/40 font-bold tracking-[0.2em] uppercase mb-2">
+            {exp.period}
+          </span>
+          <h4 className="text-xl font-bold font-mono text-white leading-tight uppercase tracking-tight">
+            {exp.role}
+          </h4>
+          <span className="text-sm font-sans text-white/70 mt-1.5 font-medium">
+            {exp.company}
+          </span>
+          <span className="text-xs font-mono text-white/30 tracking-wide mt-1">
+            // {exp.location}
+          </span>
+        </div>
+
+        {/* Spotlight Interactive Terminal Panel */}
+        <div className="lg:col-span-8 relative overflow-hidden rounded-xl border border-white/5 bg-[#131316]/80 backdrop-blur-md transition-colors duration-500 group-hover:border-white/20">
+
+          {/* Dynamic Spotlight Mask Layers */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 40%)`
+            }}
+          />
+
+          <div className="relative p-7 md:p-8">
+            <ul className="space-y-4 mb-8">
+              {exp.highlights.map((bullet, bIdx) => (
+                <li key={bIdx} className="flex items-start gap-4 text-[0.9rem] text-neutral-400 leading-relaxed font-sans group-hover:text-neutral-300 transition-colors duration-300">
+                  <span className="text-white/20 font-mono text-xs mt-1 select-none">►</span>
+                  <span>{bullet}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Hardware Architecture Badges */}
+            <div className="flex flex-wrap gap-2 pt-5 border-t border-white/4">
+              {exp.techStack.map((tech, tIdx) => (
+                <span
+                  key={tIdx}
+                  className="text-[10px] font-mono px-2.5 py-1.5 rounded-md bg-white/3 text-white/60 uppercase tracking-widest border border-white/3 group-hover:bg-white/8 group-hover:border-white/10 group-hover:text-white/90 transition-all duration-300"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Main Pipeline Parent ---
+export default function ExperienceShowcase() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const circuitLineRef = useRef<HTMLDivElement>(null);
+  const playheadRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const scrollTriggerBase = {
+        trigger: containerRef.current,
+        start: "top 40%",
+        end: "bottom 80%",
+        scrub: 0.5, // Added slight scrub delay for buttery smooth physics
+      };
+
+      // 1. Paint the wire down the screen
+      gsap.fromTo(
+        circuitLineRef.current,
+        { scaleY: 0 },
+        { scaleY: 1, ease: "none", scrollTrigger: scrollTriggerBase }
+      );
+
+      // 2. Sync the glowing playhead to the end of the line
+      gsap.fromTo(
+        playheadRef.current,
+        { top: "0%" },
+        { top: "100%", ease: "none", scrollTrigger: scrollTriggerBase }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={containerRef} className="relative w-full max-w-6xl mx-auto px-6 py-40 bg-[#0f0f11]">
+      {/* Header Module */}
+      <div className="mb-32 flex flex-col items-start">
+        <span className="text-xs font-mono text-white/40 uppercase tracking-[0.4em] mb-3">
+          // CHRONOLOGICAL PIPELINE
+        </span>
+        <h3 className="text-5xl md:text-6xl font-bold font-mono text-white uppercase tracking-tighter">
+          EXPERIENCE <span className="text-white/30">CIRCUITS</span>
+        </h3>
+      </div>
+
+      <div className="relative pl-8 md:pl-16">
+        {/* Background Inactive Track */}
+        <div className="absolute left-1.25 md:left-1.75 top-4 bottom-0 w-0.5 bg-white/2" />
+
+        {/* Active Draw Track */}
+        <div className="absolute left-1.25 md:left-1.75 top-4 bottom-0 w-0.5 origin-top">
+          <div
+            ref={circuitLineRef}
+            className="w-full h-full bg-linear-to-b from-white/80 via-white/40 to-transparent origin-top scale-y-0 will-change-transform"
+          />
+
+          {/* Glowing Playhead Orb */}
+          <div
+            ref={playheadRef}
+            className="absolute -left-1 w-2.5 h-7.5 rounded-full bg-white blur-[2px] shadow-[0_0_20px_rgba(255,255,255,0.8)] will-change-transform"
+            style={{ top: "0%" }}
+          />
+        </div>
+
+        {/* Render Dynamic Nodes */}
+        <div className="space-y-32">
+          {EXPERIENCE_DATA.map((exp, idx) => (
+            <ExperienceCard key={idx} exp={exp} index={idx} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 ================================================================================
 FILE: components\HeroSection.tsx
@@ -802,6 +911,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MagneticButton from "./MagneticButton";
 import Terminal from "./Terminal";
+import { AnimatePresence } from "motion/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1073,7 +1183,9 @@ export default function ProjectGallery() {
                 </section>
 
             </div>
-            {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+            <AnimatePresence>
+                {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+            </AnimatePresence>
         </div>
     );
 }
@@ -1084,15 +1196,15 @@ FILE: components\ScrollReveal.tsx
 
 "use client";
 
-import React, { useEffect, useRef, useMemo, ReactNode, RefObject } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useEffect, useRef, useMemo, ReactNode, RefObject } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ScrollRevealProps {
   children: ReactNode;
-  scrollContainerRef?: RefObject<HTMLElement>;
+  scrollContainerRef?: RefObject<HTMLElement | null>;
   enableBlur?: boolean;
   baseOpacity?: number;
   baseRotation?: number;
@@ -1105,104 +1217,82 @@ interface ScrollRevealProps {
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
-  scrollContainerRef,
   enableBlur = true,
   baseOpacity = 0.1,
   baseRotation = 3,
-  blurStrength = 4,
+  blurStrength = 8,
   containerClassName = '',
   textClassName = '',
-  rotationEnd = 'bottom bottom',
   wordAnimationEnd = 'bottom bottom'
 }) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
+  // Parse children into safe typographic blocks
   const splitText = useMemo(() => {
     const text = typeof children === 'string' ? children : '';
     return text.split(/(\s+)/).map((word, index) => {
       if (word.match(/^\s+$/)) return word;
       return (
-        <span className="inline-block word" key={index}>
+        <span 
+          key={index} 
+          className="word inline-block origin-center will-change-[transform,opacity,filter]" 
+          style={{ opacity: baseOpacity }}
+        >
           {word}
         </span>
       );
     });
-  }, [children]);
+  }, [children, baseOpacity]);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
+    const words = el.querySelectorAll('.word');
+    if (!words.length) return;
 
-    gsap.fromTo(
-      el,
-      { transformOrigin: '0% 50%', rotate: baseRotation },
-      {
-        ease: 'none',
-        rotate: 0,
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top bottom',
-          end: rotationEnd,
-          scrub: true
-        }
-      }
-    );
-
-    const wordElements = el.querySelectorAll<HTMLElement>('.word');
-
-    gsap.fromTo(
-      wordElements,
-      { opacity: baseOpacity, willChange: 'opacity' },
-      {
-        ease: 'none',
-        opacity: 1,
-        stagger: 0.05,
-        scrollTrigger: {
-          trigger: el,
-          scroller,
-          start: 'top bottom-=20%',
-          end: wordAnimationEnd,
-          scrub: true,
-        }
-      }
-    );
-
-    if (enableBlur) {
+    // Use GSAP contextual scope for clean component unmounting
+    const ctx = gsap.context(() => {
       gsap.fromTo(
-        wordElements,
-        { filter: `blur(${blurStrength}px)` },
+        words,
         {
-          ease: 'none',
+          opacity: baseOpacity,
+          rotateX: baseRotation,
+          scale: 0.96,
+          filter: enableBlur ? `blur(${blurStrength}px)` : 'none',
+          y: 20,
+        },
+        {
+          opacity: 1,
+          rotateX: 0,
+          scale: 1,
           filter: 'blur(0px)',
-          stagger: 0.05,
+          y: 0,
+          stagger: 0.02,
+          ease: 'none',
           scrollTrigger: {
             trigger: el,
-            scroller,
-            start: 'top bottom-=20%',
-            end: wordAnimationEnd,
-            scrub: true
-          }
+            start: 'top 85%',
+            end: wordAnimationEnd || 'bottom 45%',
+            scrub: true,
+          },
         }
       );
-    }
+    });
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
+    return () => ctx.revert();
+  }, [baseOpacity, baseRotation, enableBlur, blurStrength, wordAnimationEnd]);
 
   return (
-    <h2 ref={containerRef} className={`my-5 ${containerClassName}`}>
-      <p className={`text-[clamp(1.6rem,4vw,3rem)] leading-normal ${textClassName}`}>{splitText}</p>
+    <h2 ref={containerRef} className={`my-5 select-none ${containerClassName}`}>
+      <p className={`text-[clamp(1.5rem,3.8vw,3.2rem)] font-bold tracking-tight uppercase leading-relaxed font-mono text-white ${textClassName}`}>
+        {splitText}
+      </p>
     </h2>
   );
 };
 
 export default ScrollReveal;
-
 
 ================================================================================
 FILE: components\SmoothScroll.tsx
@@ -1222,26 +1312,34 @@ export default function SmoothScroll({ children }: SmoothScrollProps) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
+    // Initialize the smooth scrolling engine
     const lenis = new Lenis({
       duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
     });
 
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
     lenis.on("scroll", ScrollTrigger.update);
 
-    const tickerCallback = (time: number) => {
+    gsap.ticker.add((time) => {
       lenis.raf(time * 1000);
-    };
+    });
 
-    gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(tickerCallback);
+      gsap.ticker.remove((time) => {
+        lenis.raf(time * 1000);
+      });
     };
   }, []);
 
@@ -1253,92 +1351,243 @@ FILE: components\Terminal.tsx
 ================================================================================
 
 "use client";
-import { useState, useEffect, useRef } from "react";
+
+import { useState, useEffect, useRef, FormEvent } from "react";
+import { X, Copy, Check, Terminal as TerminalIcon } from "lucide-react";
+import { motion } from "motion/react";
 
 interface TerminalProps {
     onClose: () => void;
 }
 
+interface Log {
+    id: string;
+    type: "input" | "output" | "system" | "error";
+    text: string;
+}
+
 export default function Terminal({ onClose }: TerminalProps) {
     const [input, setInput] = useState("");
-    const [history, setHistory] = useState<string[]>([
-        "Sarthak_Engine [Version 1.0.4]",
-        "(c) 2026 SP. All rights reserved.",
-        " ",
-        "Type your message to send an email. Type 'EXIT' to close session.",
-        " "
-    ]);
+    const [isTyping, setIsTyping] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Keep input focused so typing always works
-    useEffect(() => {
-        inputRef.current?.focus();
-    }, []);
+    const [history, setHistory] = useState<Log[]>([
+        { id: "sys-1", type: "system", text: "Sarthak_Engine [Version 1.0.4]" },
+        { id: "sys-2", type: "system", text: "(c) 2026 SP. All rights reserved." },
+        { id: "sys-3", type: "system", text: " " },
+        { id: "sys-4", type: "output", text: "Welcome. Type 'help' to see available commands, or 'exit' to close." },
+        { id: "sys-5", type: "system", text: " " }
+    ]);
 
-    // Auto-scroll to bottom of terminal
+    // 1. Hardware Escape Key Listener
     useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [onClose]);
+
+    const handleContainerClick = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevents clicks inside the shell from bubbling up to the backdrop
+        if (!isTyping) inputRef.current?.focus();
+    };
+
+    // Auto-scroll to bottom on new logs
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
-    }, [history]);
+    }, [history, isTyping]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            const cmd = input.trim();
-            setInput("");
+    const processCommand = async (cmd: string) => {
+        const trimmedCmd = cmd.trim().toLowerCase();
+        if (!trimmedCmd) return;
 
-            if (cmd.toUpperCase() === "EXIT") {
+        const inputLog: Log = { id: Date.now().toString(), type: "input", text: trimmedCmd };
+        setHistory((prev) => [...prev, inputLog]);
+        setInput("");
+        setIsTyping(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        let responseLines: string[] = [];
+        let logType: "output" | "error" = "output";
+
+        switch (trimmedCmd) {
+            case "help":
+                responseLines = [
+                    "AVAILABLE COMMANDS:",
+                    "  about      - Display system bio and mission parameter",
+                    "  contact    - Initialize communication protocols",
+                    "  stack      - Print core engineering technologies",
+                    "  clear      - Wipe terminal history",
+                    "  exit       - Terminate session",
+                ];
+                break;
+            case "about":
+                responseLines = [
+                    "TARGET: Sarthak Parulekar",
+                    "ROLE: Creative Software Engineer",
+                    "STATUS: Crafting high-performance web applications and fluid interactive physics interfaces.",
+                    "LOCATION: Indore, Madhya Pradesh, India"
+                ];
+                break;
+            case "contact":
+                responseLines = [
+                    "INITIALIZING CONTACT PROTOCOL...",
+                    "Email: sarthakdev143.official@gmail.com",
+                    "LinkedIn: linkedin.com/in/sarthak-parulekar",
+                    "GitHub: github.com/sarthakdev143-lite",
+                    " ",
+                    "Tip: You can use the copy button in the top right header to grab the email instantly."
+                ];
+                break;
+            case "stack":
+                responseLines = [
+                    "CORE ARCHITECTURE:",
+                    "► Frontend: Next.js, React, TypeScript, Tailwind CSS",
+                    "► Backend: Spring Boot, Node.js, REST APIs",
+                    "► Motion/Physics: GSAP, Lenis, Framer Motion, Canvas",
+                    "► Systems: Git Workflows, Deployment Pipelines"
+                ];
+                break;
+            case "sudo":
+            case "sudo su":
+                logType = "error";
+                responseLines = ["Access denied. This incident will be reported."];
+                break;
+            case "clear":
+                setHistory([]);
+                setIsTyping(false);
+                return;
+            case "exit":
                 onClose();
                 return;
-            }
+            default:
+                logType = "error";
+                responseLines = [`Command not found: ${trimmedCmd}. Type 'help' for a list of valid commands.`];
+        }
 
-            if (cmd !== "") {
-                setHistory(prev => [...prev, `C:\\GUEST\\USR> ${cmd}`, "Executing handshake protocol...", "Redirecting to secure mail client..."]);
+        for (let i = 0; i < responseLines.length; i++) {
+            await new Promise((resolve) => setTimeout(resolve, 150));
+            setHistory((prev) => [
+                ...prev,
+                { id: `out-${Date.now()}-${i}`, type: logType, text: responseLines[i] }
+            ]);
+        }
 
-                // Simulate processing time before opening mail client
-                setTimeout(() => {
-                    window.location.href = `mailto:your-email@example.com?subject=Incoming Transmission&body=${encodeURIComponent(cmd)}`;
-                    setTimeout(() => onClose(), 1000);
-                }, 800);
-            }
+        setIsTyping(false);
+        setTimeout(() => inputRef.current?.focus(), 10);
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        if (!isTyping && input) {
+            processCommand(input);
         }
     };
 
+    const handleCopyEmail = () => {
+        navigator.clipboard.writeText("sarthakdev143.official@gmail.com");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
-        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 md:p-12 bg-black/80 backdrop-blur-sm">
-            <div
-                className="w-full max-w-4xl h-[60vh] bg-[#0a0a0c] border border-white/10 rounded-lg shadow-2xl flex flex-col font-mono text-sm overflow-hidden text-[#ccff00]"
-                onClick={() => inputRef.current?.focus()}
+        // 2. Animated Backdrop
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            onClick={onClose} // Closes the terminal when clicking the outside overlay
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f11]/80 backdrop-blur-sm cursor-pointer"
+        >
+            {/* 2. Animated Terminal Shell */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="relative w-full max-w-3xl h-[60vh] min-h-100 bg-[#0c0c0e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
+                onClick={handleContainerClick} // Stops event bubbling and focuses input
             >
-                {/* Terminal Header */}
-                <div className="flex justify-between items-center bg-white/5 px-4 py-2 border-b border-white/10 text-gray-400 text-xs">
-                    <span>TERMINAL // COM_LINK</span>
-                    <button onClick={onClose} className="hover:text-white transition-colors">[ X ] CLOSE</button>
+                {/* CRT Scanline Overlay Effect */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_4px,3px_100%] z-10" />
+
+                {/* Terminal Header Bar */}
+                <div className="flex items-center justify-between px-4 py-3 bg-[#131316] border-b border-white/5 select-none relative z-20">
+                    <div className="flex items-center gap-3">
+                        <TerminalIcon className="w-4 h-4 text-neutral-400" />
+                        <span className="text-xs font-mono font-medium text-neutral-400 tracking-wider">root@sarthak_engine:~</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleCopyEmail(); }}
+                            className="group flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
+                            title="Copy Email instantly"
+                        >
+                            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors" />}
+                            <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 group-hover:text-white transition-colors">
+                                {copied ? "Copied" : "Copy Email"}
+                            </span>
+                        </button>
+
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onClose(); }}
+                            className="p-1.5 rounded hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors"
+                            title="Close (Esc)"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Terminal Body */}
-                <div ref={containerRef} className="flex-1 p-6 overflow-y-auto">
-                    {history.map((line, i) => (
-                        <div key={i} className="mb-1">{line}</div>
-                    ))}
+                {/* Terminal Output Screen */}
+                <div
+                    ref={scrollRef}
+                    className="flex-1 p-6 overflow-y-auto font-mono text-sm md:text-base relative z-20 scrollbar-hide"
+                >
+                    <div className="space-y-1.5 pb-4">
+                        {history.map((log) => (
+                            <div key={log.id} className="flex items-start gap-3">
+                                {log.type === "input" && (
+                                    <span className="text-[#ccff00] shrink-0">➜</span>
+                                )}
+                                <span className={`whitespace-pre-wrap ${log.type === "system" ? "text-neutral-500" :
+                                    log.type === "error" ? "text-red-400" :
+                                        log.type === "input" ? "text-white" :
+                                            "text-neutral-300"
+                                    }`}>
+                                    {log.text}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
 
-                    <div className="flex items-center mt-2">
-                        <span className="mr-2">C:\GUEST\USR&gt;</span>
+                    <form onSubmit={handleSubmit} className="flex items-center gap-3 mt-2">
+                        <span className="text-[#ccff00] shrink-0">➜</span>
                         <input
                             ref={inputRef}
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="flex-1 bg-transparent border-none outline-none text-[#ccff00] caret-[#ccff00]"
-                            spellCheck="false"
+                            disabled={isTyping}
+                            autoFocus
                             autoComplete="off"
+                            spellCheck="false"
+                            className="flex-1 bg-transparent outline-none border-none text-white font-mono shadow-none focus:ring-0 p-0 disabled:opacity-50"
                         />
-                    </div>
+                    </form>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
 
@@ -1483,7 +1732,7 @@ FILE: app\layout.tsx
 
 import type { Metadata } from "next";
 import { JetBrains_Mono, Geist } from "next/font/google";
-import SmoothScroll from "@/components/SmoothScroll"; 
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import HUD from "@/components/HUD";
@@ -1497,19 +1746,24 @@ export const metadata: Metadata = {
   description: "Crafting high-performance web applications and fluid interactive physics interfaces.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={cn(jetbrainsMono.variable, "font-sans", geist.variable)}>
-      <body className="antialiased bg-[#0f0f11] text-[#f3f3f3]">
-        <HUD />
-        <Noise />
+    <html lang="en" className={cn(jetbrainsMono.variable, "font-sans", geist.variable, "dark")}>
+      <body className="antialiased bg-[#0f0f11] text-white">
+        {/* Wrap your digital pipeline inside the smooth scrolling structure */}
         <SmoothScroll>
-          {children}
+          <Noise />
+          <HUD />
+          <main>{children}</main>
         </SmoothScroll>
       </body>
     </html>
   );
-}
+} 
 
 ================================================================================
 FILE: app\page.tsx
@@ -1518,48 +1772,42 @@ FILE: app\page.tsx
 import Hero from "@/components/HeroSection";
 import CurvedLoop from "@/components/CurvedLoop";
 import ScrollReveal from "@/components/ScrollReveal";
-import MagneticButton from "@/components/MagneticButton";
 import ProjectGallery from "@/components/ProjectGallery";
-import BuildPipeline from "@/components/BuildPipeline";
+import ExperienceShowcase from "@/components/ExperienceShowcase";
 
 export default function Home() {
   return (
-    <main className="bg-[#0f0f11] text-[#f3f3f3] min-h-screen font-sans selection:bg-[#ccff00] selection:text-black overflow-x-hidden">
-
-      {/* 1. KINETIC DECONSTRUCTION HERO BLOCK */}
+    <div className="relative w-full overflow-hidden">
+      {/* 1. Hero Introduction Entrypoint */}
       <Hero />
 
-      {/* 2. HYPER-FAST CONTINUOUS WAVE MARQUEE SEPARATOR */}
-      <CurvedLoop marqueeText="Sarthak Parulekar ✦ CREATIVE SOFTWARE ENGINE ✦" speed={4} className="text-[#ccff00]/10 font-black" />
+      {/* 2. Interactive Ambient Separator Belt */}
+      <div className="py-8 bg-[#0f0f11] overflow-hidden">
+        <CurvedLoop
+          marqueeText="INGENIOUS BUILDER // SARTHAK PARULEKAR // "
+          speed={2.5}
+          interactive={true}
+        />
+      </div>
 
-      <BuildPipeline />
-
-      {/* 3. THE MANIFESTO CONSOLE */}
-      <section className="min-h-screen flex flex-col items-center justify-center max-w-6xl mx-auto w-full py-32 px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-16">
-
-          <div className="max-w-2xl">
-            <ScrollReveal baseOpacity={0.05} blurStrength={8} rotationEnd="top top" wordAnimationEnd="top top+=150">
-              TYING CUSTOM INTERACTION DESIGN DIRECTLY TO PHYSICS TO MAKE APPLICATIONS FEEL UNAPOLOGETICALLY RAW, HIGH-PERFORMANCE, AND RESPONSIVE.
-            </ScrollReveal>
-          </div>
-
-          {/* Kinetic Orbit Target Cluster */}
-          <div className="relative flex items-center justify-center pt-8 md:pt-0 shrink-0 self-end md:self-center">
-            <MagneticButton>
-              <div className="w-32 h-32 md:w-36 md:h-36 rounded-full border border-white/10 hover:border-[#ccff00] bg-transparent transition-colors duration-500 flex items-center justify-center text-white font-mono text-xs uppercase tracking-wider shadow-xl cursor-pointer">
-                SYS_STATUS
-              </div>
-            </MagneticButton>
-          </div>
-
-        </div>
+      {/* 3. Narrative Cinematic Manifest Segment */}
+      <section className="max-w-6xl mx-auto px-6 pt-32 md:pt-48">
+        <ScrollReveal
+          baseOpacity={0.05}
+          baseRotation={4}
+          blurStrength={12}
+          wordAnimationEnd="top 30%"
+        >
+          I ARCHITECT HIGH PERFORMANCE APPLICATIONS BY INTEGRATING INTERACTIVE PHYSICS INTERFACES DIRECTLY INTO THE DATA PIPELINE, WE ERASE THE SEAMS BETWEEN RAW LOGIC AND KINETIC BEAUTY.
+        </ScrollReveal>
       </section>
 
-      {/* 4. THE SPATIAL HORIZONTAL WARP MATRIX GALLERY + CLOSING VOID */}
-      <ProjectGallery />
+      {/* 4. Active Experience Showcase Circuit Pipeline */}
+      <ExperienceShowcase />
 
-    </main>
+      {/* 5. Production Application Showcases & Interactive Console Terminal */}
+      <ProjectGallery />
+    </div>
   );
 }
 
