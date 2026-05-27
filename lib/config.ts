@@ -72,3 +72,28 @@ export const PROJECTS = [
         accent: "#ffffff",
     },
 ];
+
+export const HERO_PANELS = {
+    panel1: {
+        tag: "[ CORE ]",
+        meta: "01 // STACK",
+        title: "FULL STACK ENGINEER",
+        desc: "I engineer experiences from API contracts to pixel-perfect motion, shipped to production and built to last.",
+        stack: ["React/Next.js", "Spring Boot", "Node.js", "TypeScript", "MongoDB", "PostgreSQL", "Redis", "Docker", "AWS", "Git"],
+    },
+    panel2: {
+        tag: "[ MISSION ]",
+        meta: "02 // CORE",
+        headline: "Worked with 2 startups",
+        subtext: "Not just functional, but obsessively crafted. Every pixel, every interaction, every millisecond.",
+    },
+    panel3: {
+        tag: "[ CURRENT STATUS ]",
+        title: "SHIPPING_\nIN PROD",
+        desc: "Full Stack Dev based in Indore, India building for international & domestic clients.",
+    },
+    panel4: {
+        tag: "[ OPEN TO COLLABORATE ]",
+        cta: "PING ME_",
+    },
+} as const;

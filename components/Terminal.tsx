@@ -1,278 +1,981 @@
-"use client";
-
-import { useState, useEffect, useRef, FormEvent } from "react";
-import { X, Copy, Check, Terminal as TerminalIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
+import { X, Copy, Check, Terminal as TerminalIcon, Volume2, VolumeX, Send, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface TerminalProps {
     onClose: () => void;
 }
 
+type LogType = "input" | "output" | "error" | "system";
+
 interface Log {
     id: string;
-    type: "input" | "output" | "system" | "error";
-    text: string;
+    type: LogType;
+    segments: Segment[];
 }
 
-export default function Terminal({ onClose }: TerminalProps) {
-    const [input, setInput] = useState("");
-    const [isTyping, setIsTyping] = useState(false);
-    const [copied, setCopied] = useState(false);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+interface Segment {
+    text: string;
+    color?: string;
+    bold?: boolean;
+    dim?: boolean;
+    href?: string;
+}
 
-    const [history, setHistory] = useState<Log[]>([
-        { id: "sys-1", type: "system", text: "Sarthak_Engine [Version 1.0.4]" },
-        { id: "sys-2", type: "system", text: "(c) 2026 SP. All rights reserved." },
-        { id: "sys-3", type: "system", text: " " },
-        { id: "sys-4", type: "output", text: "Welcome. Type 'help' to see available commands, or 'exit' to close." },
-        { id: "sys-5", type: "system", text: " " }
-    ]);
+// ─── Theme system ─────────────────────────────────────────────────────────────
+type ThemeName = "onedark" | "matrix" | "dracula" | "nord" | "monokai";
 
-    // 1. Hardware Escape Key Listener
+interface ThemeColors {
+    blue: string; purple: string; green: string; yellow: string;
+    orange: string; red: string; cyan: string; white: string;
+    dim: string; bright: string; bg: string; headerBg: string; border: string;
+}
+
+const THEMES: Record<ThemeName, ThemeColors> = {
+    onedark: {
+        blue: "#61afef", purple: "#c678dd", green: "#98c379", yellow: "#e5c07b",
+        orange: "#d19a66", red: "#e06c75", cyan: "#56b6c2", white: "#abb2bf",
+        dim: "#5c6370", bright: "#ffffff", bg: "#0c0c0e", headerBg: "#131316",
+        border: "255,255,255",
+    },
+    matrix: {
+        blue: "#00ff41", purple: "#00ff41", green: "#00ff41", yellow: "#00ff41",
+        orange: "#00ff41", red: "#00ff41", cyan: "#00ff41", white: "#00cc33",
+        dim: "#006622", bright: "#00ff41", bg: "#0a0a0a", headerBg: "#0d0d0d",
+        border: "0,255,65",
+    },
+    dracula: {
+        blue: "#bd93f9", purple: "#ff79c6", green: "#50fa7b", yellow: "#f1fa8c",
+        orange: "#ffb86c", red: "#ff5555", cyan: "#8be9fd", white: "#f8f8f2",
+        dim: "#6272a4", bright: "#ffffff", bg: "#1e1f29", headerBg: "#21222c",
+        border: "189,147,249",
+    },
+    nord: {
+        blue: "#81a1c1", purple: "#b48ead", green: "#a3be8c", yellow: "#ebcb8b",
+        orange: "#d08770", red: "#bf616a", cyan: "#88c0d0", white: "#d8dee9",
+        dim: "#4c566a", bright: "#eceff4", bg: "#242933", headerBg: "#2e3440",
+        border: "136,192,208",
+    },
+    monokai: {
+        blue: "#66d9ef", purple: "#ae81ff", green: "#a6e22e", yellow: "#e6db74",
+        orange: "#fd971f", red: "#f92672", cyan: "#a1efe4", white: "#cfcfc2",
+        dim: "#75715e", bright: "#f8f8f2", bg: "#1e1e1e", headerBg: "#252526",
+        border: "166,226,46",
+    },
+};
+
+const s = (text: string, color?: string, bold?: boolean, href?: string): Segment => ({ text, color, bold, href });
+const dim = (text: string, color?: string): Segment => ({ text, color: color ?? C.dim, dim: true });
+
+let C = THEMES.onedark;
+
+// ─── Sound engine ─────────────────────────────────────────────────────────────
+let audioCtx: AudioContext | null = null;
+let soundEnabled = true;
+
+function getAudioCtx(): AudioContext | null {
+    if (!soundEnabled) return null;
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)(); }
+        catch { return null; }
+    }
+    return audioCtx;
+}
+
+function playTick() {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = "sine"; osc.frequency.value = 600 + Math.random() * 300;
+    gain.gain.setValueAtTime(0.015, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.04);
+}
+
+function playReturn() {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = "triangle"; osc.frequency.value = 120;
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.08);
+}
+
+// ─── Commands ─────────────────────────────────────────────────────────────────
+const COMMANDS = [
+    "help", "about", "contact", "stack", "clear", "exit",
+    "projects", "whoami", "neofetch", "date", "echo", "ls",
+    "theme", "matrix", "sound", "sudo", "cat", "resume", "dm",
+];
+
+function levenshtein(a: string, b: string): number {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++)
+        for (let j = 1; j <= n; j++)
+            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    return dp[m][n];
+}
+
+function findSuggestions(input: string): string[] {
+    if (!input || input.length < 2) return [];
+    const lower = input.toLowerCase();
+    return COMMANDS
+        .filter((c) => levenshtein(lower, c) <= 3 && c !== lower)
+        .sort((a, b) => levenshtein(lower, a) - levenshtein(lower, b))
+        .slice(0, 3);
+}
+
+// ─── ASCII art ────────────────────────────────────────────────────────────────
+const NEOFETCH_ASCII = [
+    "      :---------------:      ",
+    "     :------------------:     ",
+    "    :--------------------:    ",
+    "   :-------.  .----------:   ",
+    "  :-------    :----------:   ",
+    " :-------      ----------:   ",
+    ":--------    :----------:    ",
+    ":--------  :----------:      ",
+    ":-------------------:        ",
+    " :-----------------:         ",
+    "  :-------------:            ",
+];
+
+// ─── Response builders ────────────────────────────────────────────────────────
+function buildHelp(): Segment[][] {
+    const cmds: [string, string][] = [
+        ["about",       "System bio and mission parameters"],
+        ["contact",     "Initialize communication protocols"],
+        ["dm",          "Send a direct message to the developer"],
+        ["stack",       "Core engineering technologies"],
+        ["projects",    "List portfolio projects"],
+        ["neofetch",    "Display system information"],
+        ["whoami",      "Current user identity"],
+        ["date",        "Print system date/time"],
+        ["echo <txt>",  "Echo text back"],
+        ["ls",          "List directory contents"],
+        ["theme <name>","Switch color scheme"],
+        ["matrix",      "Toggle Matrix rain"],
+        ["sound",       "Toggle keyboard sounds"],
+        ["clear",       "Wipe terminal history"],
+        ["exit",        "Terminate session"],
+    ];
+    return [
+        [s("AVAILABLE COMMANDS", C.yellow, true)],
+        ...cmds.map(([cmd, desc]) => [
+            s("  "), s(cmd.padEnd(14), C.green, true),
+            s("─ ", C.dim), s(desc, C.white),
+        ]),
+    ];
+}
+
+function buildAbout(): Segment[][] {
+    return [
+        [s("┌─ ", C.dim), s("SYSTEM INFO", C.cyan, true)],
+        [s("│ ", C.dim), s("TARGET   ", C.blue), s("Sarthak Parulekar", C.bright, true)],
+        [s("│ ", C.dim), s("ROLE     ", C.blue), s("Creative Software Engineer", C.purple)],
+        [s("│ ", C.dim), s("STATUS   ", C.blue), s("Crafting high-performance web apps & fluid interactive interfaces", C.white)],
+        [s("└─ ", C.dim), s("LOCATION ", C.blue), s("Indore, Madhya Pradesh, India", C.yellow)],
+    ];
+}
+
+function buildContact(): Segment[][] {
+    return [
+        [s("INITIALIZING CONTACT PROTOCOL", C.cyan, true), s(" ···", C.dim)],
+        [s("  ✉  ", C.green),  s("Email     ", C.dim), s("sarthakdev143.official@gmail.com", C.green)],
+        [s("  ⬡  ", C.blue),   s("LinkedIn  ", C.dim), s("linkedin.com/in/sarthak-parulekar", C.blue,   false, "https://www.linkedin.com/in/sarthak-parulekar")],
+        [s("  ⌥  ", C.purple), s("GitHub    ", C.dim), s("github.com/sarthakdev143-lite",     C.purple, false, "https://github.com/sarthakdev143-lite")],
+        [s("")],
+        [s("  💬 ", C.cyan), s("Type ", C.dim), s("dm", C.cyan, true), s(" to send me a message directly from this terminal.", C.dim)],
+    ];
+}
+
+function buildStack(): Segment[][] {
+    return [
+        [s("CORE ARCHITECTURE", C.yellow, true)],
+        [s("  ► ", C.orange), s("Frontend  ", C.blue), s("Next.js · React · TypeScript · Tailwind CSS", C.white)],
+        [s("  ► ", C.orange), s("Backend   ", C.blue), s("Spring Boot · Node.js · REST APIs", C.white)],
+        [s("  ► ", C.orange), s("Motion    ", C.blue), s("GSAP · Lenis · Framer Motion · Canvas", C.white)],
+        [s("  ► ", C.orange), s("Systems   ", C.blue), s("Git Workflows · Deployment Pipelines", C.white)],
+    ];
+}
+
+function buildProjects(): Segment[][] {
+    const projects = [
+        { name: "Portfolio 3D",  tech: "Next.js · Three.js · GSAP",   desc: "Immersive 3D portfolio with physics-based interactions" },
+        { name: "DevFlow",       tech: "React · Node.js · MongoDB",    desc: "Developer workflow automation & CI/CD dashboard" },
+        { name: "PixelForge",    tech: "TypeScript · Canvas API",      desc: "Browser-based pixel art editor with layer support" },
+        { name: "API Nexus",     tech: "Spring Boot · PostgreSQL",     desc: "High-throughput REST API gateway with rate limiting" },
+    ];
+    return [
+        [s("PORTFOLIO PROJECTS", C.yellow, true)],
+        [s("═".repeat(40), C.dim)],
+        ...projects.flatMap((p) => [
+            [s("  ◆ ", C.orange), s(p.name, C.cyan, true)],
+            [s("    "), s("Stack  ", C.dim), s(p.tech, C.white)],
+            [s("    "), s("About  ", C.dim), s(p.desc, C.white)],
+            [s("")],
+        ]),
+    ];
+}
+
+function buildWhoami(): Segment[][] {
+    return [[s("sarthak_engine", C.green, true)]];
+}
+
+function buildNeofetch(): Segment[][] {
+    const rows: Segment[][] = [];
+    const info: [string, string][] = [
+        ["OS",         "SarthakOS 18.04 LTS"],
+        ["Host",       "MacBook Pro (18,3) · Apple M4 Pro"],
+        ["Kernel",     "18.5.4-generic"],
+        ["Shell",      "bash 5.2.15"],
+        ["Uptime",     `${Math.floor(Math.random() * 168) + 1} hours`],
+        ["Packages",   `${Math.floor(Math.random() * 2000) + 500} (npm)`],
+        ["Resolution", "1728x1117 @ 120Hz"],
+        ["Terminal",   "Sarthak_Engine v3.2.1"],
+    ];
+    const colors = [C.red, C.orange, C.yellow, C.green, C.cyan, C.blue, C.purple, C.red, C.orange];
+    const maxLen = Math.max(NEOFETCH_ASCII.length, info.length);
+    for (let i = 0; i < maxLen; i++) {
+        const ascii = NEOFETCH_ASCII[i] ?? "";
+        const [label, value] = info[i] ?? ["", ""];
+        const asciiColored = [...ascii].map((ch, j) =>
+            ch === " " ? s(" ") : s(ch, colors[j % colors.length], true)
+        );
+        const infoPart = label
+            ? [s("  "), s(label.padEnd(12), C.blue), s(value, C.white)]
+            : [s("")];
+        rows.push([...asciiColored, ...infoPart]);
+    }
+    return rows;
+}
+
+function buildDate(): Segment[][] {
+    return [[s(new Date().toLocaleString("en-US", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short",
+    }), C.green)]];
+}
+
+function buildLs(): Segment[][] {
+    const dirs = ["projects/", "about.txt", "contact.txt", "resume.pdf", "stack.json", ".secret/"];
+    return [
+        [s("total "), s(String(dirs.length), C.yellow)],
+        ...dirs.map((d) => [
+            s(d.endsWith("/") ? "drwxr-xr-x  " : "-rw-r--r--  ", C.dim),
+            s(d, d.endsWith("/") ? C.blue : C.white, d.endsWith("pdf")),
+        ]),
+    ];
+}
+
+function buildCat(args: string): Segment[][] {
+    const file = args.trim().toLowerCase();
+    switch (file) {
+        case "about.txt":   return [[s("Sarthak Parulekar — Creative Software Engineer", C.bright, true)], [s("Based in Indore, MP, India.", C.white)], [s("Building high-performance web apps with modern tooling.", C.white)]];
+        case "resume.pdf":  return [[s("⚠  Binary file. Use ", C.yellow), s("resume", C.green, true), s(" command to download.", C.yellow)]];
+        case "stack.json":  return [[s("{", C.dim)], [s('  "frontend": ["Next.js","React","TypeScript","Tailwind"],', C.white)], [s('  "backend":  ["Spring Boot","Node.js","REST"],', C.white)], [s('  "motion":   ["GSAP","Lenis","Framer Motion"],', C.white)], [s('  "systems":  ["Git","CI/CD","Docker"]', C.white)], [s("}", C.dim)]];
+        default:            return [[s(`cat: ${file}: No such file or directory`, C.red)]];
+    }
+}
+
+function buildEcho(args: string): Segment[][] {
+    return args.trim() ? [[s(args.trim(), C.green)]] : [[s("")]];
+}
+
+function buildResumeDownload(): Segment[][] {
+    return [
+        [s("📄 ", C.yellow), s("Preparing resume download...", C.white)],
+        [s("⚠  ", C.orange), s("Resume PDF is not yet uploaded to this build.", C.dim)],
+        [s("   "), s("Contact via ", C.dim), s("email", C.green), s(" to request a copy.", C.dim)],
+    ];
+}
+
+function buildThemeList(): Segment[][] {
+    const themes: [ThemeName, string][] = [
+        ["onedark", "One Dark (default)"],
+        ["matrix",  "Matrix"],
+        ["dracula", "Dracula"],
+        ["nord",    "Nord"],
+        ["monokai", "Monokai"],
+    ];
+    return [
+        [s("AVAILABLE THEMES", C.yellow, true)],
+        [s("Usage: "), s("theme <name>", C.green)],
+        ...themes.map(([name, desc]) => [
+            s("  ◆ ", C.orange), s(name.padEnd(12), C.cyan, true), s(desc, C.white),
+        ]),
+    ];
+}
+
+function buildError(cmd: string): Segment[][] {
+    const suggestions = findSuggestions(cmd);
+    const rows: Segment[][] = [[s("✗ ", C.red), s("Command not found: ", C.red), s(cmd, C.white, true)]];
+    if (suggestions.length > 0) {
+        rows.push([
+            s("  "), s("Did you mean: ", C.dim),
+            ...suggestions.flatMap((sug, i) => [
+                s(sug, C.green, true),
+                s(i < suggestions.length - 1 ? ", " : "", C.dim),
+            ]),
+            s(" ?", C.dim),
+        ]);
+    }
+    rows.push([s("  Type ", C.dim), s("help", C.green), s(" for valid commands.", C.dim)]);
+    return rows;
+}
+
+function buildSudo(): Segment[][] {
+    return [[s("⚠  Access denied.", C.red, true), s("  This incident will be reported.", C.dim)]];
+}
+
+function buildThemeApplied(name: ThemeName): Segment[][] {
+    return [[s("✓ ", C.green), s("Theme switched to ", C.white), s(name, C.green, true)]];
+}
+
+function buildSoundToggled(enabled: boolean): Segment[][] {
+    return [[s(enabled ? "🔊 Sound ON" : "🔇 Sound OFF", enabled ? C.green : C.red, true)]];
+}
+
+function buildDmIntro(): Segment[][] {
+    return [
+        [s("╔══ ", C.cyan), s("DIRECT MESSAGE", C.cyan, true), s(" ═════════════╗", C.cyan)],
+        [s("║  ", C.cyan), s("Send a message directly to Sarthak's inbox.   ", C.white), s("  ║", C.cyan)],
+        [s("╚════════════════════════════╝", C.cyan)],
+        [s("")],
+        [s("  Fill in the form below and hit ", C.dim), s("Send", C.green, true), s(".", C.dim)],
+    ];
+}
+
+// ─── Matrix Rain ──────────────────────────────────────────────────────────────
+function MatrixRain({ active }: { active: boolean }) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const rafRef = useRef<number>(0);
+
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose();
+        if (!active) return;
+        const canvas = canvasRef.current; if (!canvas) return;
+        const ctx = canvas.getContext("2d"); if (!ctx) return;
+        const resize = () => { canvas.width = canvas.parentElement!.clientWidth; canvas.height = canvas.parentElement!.clientHeight; };
+        resize(); window.addEventListener("resize", resize);
+        const fontSize = 14;
+        const cols = Math.floor(canvas.width / fontSize);
+        const drops: number[] = Array(cols).fill(0).map(() => Math.random() * -100);
+        const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789";
+        const draw = () => {
+            ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = `${fontSize}px monospace`;
+            for (let i = 0; i < drops.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSize; const y = drops[i] * fontSize;
+                ctx.fillStyle = "#00ff41"; ctx.globalAlpha = 0.8; ctx.fillText(char, x, y);
+                ctx.fillStyle = "#ccffcc"; ctx.globalAlpha = 1; ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y - fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
             }
+            ctx.globalAlpha = 1;
+            rafRef.current = requestAnimationFrame(draw);
         };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [onClose]);
+        rafRef.current = requestAnimationFrame(draw);
+        return () => { cancelAnimationFrame(rafRef.current); window.removeEventListener("resize", resize); };
+    }, [active]);
 
-    const handleContainerClick = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevents clicks inside the shell from bubbling up to the backdrop
-        if (!isTyping) inputRef.current?.focus();
+    if (!active) return null;
+    return <canvas ref={canvasRef} className="absolute inset-0 z-10 pointer-events-none opacity-20" />;
+}
+
+// ─── Segment row ──────────────────────────────────────────────────────────────
+function SegmentRow({ segments }: { segments: Segment[] }) {
+    return (
+        <span className="font-mono">
+            {segments.map((seg, i) => {
+                const style = { color: seg.color ?? C.white, fontWeight: seg.bold ? 700 : 400 };
+                if (seg.href) return (
+                    <a key={i} href={seg.href} target="_blank" rel="noopener noreferrer"
+                        style={{ ...style, textDecoration: "underline", cursor: "pointer" }}
+                        onClick={(e) => e.stopPropagation()} className="hover:opacity-80 transition-opacity">
+                        {seg.text}
+                    </a>
+                );
+                return <span key={i} style={style}>{seg.text}</span>;
+            })}
+        </span>
+    );
+}
+
+// ─── DM Form ──────────────────────────────────────────────────────────────────
+interface DmFormProps {
+    theme: ThemeName;
+    onSent: (success: boolean) => void;
+    onCancel: () => void;
+}
+
+function DmForm({ theme, onSent, onCancel }: DmFormProps) {
+    const T = THEMES[theme];
+    const [name,    setName]    = useState("");
+    const [email,   setEmail]   = useState("");
+    const [message, setMessage] = useState("");
+    const [status,  setStatus]  = useState<"idle" | "sending" | "done">("idle");
+    const [error,   setError]   = useState("");
+    const nameRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => { nameRef.current?.focus(); }, []);
+
+    const fieldStyle = {
+        background: "rgba(255,255,255,0.04)",
+        border: `1px solid rgba(${T.border},0.15)`,
+        color: T.bright,
+        caretColor: T.green,
+        outline: "none",
     };
 
-    // Auto-scroll to bottom on new logs
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const labelStyle = { color: T.blue, fontSize: "11px", fontFamily: "monospace", letterSpacing: "0.08em" };
+    const inputClass = "w-full rounded px-3 py-2 text-sm font-mono placeholder:opacity-30 focus:ring-0 transition-colors";
+
+    const validate = () => {
+        if (!name.trim())    return "Name is required.";
+        if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Valid email is required.";
+        if (!message.trim()) return "Message cannot be empty.";
+        return "";
+    };
+
+    const handleSend = async (e: FormEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const err = validate();
+        if (err) { setError(err); return; }
+        setError(""); setStatus("sending");
+
+        try {
+            // Using Formspree — replace YOUR_FORM_ID with your actual Formspree endpoint
+            const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                body: JSON.stringify({ name, email, message, _subject: `Terminal DM from ${name}` }),
+            });
+            if (res.ok) {
+                setStatus("done");
+                setTimeout(() => onSent(true), 1200);
+            } else {
+                throw new Error("Server error");
+            }
+        } catch {
+            setError("Failed to send. Please try emailing directly.");
+            setStatus("idle");
         }
-    }, [history, isTyping]);
+    };
+
+    return (
+        <AnimatePresence>
+            <motion.form
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25 }}
+                onSubmit={handleSend}
+                onClick={(e) => e.stopPropagation()}
+                className="ml-1 mt-3 mb-1 rounded-lg p-4 space-y-3"
+                style={{
+                    background: `rgba(255,255,255,0.025)`,
+                    border: `1px solid rgba(${T.border},0.12)`,
+                    maxWidth: "480px",
+                }}
+            >
+                {/* Name */}
+                <div className="space-y-1">
+                    <label style={labelStyle}>NAME</label>
+                    <input
+                        ref={nameRef}
+                        type="text" value={name}
+                        onChange={(e) => { setName(e.target.value); setError(""); }}
+                        placeholder="Your name"
+                        style={fieldStyle} className={inputClass}
+                        disabled={status !== "idle"}
+                    />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-1">
+                    <label style={labelStyle}>EMAIL</label>
+                    <input
+                        type="email" value={email}
+                        onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                        placeholder="your@email.com"
+                        style={fieldStyle} className={inputClass}
+                        disabled={status !== "idle"}
+                    />
+                </div>
+
+                {/* Message */}
+                <div className="space-y-1">
+                    <label style={labelStyle}>MESSAGE</label>
+                    <textarea
+                        value={message}
+                        onChange={(e) => { setMessage(e.target.value); setError(""); }}
+                        placeholder="What's on your mind?"
+                        rows={4}
+                        style={{ ...fieldStyle, resize: "vertical" }}
+                        className={inputClass}
+                        disabled={status !== "idle"}
+                    />
+                    <div className="text-right font-mono" style={{ color: T.dim, fontSize: "10px" }}>
+                        {message.length} / 500
+                    </div>
+                </div>
+
+                {/* Error */}
+                {error && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="text-xs font-mono" style={{ color: T.red }}>
+                        ✗  {error}
+                    </motion.p>
+                )}
+
+                {/* Success */}
+                {status === "done" && (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="text-xs font-mono" style={{ color: T.green }}>
+                        ✓  Message sent! I'll get back to you soon.
+                    </motion.p>
+                )}
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-1">
+                    <button
+                        type="submit"
+                        disabled={status !== "idle"}
+                        className="flex items-center gap-2 px-4 py-2 rounded text-xs font-mono font-bold tracking-wider transition-all disabled:opacity-50"
+                        style={{ background: T.green, color: T.bg }}
+                    >
+                        {status === "sending"
+                            ? <><Loader2 className="w-3 h-3 animate-spin" /> SENDING…</>
+                            : status === "done"
+                            ? <><Check className="w-3 h-3" /> SENT</>
+                            : <><Send className="w-3 h-3" /> SEND MESSAGE</>
+                        }
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); onCancel(); }}
+                        disabled={status === "sending"}
+                        className="px-3 py-2 rounded text-xs font-mono tracking-wider transition-colors hover:bg-white/10 disabled:opacity-40"
+                        style={{ color: T.dim }}
+                    >
+                        CANCEL
+                    </button>
+
+                    <span className="text-[10px] font-mono ml-auto" style={{ color: T.dim }}>
+                        ESC to cancel
+                    </span>
+                </div>
+            </motion.form>
+        </AnimatePresence>
+    );
+}
+
+// ─── Main Terminal ────────────────────────────────────────────────────────────
+export default function Terminal({ onClose }: TerminalProps) {
+    const [input,        setInput]        = useState("");
+    const [isTyping,     setIsTyping]     = useState(false);
+    const [copied,       setCopied]       = useState(false);
+    const [theme,        setTheme]        = useState<ThemeName>("onedark");
+    const [matrixActive, setMatrixActive] = useState(false);
+    const [soundOn,      setSoundOn]      = useState(true);
+    const [suggestions,  setSuggestions]  = useState<string[]>([]);
+    const [showDmForm,   setShowDmForm]   = useState(false);
+
+    const scrollRef   = useRef<HTMLDivElement>(null);
+    const inputRef    = useRef<HTMLInputElement>(null);
+    const bottomRef   = useRef<HTMLDivElement>(null);
+    const commandHistoryRef      = useRef<string[]>([]);
+    const inputBeforeHistoryRef  = useRef<string>("");
+    const [historyIndex, setHistoryIndex] = useState(-1);
+
+    C = THEMES[theme];
+
+    const makeLog = useCallback((type: LogType, rows: Segment[][]): Log[] =>
+        rows.map((segments, i) => ({
+            id: `${Date.now()}-${i}-${Math.random()}`,
+            type, segments,
+        })), []);
+
+    const [history, setHistory] = useState<Log[]>(() => [
+        ...makeLog("system", [
+            [s("Sarthak_Parulekar ", C.cyan, true), s("[Version 18.0.4]", C.dim)],
+            [{ text: `(c) ${new Date().getFullYear()} Sarthak Parulekar. All rights reserved.`, color: C.dim, dim: true }],
+            [s(" ")],
+        ]),
+        ...makeLog("output", [
+            [s("Welcome! Type ", C.white), s("help", C.green, true), s(" to see commands, ", C.white), s("exit", C.red), s(" to close.", C.white)],
+            [s(" ")],
+        ]),
+    ]);
+
+    // Persist / restore theme
+    useEffect(() => { try { localStorage.setItem("terminal-theme", theme); } catch { /**/ } }, [theme]);
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem("terminal-theme") as ThemeName | null;
+            if (saved && THEMES[saved]) setTheme(saved);
+        } catch { /**/ }
+    }, []);
+
+    // Escape → cancel DM form first, then close terminal
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                if (showDmForm) { setShowDmForm(false); inputRef.current?.focus(); }
+                else onClose();
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [onClose, showDmForm]);
+
+    // Lock body scroll
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => { document.body.style.overflow = ""; };
+    }, []);
+
+    // Auto-scroll — always scroll to the very bottom
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [history, isTyping, showDmForm, suggestions]);
+
+    useEffect(() => { soundEnabled = soundOn; }, [soundOn]);
+
+    const getPrompt = () => (
+        <span className="font-mono shrink-0 select-none">
+            <span style={{ color: C.blue }}>~/portfolio</span>
+            <span style={{ color: C.purple }}> ❯ </span>
+        </span>
+    );
+
+    const appendOutput = async (rows: Segment[][], type: LogType) => {
+        for (let i = 0; i < rows.length; i++) {
+            await new Promise((r) => setTimeout(r, 80));
+            setHistory((prev) => [...prev, { id: `out-${Date.now()}-${i}`, type, segments: rows[i] }]);
+        }
+        setHistory((prev) => [...prev, { id: `spacer-${Date.now()}`, type: "system", segments: [s(" ")] }]);
+    };
 
     const processCommand = async (cmd: string) => {
-        const trimmedCmd = cmd.trim().toLowerCase();
-        if (!trimmedCmd) return;
+        const trimmed = cmd.trim();
+        if (!trimmed) return;
 
-        const inputLog: Log = { id: Date.now().toString(), type: "input", text: trimmedCmd };
+        commandHistoryRef.current = [trimmed, ...commandHistoryRef.current.filter((c) => c !== trimmed)].slice(0, 100);
+        setHistoryIndex(-1);
+
+        const inputLog: Log = { id: `inp-${Date.now()}`, type: "input", segments: [s(trimmed, C.bright)] };
         setHistory((prev) => [...prev, inputLog]);
-        setInput("");
-        setIsTyping(true);
+        setInput(""); setIsTyping(true); setSuggestions([]);
+        playReturn();
+        await new Promise((r) => setTimeout(r, 350));
 
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        let rows: Segment[][] = [];
+        let type: LogType = "output";
+        const parts   = trimmed.split(/\s+/);
+        const baseCmd = parts[0].toLowerCase();
+        const args    = parts.slice(1).join(" ");
 
-        let responseLines: string[] = [];
-        let logType: "output" | "error" = "output";
-
-        switch (trimmedCmd) {
-            case "help":
-                responseLines = [
-                    "AVAILABLE COMMANDS:",
-                    "  about      - Display system bio and mission parameter",
-                    "  contact    - Initialize communication protocols",
-                    "  stack      - Print core engineering technologies",
-                    "  clear      - Wipe terminal history",
-                    "  exit       - Terminate session",
-                ];
+        switch (baseCmd) {
+            case "help":     rows = buildHelp();     break;
+            case "about":    rows = buildAbout();    break;
+            case "contact":  rows = buildContact();  break;
+            case "stack":    rows = buildStack();    break;
+            case "projects": rows = buildProjects(); break;
+            case "whoami":   rows = buildWhoami();   break;
+            case "neofetch": rows = buildNeofetch(); break;
+            case "date":     rows = buildDate();     break;
+            case "ls":       rows = buildLs();       break;
+            case "cat":      rows = buildCat(args);  break;
+            case "echo":     rows = buildEcho(args); break;
+            case "resume":   rows = buildResumeDownload(); break;
+            case "theme":
+                if (args && THEMES[args as ThemeName]) {
+                    setTheme(args as ThemeName); rows = buildThemeApplied(args as ThemeName);
+                } else { rows = buildThemeList(); }
                 break;
-            case "about":
-                responseLines = [
-                    "TARGET: Sarthak Parulekar",
-                    "ROLE: Creative Software Engineer",
-                    "STATUS: Crafting high-performance web applications and fluid interactive physics interfaces.",
-                    "LOCATION: Indore, Madhya Pradesh, India"
-                ];
+            case "matrix":
+                setMatrixActive((p) => !p);
+                rows = [[s(matrixActive ? "☐ Matrix rain deactivated" : "☑ Matrix rain activated", C.green, true)]];
                 break;
-            case "contact":
-                responseLines = [
-                    "INITIALIZING CONTACT PROTOCOL...",
-                    "Email: sarthakdev143.official@gmail.com",
-                    "LinkedIn: linkedin.com/in/sarthak-parulekar",
-                    "GitHub: github.com/sarthakdev143-lite",
-                ];
-                break;
-            case "stack":
-                responseLines = [
-                    "CORE ARCHITECTURE:",
-                    "► Frontend: Next.js, React, TypeScript, Tailwind CSS",
-                    "► Backend: Spring Boot, Node.js, REST APIs",
-                    "► Motion/Physics: GSAP, Lenis, Framer Motion, Canvas",
-                    "► Systems: Git Workflows, Deployment Pipelines"
-                ];
-                break;
-            case "sudo":
-            case "sudo su":
-                logType = "error";
-                responseLines = ["Access denied. This incident will be reported."];
-                break;
-            case "clear":
-                setHistory([]);
+            case "sound":
+                setSoundOn((p) => !p); rows = buildSoundToggled(!soundOn); break;
+            case "sudo": case "sudo su":
+                rows = buildSudo(); type = "error"; break;
+            case "dm":
+                rows = buildDmIntro();
+                await appendOutput(rows, type);
                 setIsTyping(false);
+                setShowDmForm(true);
                 return;
+            case "clear":
+                setHistory([]); setShowDmForm(false); setIsTyping(false); return;
             case "exit":
-                onClose();
-                return;
+                onClose(); return;
             default:
-                logType = "error";
-                responseLines = [`Command not found: ${trimmedCmd}. Type 'help' for a list of valid commands.`];
+                rows = buildError(baseCmd); type = "error";
         }
 
-        for (let i = 0; i < responseLines.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, 150));
-            setHistory((prev) => [
-                ...prev,
-                { id: `out-${Date.now()}-${i}`, type: logType, text: responseLines[i] }
-            ]);
-        }
-
+        await appendOutput(rows, type);
         setIsTyping(false);
         setTimeout(() => inputRef.current?.focus(), 10);
     };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!isTyping && input) {
-            processCommand(input);
+        if (!isTyping && !showDmForm && input.trim()) processCommand(input);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            if (!input.trim()) return;
+            const partial = input.trim().toLowerCase();
+            const matches = COMMANDS.filter((c) => c.startsWith(partial));
+            if (matches.length === 1) { setInput(matches[0] + " "); playTick(); }
+            else if (matches.length > 1) {
+                const commonPrefix = matches.reduce((prefix, cmd) => {
+                    let i = 0;
+                    while (i < prefix.length && i < cmd.length && prefix[i] === cmd[i]) i++;
+                    return prefix.slice(0, i);
+                }, matches[0]);
+                if (commonPrefix.length > partial.length) { setInput(commonPrefix); playTick(); }
+                else {
+                    setHistory((prev) => [...prev, { id: `tab-${Date.now()}`, type: "system", segments: [s(matches.join("  "), C.dim)] }]);
+                }
+            }
+            return;
         }
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            const hist = commandHistoryRef.current; if (!hist.length) return;
+            if (historyIndex === -1) inputBeforeHistoryRef.current = input;
+            const newIdx = Math.min(historyIndex + 1, hist.length - 1);
+            setHistoryIndex(newIdx); setInput(hist[newIdx]);
+            setTimeout(() => { if (inputRef.current) { inputRef.current.selectionStart = inputRef.current.selectionEnd = hist[newIdx].length; } }, 0);
+            playTick(); return;
+        }
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (historyIndex <= 0) { setHistoryIndex(-1); setInput(inputBeforeHistoryRef.current); return; }
+            const newIdx = historyIndex - 1;
+            setHistoryIndex(newIdx); setInput(commandHistoryRef.current[newIdx]);
+            setTimeout(() => { if (inputRef.current) { inputRef.current.selectionStart = inputRef.current.selectionEnd = commandHistoryRef.current[newIdx].length; } }, 0);
+            playTick(); return;
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value; setInput(val);
+        const parts = val.trim().split(/\s+/);
+        if (parts.length === 1 && parts[0] && !COMMANDS.includes(parts[0].toLowerCase()))
+            setSuggestions(findSuggestions(parts[0]));
+        else setSuggestions([]);
+        if (val.length > 0) playTick();
+    };
+
+    const handleDmSent = (success: boolean) => {
+        setShowDmForm(false);
+        const rows: Segment[][] = success
+            ? [
+                [s("✓ ", C.green), s("Message delivered successfully!", C.green, true)],
+                [s("  I'll get back to you soon. ", C.dim), s("— Sarthak", C.cyan)],
+              ]
+            : [[s("✗ ", C.red), s("Delivery failed. Please email directly.", C.red)]];
+        setHistory((prev) => [...prev, ...rows.map((segments, i) => ({ id: `dm-res-${i}`, type: "output" as LogType, segments }))]);
+        setTimeout(() => inputRef.current?.focus(), 50);
+    };
+
+    const handleDmCancel = () => {
+        setShowDmForm(false);
+        setHistory((prev) => [...prev, { id: `dm-cancel-${Date.now()}`, type: "system", segments: [s("  DM cancelled.", C.dim)] }]);
+        setTimeout(() => inputRef.current?.focus(), 50);
     };
 
     const handleCopyEmail = () => {
         navigator.clipboard.writeText("sarthakdev143.official@gmail.com");
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        setCopied(true); setTimeout(() => setCopied(false), 2000);
     };
 
-    const renderIDEText = (text: string) => {
-        // If it's just standard text, let's parse it for common code patterns
-        const parts = text.split(/("(?:[^"\\]|\\.)*"|\[.*?\]|=>|true|false)/g);
-
-        return (
-            <>
-                {parts.map((part, index) => {
-                    if (!part) return null;
-
-                    // Strings (Green)
-                    if (part.startsWith('"') && part.endsWith('"')) {
-                        return <span key={index} className="text-[#98c379]">{part}</span>;
-                    }
-                    // Arrays/Brackets (Yellow)
-                    if (part.startsWith('[') && part.endsWith(']')) {
-                        return <span key={index} className="text-[#e5c07b]">{part}</span>;
-                    }
-                    // Booleans (Orange)
-                    if (part === 'true' || part === 'false') {
-                        return <span key={index} className="text-[#d19a66]">{part}</span>;
-                    }
-                    // Arrows/Operators (Purple)
-                    if (part === '=>') {
-                        return <span key={index} className="text-[#c678dd]">{part}</span>;
-                    }
-
-                    // Highlight specific system paths or commands in Blue
-                    if (part.includes('/usr/bin/') || part.includes('npm run')) {
-                        return <span key={index} className="text-[#61afef]">{part}</span>;
-                    }
-
-                    // Default text
-                    return <span key={index} className="text-white/80">{part}</span>;
-                })}
-            </>
-        );
-    };
+    // Suggestions height in pixels (approx) so we can pad the bottom accordingly
+    const suggestionVisible = suggestions.length > 0 && input && !showDmForm;
 
     return (
-        // 2. Animated Backdrop
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            onClick={onClose} // Closes the terminal when clicking the outside overlay
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0f0f11]/80 backdrop-blur-sm cursor-pointer"
+            onClick={onClose}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm cursor-pointer"
+            style={{ background: `${THEMES[theme].bg}cc` }}
         >
-            {/* 2. Animated Terminal Shell */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 15 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-3xl h-[60vh] min-h-100 bg-[#0c0c0e] border border-white/10 rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
-                onClick={handleContainerClick} // Stops event bubbling and focuses input
+                className="relative w-full max-w-3xl h-[65vh] min-h-[420px] rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
+                style={{
+                    background: THEMES[theme].bg,
+                    borderColor: `rgba(${THEMES[theme].border},0.1)`,
+                    borderWidth: 1,
+                }}
+                onClick={(e) => { e.stopPropagation(); if (!isTyping && !showDmForm) inputRef.current?.focus(); }}
             >
-                {/* CRT Scanline Overlay Effect */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-size-[100%_4px,3px_100%] z-10" />
+                <MatrixRain active={matrixActive} />
 
-                {/* Terminal Header Bar */}
-                <div className="flex items-center justify-between px-4 py-3 bg-[#131316] border-b border-white/5 select-none relative z-20">
+                {/* CRT overlay */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] z-20"
+                    style={{
+                        backgroundImage: "linear-gradient(rgba(255,255,255,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06))",
+                        backgroundSize: "100% 4px, 3px 100%",
+                    }}
+                />
+
+                {/* ── Header ── */}
+                <div className="flex items-center justify-between px-4 py-3 border-b select-none relative z-30"
+                    style={{ background: THEMES[theme].headerBg, borderColor: `rgba(${THEMES[theme].border},0.05)` }}>
                     <div className="flex items-center gap-3">
-                        <TerminalIcon className="w-4 h-4 text-neutral-400" />
-                        <span className="text-xs font-mono font-medium text-neutral-400 tracking-wider">root@sarthak_engine:~</span>
+                        <TerminalIcon className="w-4 h-4" style={{ color: C.dim }} />
+                        <span className="text-xs font-mono font-medium tracking-wider">
+                            <span style={{ color: C.blue }}>root</span>
+                            <span style={{ color: C.dim }}>@</span>
+                            <span style={{ color: C.green }}>sarthak_engine</span>
+                            <span style={{ color: C.dim }}>:~</span>
+                        </span>
+                        {matrixActive && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.green }}>⬡ MATRIX</span>}
+                        {showDmForm  && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan  }}>✉ DM MODE</span>}
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <button
-                            onClick={(e) => { e.stopPropagation(); handleCopyEmail(); }}
-                            aria-label={copied ? "Email copied" : "Copy email address"}
-                            className="group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors border border-white/5"
-                        >
-                            {copied
-                                ? <Check className="w-3.5 h-3.5 text-green-400" aria-hidden="true" />
-                                : <Copy className="w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-colors" aria-hidden="true" />
-                            }
-                            <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 group-hover:text-white transition-colors">
+                        <button onClick={(e) => { e.stopPropagation(); setSoundOn((p) => !p); }}
+                            className="p-1.5 cursor-pointer rounded hover:bg-white/10 transition-colors" style={{ color: C.dim }}>
+                            {soundOn ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleCopyEmail(); }}
+                            className="group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded hover:bg-white/10 transition-colors border"
+                            style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.05)" }}>
+                            {copied ? <Check className="w-3.5 h-3.5" style={{ color: C.green }} /> : <Copy className="w-3.5 h-3.5" style={{ color: C.dim }} />}
+                            <span className="text-[10px] font-mono uppercase tracking-widest transition-colors" style={{ color: C.dim }}>
                                 {copied ? "Copied" : "Copy Email"}
                             </span>
                         </button>
-
-                        <button
-                            onClick={(e) => { e.stopPropagation(); onClose(); }}
-                            className="p-1.5 cursor-pointer rounded hover:bg-red-500/20 text-neutral-400 hover:text-red-400 transition-colors"
-                            aria-label="Close terminal"
-                            title="Close (Esc)"
-                        >
-                            <X className="w-4 h-4" aria-hidden="true" />
+                        <button onClick={(e) => { e.stopPropagation(); onClose(); }}
+                            className="p-1.5 cursor-pointer rounded hover:bg-red-500/20 transition-colors" style={{ color: C.dim }}>
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
-                {/* Terminal Output Screen */}
+                {/* ── Scrollable output area ── */}
                 <div
                     ref={scrollRef}
-                    className="flex-1 p-6 overflow-y-auto font-mono text-sm md:text-base relative z-20 scrollbar-ide"
+                    onWheel={(e) => e.stopPropagation()}
+                    onTouchMove={(e) => e.stopPropagation()}
+                    className="flex-1 overflow-y-auto relative z-30"
+                    style={{ scrollbarWidth: "thin", scrollbarColor: `${C.dim} transparent` }}
                 >
-                    <div className="space-y-1.5 pb-4">
-                        {history.map((log) => (
-                            <div key={log.id} className="flex items-start gap-3">
-                                {log.type === "input" && (
-                                    <div className="flex gap-2 text-white/90">
-                                        <span className="text-[#61afef]">~/portfolio</span>
-                                        <span className="text-[#c678dd]">❯</span>
-                                        <span>{log.text}</span>
-                                    </div>
-                                )}
-                                <div className={`pl-4 ${log.type === 'error' ? 'text-red-400' : ''}`}>
-                                    {log.type === 'error' ? log.text : renderIDEText(log.text)}
+                    <div className="px-5 py-4 space-y-[3px]">
+                        {/* History logs */}
+                        {history.map((log) =>
+                            log.type === "input" ? (
+                                <div key={log.id} className="flex items-center gap-1 mt-2">
+                                    {getPrompt()}
+                                    <SegmentRow segments={log.segments} />
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ) : (
+                                <div key={log.id} className="pl-1">
+                                    <SegmentRow segments={log.segments} />
+                                </div>
+                            )
+                        )}
 
-                    <form onSubmit={handleSubmit} className="flex items-center gap-3 mt-2">
-                        <span className="text-brand shrink-0">➜</span>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            disabled={isTyping}
-                            autoFocus
-                            autoComplete="off"
-                            spellCheck="false"
-                            className="flex-1 bg-transparent outline-none border-none text-white font-mono shadow-none focus:ring-0 p-0 disabled:opacity-50"
+                        {/* Inline DM form */}
+                        {showDmForm && (
+                            <DmForm theme={theme} onSent={handleDmSent} onCancel={handleDmCancel} />
+                        )}
+
+                        {/* Input row — always rendered so it anchors the scroll */}
+                        {!showDmForm && (
+                            <form onSubmit={handleSubmit} className="flex items-center gap-1 mt-2">
+                                {getPrompt()}
+                                <input
+                                    ref={inputRef}
+                                    type="text" value={input}
+                                    onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    disabled={isTyping}
+                                    autoFocus autoComplete="off" spellCheck={false}
+                                    className="flex-1 bg-transparent outline-none border-none shadow-none focus:ring-0 p-0 disabled:opacity-40 font-mono text-sm"
+                                    style={{ color: C.bright, caretColor: C.green }}
+                                />
+                                {isTyping && (
+                                    <span className="text-xs font-mono animate-pulse shrink-0" style={{ color: C.dim }}>
+                                        processing…
+                                    </span>
+                                )}
+                            </form>
+                        )}
+
+                        {/* ── Suggestions — rendered below the input, always visible ── */}
+                        <AnimatePresence>
+                            {suggestionVisible && (
+                                <motion.div
+                                    key="suggestions"
+                                    initial={{ opacity: 0, y: -4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="pl-[7.5rem] mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
+                                    style={{ color: C.dim }}
+                                >
+                                    <span>Did you mean:</span>
+                                    {suggestions.map((sug, i) => (
+                                        <span key={sug} className="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => { setInput(sug + " "); setSuggestions([]); inputRef.current?.focus(); }}
+                                                className="hover:underline cursor-pointer"
+                                                style={{ color: C.green }}
+                                            >
+                                                {sug}
+                                            </button>
+                                            {i < suggestions.length - 1 && <span style={{ color: C.dim }}>,</span>}
+                                        </span>
+                                    ))}
+                                    <span>?</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/*
+                         * Spacer div — ensures there is always breathing room below
+                         * the input + suggestions so nothing is clipped by the footer.
+                         * The extra height when suggestions are shown prevents them
+                         * from being obscured.
+                         */}
+                        <div
+                            ref={bottomRef}
+                            style={{ height: suggestionVisible ? "5rem" : "3rem" }}
+                            aria-hidden
                         />
-                    </form>
+                    </div>
+                </div>
+
+                {/* ── Footer ── */}
+                <div
+                    className="flex items-center justify-between px-4 py-1.5 border-t text-[10px] font-mono relative z-30 select-none"
+                    style={{ background: THEMES[theme].headerBg, borderColor: `rgba(${THEMES[theme].border},0.05)`, color: C.dim }}
+                >
+                    <span><span style={{ color: C.green }}>●</span> {theme.toUpperCase()}</span>
+                    <span>{soundOn ? "🔊" : "🔇"} SOUND {soundOn ? "ON" : "OFF"}</span>
+                    <span>TAB: complete · ↑↓: history · <span style={{ color: C.cyan }}>dm</span>: message me</span>
                 </div>
             </motion.div>
         </motion.div>
