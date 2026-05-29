@@ -67,26 +67,26 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
       />
 
       {/* Main Content Layout */}
-      <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start will-change-[transform,opacity,filter]">
+      <div ref={contentRef} className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-8 items-start will-change-[transform,opacity,filter]">
 
         {/* Timestamp & Meta Panel */}
         <div className="lg:col-span-4 flex flex-col pt-3">
           <span className="text-xs font-mono text-white/40 font-bold tracking-[0.2em] uppercase mb-2">
             {exp.period}
           </span>
-          <h4 className="text-xl font-bold font-mono text-white leading-tight uppercase tracking-tight">
+          <h4 className="text-lg md:text-xl font-bold font-mono text-white leading-tight uppercase tracking-tight">
             {exp.role}
           </h4>
           <span className="text-sm font-sans text-white/70 mt-1.5 font-medium">
             {exp.company}
           </span>
           <span className="text-xs font-mono text-white/30 tracking-wide mt-1">
-            // {exp.location}
+            {"// "}{exp.location}
           </span>
         </div>
 
         {/* Spotlight Interactive Terminal Panel */}
-        <div className="lg:col-span-8 relative overflow-hidden rounded-xl border border-white/5 bg-[#131316]/80 backdrop-blur-md transition-colors duration-500 group-hover:border-white/20">
+        <div className="lg:col-span-8 relative overflow-hidden rounded-lg md:rounded-xl border border-white/8 bg-[#151519] backdrop-blur-md transition-colors duration-500 group-hover:border-white/20">
 
           {/* Dynamic Spotlight Mask Layers */}
           <div
@@ -96,10 +96,10 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
             }}
           />
 
-          <div className="relative p-7 md:p-8">
-            <ul className="space-y-4 mb-8">
+          <div className="relative p-5 md:p-8">
+            <ul className="space-y-3 md:space-y-4 mb-7 md:mb-8">
               {exp.highlights.map((bullet, bIdx) => (
-                <li key={bIdx} className="flex items-start gap-4 text-[0.9rem] text-neutral-400 leading-relaxed font-sans group-hover:text-neutral-300 transition-colors duration-300">
+                <li key={bIdx} className="flex items-start gap-3 md:gap-4 text-[0.84rem] md:text-[0.9rem] text-neutral-400 leading-relaxed font-sans group-hover:text-neutral-300 transition-colors duration-300">
                   <span className="text-white/20 font-mono text-xs mt-1 select-none">►</span>
                   <span>{bullet}</span>
                 </li>
@@ -107,11 +107,11 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
             </ul>
 
             {/* Hardware Architecture Badges */}
-            <div className="flex flex-wrap gap-2 pt-5 border-t border-white/4">
+            <div className="flex flex-wrap gap-1.5 md:gap-2 pt-5 border-t border-white/4">
               {exp.techStack.map((tech, tIdx) => (
                 <span
                   key={tIdx}
-                  className="text-[10px] font-mono px-2.5 py-1.5 rounded-md bg-white/3 text-white/60 uppercase tracking-widest border border-white/3 group-hover:bg-white/8 group-hover:border-white/10 group-hover:text-white/90 transition-all duration-300"
+                  className="text-[9px] md:text-[10px] font-mono px-2 md:px-2.5 py-1.5 rounded bg-white/3 text-white/60 uppercase tracking-widest border border-white/3 group-hover:bg-white/8 group-hover:border-white/10 group-hover:text-white/90 transition-all duration-300"
                 >
                   {tech}
                 </span>
@@ -158,23 +158,23 @@ export default function ExperienceShowcase() {
   }, []);
 
   return (
-    <section ref={containerRef} className="relative w-full max-w-6xl mx-auto px-6 py-40 bg-[#0f0f11]">
+    <section ref={containerRef} className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 py-24 md:py-40 bg-[#0f0f11]">
       {/* Header Module */}
-      <div className="mb-32 flex flex-col items-start">
-        <span className="text-xs font-mono text-white/40 uppercase tracking-[0.4em] mb-3">
-          // CHRONOLOGICAL PIPELINE
+      <div className="mb-16 md:mb-32 flex flex-col items-start">
+        <span className="text-[10px] sm:text-xs font-mono text-white/40 uppercase tracking-[0.24em] sm:tracking-[0.4em] mb-3">
+          {"// CHRONOLOGICAL PIPELINE"}
         </span>
-        <h3 className="text-5xl md:text-6xl font-bold font-mono text-white uppercase tracking-tighter">
+        <h3 className="text-[clamp(2.1rem,12vw,3.75rem)] md:text-6xl font-bold font-mono text-white uppercase tracking-tighter leading-none">
           EXPERIENCE <span className="text-brand/30">CIRCUITS</span>
         </h3>
       </div>
 
-      <div className="relative pl-8 md:pl-16">
+      <div className="relative pl-8.5 md:pl-16">
         {/* Background Inactive Track */}
-        <div className="absolute left-1.25 md:left-1.75 top-4 bottom-0 w-0.5 bg-white/2" />
+        <div className="absolute left-1.5 md:left-1.75 top-4 bottom-0 w-0.5 bg-white/2" />
 
         {/* Active Draw Track */}
-        <div className="absolute left-1.25 md:left-1.75 top-4 bottom-0 w-0.5 origin-top">
+        <div className="absolute left-1.5 md:left-1.75 top-4 bottom-0 w-0.5 origin-top">
           <div
             ref={circuitLineRef}
             className="w-full h-full bg-linear-to-b from-brand/80 via-brand/40 to-transparent origin-top scale-y-0 will-change-transform"
@@ -189,7 +189,7 @@ export default function ExperienceShowcase() {
         </div>
 
         {/* Render Dynamic Nodes */}
-        <div className="space-y-32">
+        <div className="space-y-14 md:space-y-32">
           {EXPERIENCE_DATA.map((exp, idx) => (
             <ExperienceCard key={idx} exp={exp} />
           ))}

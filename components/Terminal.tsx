@@ -391,7 +391,7 @@ function MatrixRain({ active }: { active: boolean }) {
 // ─── Segment row ──────────────────────────────────────────────────────────────
 function SegmentRow({ segments }: { segments: Segment[] }) {
     return (
-        <span className="font-mono">
+        <span className="font-mono break-words whitespace-pre-wrap">
             {segments.map((seg, i) => {
                 const style = { color: seg.color ?? C.white, fontWeight: seg.bold ? 700 : 400 };
                 if (seg.href) return (
@@ -869,7 +869,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-3xl h-[65vh] min-h-105 rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
+                className="relative w-full max-w-3xl h-[calc(100dvh-1.5rem)] sm:h-[65vh] sm:min-h-105 rounded-lg sm:rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
                 style={{
                     background: THEMES[theme].bg,
                     borderColor: `rgba(${THEMES[theme].border},0.1)`,
@@ -888,11 +888,11 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                 />
 
                 {/* ── Header ── */}
-                <div className="flex items-center justify-between px-4 py-3 border-b select-none relative z-30"
+                <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-3 border-b select-none relative z-30"
                     style={{ background: THEMES[theme].headerBg, borderColor: `rgba(${THEMES[theme].border},0.05)` }}>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         <TerminalIcon className="w-4 h-4" style={{ color: C.dim }} />
-                        <span className="text-xs font-mono font-medium tracking-wider">
+                        <span className="text-[10px] sm:text-xs font-mono font-medium tracking-wider truncate">
                             <span style={{ color: C.blue }}>root</span>
                             <span style={{ color: C.dim }}>@</span>
                             <span style={{ color: C.green }}>sarthak_engine</span>
@@ -902,16 +902,16 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                         {showDmForm && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan }}>✉ DM MODE</span>}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                         <button onClick={(e) => { e.stopPropagation(); setSoundOn((p) => !p); }}
                             className="p-1.5 cursor-pointer rounded hover:bg-white/10 transition-colors" style={{ color: C.dim }}>
                             {soundOn ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); handleCopyEmail(); }}
-                            className="group cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded hover:bg-white/10 transition-colors border"
+                            className="group cursor-pointer flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded hover:bg-white/10 transition-colors border"
                             style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.05)" }}>
                             {copied ? <Check className="w-3.5 h-3.5" style={{ color: C.green }} /> : <Copy className="w-3.5 h-3.5" style={{ color: C.dim }} />}
-                            <span className="text-[10px] font-mono uppercase tracking-widest transition-colors" style={{ color: C.dim }}>
+                            <span className="hidden sm:inline text-[10px] font-mono uppercase tracking-widest transition-colors" style={{ color: C.dim }}>
                                 {copied ? "Copied" : "Copy Email"}
                             </span>
                         </button>
@@ -930,7 +930,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                     className="flex-1 overflow-y-auto relative z-30"
                     style={{ scrollbarWidth: "thin", scrollbarColor: `${C.dim} transparent` }}
                 >
-                    <div className="px-5 py-4 space-y-0.75">
+                    <div className="px-3 sm:px-5 py-4 space-y-0.75 text-sm">
                         {/* History logs */}
                         {history.map((log) =>
                             log.type === "input" ? (
@@ -983,7 +983,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -4 }}
                                     transition={{ duration: 0.15 }}
-                                    className="pl-30 mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
+                                    className="pl-0 sm:pl-30 mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
                                     style={{ color: C.dim }}
                                 >
                                     <span>Did you mean:</span>
@@ -1015,7 +1015,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
 
                 {/* ── Footer ── */}
                 <div
-                    className="flex items-center justify-between px-4 py-1.5 border-t text-[10px] font-mono relative z-30 select-none"
+                    className="terminal-footer flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 border-t text-[10px] font-mono relative z-30 select-none"
                     style={{ background: THEMES[theme].headerBg, borderColor: `rgba(${THEMES[theme].border},0.05)`, color: C.dim }}
                 >
                     <span><span style={{ color: C.green }}>●</span> {theme.toUpperCase()}</span>
