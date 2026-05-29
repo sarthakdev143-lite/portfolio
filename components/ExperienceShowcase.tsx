@@ -165,7 +165,7 @@ export default function ExperienceShowcase() {
           // CHRONOLOGICAL PIPELINE
         </span>
         <h3 className="text-5xl md:text-6xl font-bold font-mono text-white uppercase tracking-tighter">
-          EXPERIENCE <span className="text-white/30">CIRCUITS</span>
+          EXPERIENCE <span className="text-brand/30">CIRCUITS</span>
         </h3>
       </div>
 
@@ -177,7 +177,7 @@ export default function ExperienceShowcase() {
         <div className="absolute left-1.25 md:left-1.75 top-4 bottom-0 w-0.5 origin-top">
           <div
             ref={circuitLineRef}
-            className="w-full h-full bg-linear-to-b from-white/80 via-white/40 to-transparent origin-top scale-y-0 will-change-transform"
+            className="w-full h-full bg-linear-to-b from-brand/80 via-brand/40 to-transparent origin-top scale-y-0 will-change-transform"
           />
 
           {/* Glowing Playhead Orb */}

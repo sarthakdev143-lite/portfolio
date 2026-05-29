@@ -101,6 +101,14 @@ export default function ProjectGallery() {
 
     return (
         <>
+            <div className="mx-auto max-w-7xl flex flex-col items-start">
+                <span className="text-xs font-mono text-white/40 uppercase tracking-[0.4em] mb-3">
+                       // COMPILED ARTIFACTS
+                </span>
+                <h3 className="text-5xl md:text-6xl font-bold font-mono text-white uppercase tracking-tighter">
+                    PROJECTS <span className="text-brand/30">BUILD LOG</span>
+                </h3>
+            </div>
             <div ref={scrollContainerRef} className="relative w-full h-screen bg-[#0f0f11] overflow-hidden" style={{ "--projects-count": PROJECTS.length } as React.CSSProperties}>
                 <div ref={trackRef} className="relative md:absolute top-0 left-0 h-full flex flex-col md:flex-row items-center will-change-transform md:w-[calc((var(--projects-count)+1)*100vw)] w-full">
 
@@ -188,7 +196,7 @@ export default function ProjectGallery() {
 
                 </div>
             </div>
-            
+
             <AnimatePresence>
                 {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
             </AnimatePresence>
