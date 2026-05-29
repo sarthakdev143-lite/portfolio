@@ -67,21 +67,21 @@ export const EXPERIENCE_DATA = [
 export const PROJECTS = [
     {
         id: "01",
-        title: "INTERVIEW HACKER",
-        tagline: "CONTEXT INJECTION ENGINE",
-        desc: "A raw context injection utility and real-time browser assistant. Built to intercept, analyze, and stream intelligent contextual overlays over live web frames without affecting DOM footprints.",
-        tech: ["Chrome Extension API", "React", "TypeScript", "Tailwind CSS"],
+        title: "WINGMAN",
+        tagline: "REAL-TIME INTERVIEW ASSISTANT",
+        desc: "A real-time desktop interview assistant that captures system audio, transcribes it with Groq Whisper, detects interview questions, and streams AI-generated answers through a protected floating overlay.",
+        tech: ["Electron", "React", "TypeScript", "Tailwind CSS", "Python", "FastAPI", "Groq"],
         link: "https://github.com/sarthakdev143-lite/interview-hacker",
         accent: "var(--color-brand)",
     },
     {
         id: "02",
-        title: "YOUTUBE AUTOMATION",
-        tagline: "HEADLESS CONTENT PIPELINE",
-        desc: "An automated, bulk content generation and deployment matrix. Coordinates headless video asset processing, metadata optimization cascades, and automated publishing pipelines to completely eliminate manual rendering constraints.",
-        tech: ["Node.js", "FFmpeg Engine", "Puppeteer", "Next.js"],
+        title: "YT AUTOMATION FACTORY",
+        tagline: "MULTI-PLATFORM VIDEO PIPELINE",
+        desc: "A fully automated video workflow that downloads short-form content from multiple platforms, applies FFmpeg editing, generates AI-optimized YouTube metadata, and batch-uploads or schedules content through a single web UI.",
+        tech: ["Next.js", "TypeScript", "Tailwind CSS", "FastAPI", "FFmpeg", "yt-dlp", "SQLite"],
         link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
-        accent: "#ffffff",
+        accent: "var(--color-brand)",
     },
 ];
 
