@@ -83,6 +83,15 @@ export const PROJECTS = [
         link: "https://github.com/sarthakdev143-lite/ultimate-youtube-automation",
         accent: "var(--color-brand)",
     },
+    {
+        id: "03",
+        title: "SHADOW",
+        tagline: "CLASSICAL POETRY GENERATOR",
+        desc: "GPT-Style Language Model (2.2M Parameters) built around a word-level PyTorch LSTM, with a Gradio UI for local and hosted use, plus optional FastAPI and custom browser interfaces.",
+        tech: ["Python", "PyTorch", "Gradio", "FastAPI", "Docker"],
+        link: "https://github.com/sarthakdev143-lite/shadow-poem-generator",
+        accent: "var(--color-brand)",
+    }
 ];
 
 export const HERO_PANELS = {
