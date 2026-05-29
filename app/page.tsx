@@ -1,6 +1,7 @@
+
 import Hero from "@/components/HeroSection";
 import CurvedLoop from "@/components/CurvedLoop";
-import ScrollReveal from "@/components/ScrollReveal";
+// import ScrollReveal from "@/components/ScrollReveal";
 import ProjectGallery from "@/components/ProjectGallery";
 import ExperienceShowcase from "@/components/ExperienceShowcase";
 
@@ -19,22 +20,10 @@ export default function Home() {
         />
       </div>
 
-      {/* 3. Narrative Cinematic Manifest Segment */}
-      <section className="max-w-6xl mx-auto px-6 pt-32 md:pt-48">
-        <ScrollReveal
-          baseOpacity={0.05}
-          baseRotation={4}
-          blurStrength={12}
-          wordAnimationEnd="top 30%"
-        >
-          I ARCHITECT HIGH PERFORMANCE APPLICATIONS BY INTEGRATING INTERACTIVE PHYSICS INTERFACES DIRECTLY INTO THE DATA PIPELINE, WE ERASE THE SEAMS BETWEEN RAW LOGIC AND KINETIC BEAUTY.
-        </ScrollReveal>
-      </section>
-
-      {/* 4. Active Experience Showcase Circuit Pipeline */}
+      {/* 3. Active Experience Showcase Circuit Pipeline */}
       <ExperienceShowcase />
 
-      {/* 5. Production Application Showcases & Interactive Console Terminal */}
+      {/* 4. Production Application Showcases & Interactive Console Terminal */}
       <ProjectGallery />
     </div>
   );

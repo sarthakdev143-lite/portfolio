@@ -1,8 +1,9 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HERO_PANELS } from "@/lib/config";
+import { HERO_PANELS } from "../lib/config";
 import { AnimatePresence } from "motion/react";
 import Terminal from "./Terminal";
 
@@ -16,12 +17,23 @@ export default function Hero() {
     const panelGridRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLDivElement>(null);
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+    const [terminalInitialCommand, setTerminalInitialCommand] = useState<string | undefined>(undefined);
+
+    const openTerminalWithDm = () => {
+        setTerminalInitialCommand("dm");
+        setIsTerminalOpen(true);
+    };
+
+    const closeTerminal = () => {
+        setIsTerminalOpen(false);
+        setTerminalInitialCommand(undefined);
+    };
 
     useEffect(() => {
         const ctx = gsap.context(() => {
             const mm = gsap.matchMedia();
 
-            // 💻 DESKTOP: Full kinetic explosion and pinning
+            // DESKTOP: Full kinetic explosion and pinning
             mm.add("(min-width: 768px)", () => {
                 // 1. Initial Intro
                 const introTimeline = gsap.timeline();
@@ -49,7 +61,7 @@ export default function Hero() {
                     .to(navRef.current, { opacity: 0, y: -30, ease: "none" }, 0);
             });
 
-            // 📱 MOBILE: Clean static fade-ins, no scroll-jacking
+            // MOBILE: Clean static fade-ins, no scroll-jacking
             mm.add("(max-width: 767px)", () => {
                 const mobileTimeline = gsap.timeline();
                 mobileTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" })
@@ -63,7 +75,7 @@ export default function Hero() {
 
     return (
         <>
-            <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
+            <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden" style={{ perspective: "1000px" }}>
                 {/* HEADLINE */}
                 <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
                     <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
@@ -71,7 +83,7 @@ export default function Hero() {
                             <span className="intro-mask-line block will-change-transform translate-y-[110%]">DISRUPTIVE</span>
                         </div>
                         <div className="overflow-hidden block py-2">
-                            <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%] bg-clip-text bg-linear-to-r from-gray-500 via-gray-300 to-white">
+                            <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%]" style={{ backgroundClip: "text", WebkitBackgroundClip: "text", backgroundImage: "linear-gradient(to right, #6b7280, #d1d5db, #ffffff)" }}>
                                 ARCHITECT
                             </span>
                         </div>
@@ -86,9 +98,9 @@ export default function Hero() {
                     <div className="flex flex-row gap-6 w-full items-stretch">
 
                         {/* PANEL 2 */}
-                        <div className="f-panel-2 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-8 flex-1 flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
+                        <div className="f-panel-2 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-8 flex-1 flex flex-col justify-between pointer-events-auto backdrop-blur-md shadow-2xl" style={{ transform: "translateX(-120vw) translateY(-20vh) rotate(-25deg) scale(1.5)" }}>
                             <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                                <span className="font-mono text-xs text-brand">{panel2.tag}</span>
+                                <span className="font-mono text-xs" style={{ color: "#c678dd" }}>{panel2.tag}</span>
                                 <span className="font-mono text-xs text-gray-500">{panel2.meta}</span>
                             </div>
                             <div className="my-auto">
@@ -103,7 +115,7 @@ export default function Hero() {
                         </div>
 
                         {/* PANEL 1 */}
-                        <div className="f-panel-1 floating-panel-initial bg-brand text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
+                        <div className="f-panel-1 floating-panel-initial bg-[#c678dd] text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateX(120vw) translateY(30vh) rotate(35deg) scale(1.25)" }}>
                             <div className="flex justify-between items-start border-b border-black/10 pb-4">
                                 <span className="font-mono text-xs font-bold">{panel1.tag}</span>
                                 <span className="font-mono text-xs font-bold opacity-60">{panel1.meta}</span>
@@ -124,7 +136,7 @@ export default function Hero() {
                         </div>
 
                         {/* PANEL 3 */}
-                        <div className="f-panel-3 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-6 flex-1 flex flex-col justify-between transform translate-y-[150vh] rotate-[-15deg] pointer-events-auto shadow-2xl">
+                        <div className="f-panel-3 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-6 flex-1 flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateY(150vh) rotate(-15deg)" }}>
                             <div className="flex justify-between items-center">
                                 <span className="font-mono text-[10px] text-gray-500">{panel3.tag}</span>
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -139,9 +151,9 @@ export default function Hero() {
                     </div>
 
                     <div className="flex justify-center w-full">
-                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 transform translate-y-[60vh] rotate-3 scale-125 pointer-events-auto shadow-2xl hover:border-brand transition-colors duration-300">
+                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 pointer-events-auto shadow-2xl hover:border-[#c678dd] transition-colors duration-300" style={{ transform: "translateY(60vh) rotate(3deg) scale(1.25)" }}>
                             <p className="font-mono text-[10px] text-gray-500 tracking-widest uppercase">{panel4.tag}</p>
-                            <button onClick={() => setIsTerminalOpen(true)} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-brand hover:scale-105 transition-transform duration-300">
+                            <button onClick={openTerminalWithDm} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-[#c678dd] hover:scale-105 transition-transform duration-300">
                                 {panel4.cta}
                             </button>
                         </div>
@@ -150,9 +162,13 @@ export default function Hero() {
             </div>
 
             <AnimatePresence>
-                {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+                {isTerminalOpen && (
+                    <Terminal
+                        onClose={closeTerminal}
+                        initialCommand={terminalInitialCommand}
+                    />
+                )}
             </AnimatePresence>
-
         </>
     );
 }

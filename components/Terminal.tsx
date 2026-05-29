@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 interface TerminalProps {
     onClose: () => void;
+    initialCommand?: string;
 }
 
 type LogType = "input" | "output" | "error" | "system";
@@ -65,7 +66,6 @@ const THEMES: Record<ThemeName, ThemeColors> = {
 };
 
 const s = (text: string, color?: string, bold?: boolean, href?: string): Segment => ({ text, color, bold, href });
-const dim = (text: string, color?: string): Segment => ({ text, color: color ?? C.dim, dim: true });
 
 let C = THEMES.onedark;
 
@@ -76,7 +76,7 @@ let soundEnabled = true;
 function getAudioCtx(): AudioContext | null {
     if (!soundEnabled) return null;
     if (!audioCtx) {
-        try { audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)(); }
+        try { audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); }
         catch { return null; }
     }
     return audioCtx;
@@ -147,21 +147,21 @@ const NEOFETCH_ASCII = [
 // ─── Response builders ────────────────────────────────────────────────────────
 function buildHelp(): Segment[][] {
     const cmds: [string, string][] = [
-        ["about",       "System bio and mission parameters"],
-        ["contact",     "Initialize communication protocols"],
-        ["dm",          "Send a direct message to the developer"],
-        ["stack",       "Core engineering technologies"],
-        ["projects",    "List portfolio projects"],
-        ["neofetch",    "Display system information"],
-        ["whoami",      "Current user identity"],
-        ["date",        "Print system date/time"],
-        ["echo <txt>",  "Echo text back"],
-        ["ls",          "List directory contents"],
-        ["theme <name>","Switch color scheme"],
-        ["matrix",      "Toggle Matrix rain"],
-        ["sound",       "Toggle keyboard sounds"],
-        ["clear",       "Wipe terminal history"],
-        ["exit",        "Terminate session"],
+        ["about", "System bio and mission parameters"],
+        ["contact", "Initialize communication protocols"],
+        ["dm", "Send a direct message to the developer"],
+        ["stack", "Core engineering technologies"],
+        ["projects", "List portfolio projects"],
+        ["neofetch", "Display system information"],
+        ["whoami", "Current user identity"],
+        ["date", "Print system date/time"],
+        ["echo <txt>", "Echo text back"],
+        ["ls", "List directory contents"],
+        ["theme <name>", "Switch color scheme"],
+        ["matrix", "Toggle Matrix rain"],
+        ["sound", "Toggle keyboard sounds"],
+        ["clear", "Wipe terminal history"],
+        ["exit", "Terminate session"],
     ];
     return [
         [s("AVAILABLE COMMANDS", C.yellow, true)],
@@ -185,9 +185,9 @@ function buildAbout(): Segment[][] {
 function buildContact(): Segment[][] {
     return [
         [s("INITIALIZING CONTACT PROTOCOL", C.cyan, true), s(" ···", C.dim)],
-        [s("  ✉  ", C.green),  s("Email     ", C.dim), s("sarthakdev143.official@gmail.com", C.green)],
-        [s("  ⬡  ", C.blue),   s("LinkedIn  ", C.dim), s("linkedin.com/in/sarthak-parulekar", C.blue,   false, "https://www.linkedin.com/in/sarthak-parulekar")],
-        [s("  ⌥  ", C.purple), s("GitHub    ", C.dim), s("github.com/sarthakdev143-lite",     C.purple, false, "https://github.com/sarthakdev143-lite")],
+        [s("  ✉  ", C.green), s("Email     ", C.dim), s("sarthakdev143.official@gmail.com", C.green)],
+        [s("  ⬡  ", C.blue), s("LinkedIn  ", C.dim), s("linkedin.com/in/sarthak-parulekar", C.blue, false, "https://www.linkedin.com/in/sarthak-parulekar")],
+        [s("  ⌥  ", C.purple), s("GitHub    ", C.dim), s("github.com/sarthakdev143-lite", C.purple, false, "https://github.com/sarthakdev143-lite")],
         [s("")],
         [s("  💬 ", C.cyan), s("Type ", C.dim), s("dm", C.cyan, true), s(" to send me a message directly from this terminal.", C.dim)],
     ];
@@ -205,10 +205,10 @@ function buildStack(): Segment[][] {
 
 function buildProjects(): Segment[][] {
     const projects = [
-        { name: "Portfolio 3D",  tech: "Next.js · Three.js · GSAP",   desc: "Immersive 3D portfolio with physics-based interactions" },
-        { name: "DevFlow",       tech: "React · Node.js · MongoDB",    desc: "Developer workflow automation & CI/CD dashboard" },
-        { name: "PixelForge",    tech: "TypeScript · Canvas API",      desc: "Browser-based pixel art editor with layer support" },
-        { name: "API Nexus",     tech: "Spring Boot · PostgreSQL",     desc: "High-throughput REST API gateway with rate limiting" },
+        { name: "Portfolio 3D", tech: "Next.js · Three.js · GSAP", desc: "Immersive 3D portfolio with physics-based interactions" },
+        { name: "DevFlow", tech: "React · Node.js · MongoDB", desc: "Developer workflow automation & CI/CD dashboard" },
+        { name: "PixelForge", tech: "TypeScript · Canvas API", desc: "Browser-based pixel art editor with layer support" },
+        { name: "API Nexus", tech: "Spring Boot · PostgreSQL", desc: "High-throughput REST API gateway with rate limiting" },
     ];
     return [
         [s("PORTFOLIO PROJECTS", C.yellow, true)],
@@ -229,14 +229,14 @@ function buildWhoami(): Segment[][] {
 function buildNeofetch(): Segment[][] {
     const rows: Segment[][] = [];
     const info: [string, string][] = [
-        ["OS",         "SarthakOS 18.04 LTS"],
-        ["Host",       "MacBook Pro (18,3) · Apple M4 Pro"],
-        ["Kernel",     "18.5.4-generic"],
-        ["Shell",      "bash 5.2.15"],
-        ["Uptime",     `${Math.floor(Math.random() * 168) + 1} hours`],
-        ["Packages",   `${Math.floor(Math.random() * 2000) + 500} (npm)`],
+        ["OS", "SarthakOS 18.04 LTS"],
+        ["Host", "MacBook Pro (18,3) · Apple M4 Pro"],
+        ["Kernel", "18.5.4-generic"],
+        ["Shell", "bash 5.2.15"],
+        ["Uptime", `${Math.floor(Math.random() * 168) + 1} hours`],
+        ["Packages", `${Math.floor(Math.random() * 2000) + 500} (npm)`],
         ["Resolution", "1728x1117 @ 120Hz"],
-        ["Terminal",   "Sarthak_Engine v3.2.1"],
+        ["Terminal", "Sarthak_Engine v3.2.1"],
     ];
     const colors = [C.red, C.orange, C.yellow, C.green, C.cyan, C.blue, C.purple, C.red, C.orange];
     const maxLen = Math.max(NEOFETCH_ASCII.length, info.length);
@@ -275,10 +275,10 @@ function buildLs(): Segment[][] {
 function buildCat(args: string): Segment[][] {
     const file = args.trim().toLowerCase();
     switch (file) {
-        case "about.txt":   return [[s("Sarthak Parulekar — Creative Software Engineer", C.bright, true)], [s("Based in Indore, MP, India.", C.white)], [s("Building high-performance web apps with modern tooling.", C.white)]];
-        case "resume.pdf":  return [[s("⚠  Binary file. Use ", C.yellow), s("resume", C.green, true), s(" command to download.", C.yellow)]];
-        case "stack.json":  return [[s("{", C.dim)], [s('  "frontend": ["Next.js","React","TypeScript","Tailwind"],', C.white)], [s('  "backend":  ["Spring Boot","Node.js","REST"],', C.white)], [s('  "motion":   ["GSAP","Lenis","Framer Motion"],', C.white)], [s('  "systems":  ["Git","CI/CD","Docker"]', C.white)], [s("}", C.dim)]];
-        default:            return [[s(`cat: ${file}: No such file or directory`, C.red)]];
+        case "about.txt": return [[s("Sarthak Parulekar — Creative Software Engineer", C.bright, true)], [s("Based in Indore, MP, India.", C.white)], [s("Building high-performance web apps with modern tooling.", C.white)]];
+        case "resume.pdf": return [[s("⚠  Binary file. Use ", C.yellow), s("resume", C.green, true), s(" command to download.", C.yellow)]];
+        case "stack.json": return [[s("{", C.dim)], [s('  "frontend": ["Next.js","React","TypeScript","Tailwind"],', C.white)], [s('  "backend":  ["Spring Boot","Node.js","REST"],', C.white)], [s('  "motion":   ["GSAP","Lenis","Framer Motion"],', C.white)], [s('  "systems":  ["Git","CI/CD","Docker"]', C.white)], [s("}", C.dim)]];
+        default: return [[s(`cat: ${file}: No such file or directory`, C.red)]];
     }
 }
 
@@ -297,9 +297,9 @@ function buildResumeDownload(): Segment[][] {
 function buildThemeList(): Segment[][] {
     const themes: [ThemeName, string][] = [
         ["onedark", "One Dark (default)"],
-        ["matrix",  "Matrix"],
+        ["matrix", "Matrix"],
         ["dracula", "Dracula"],
-        ["nord",    "Nord"],
+        ["nord", "Nord"],
         ["monokai", "Monokai"],
     ];
     return [
@@ -415,11 +415,11 @@ interface DmFormProps {
 
 function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const T = THEMES[theme];
-    const [name,    setName]    = useState("");
-    const [email,   setEmail]   = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
-    const [status,  setStatus]  = useState<"idle" | "sending" | "done">("idle");
-    const [error,   setError]   = useState("");
+    const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
+    const [error, setError] = useState("");
     const nameRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => { nameRef.current?.focus(); }, []);
@@ -436,7 +436,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const inputClass = "w-full rounded px-3 py-2 text-sm font-mono placeholder:opacity-30 focus:ring-0 transition-colors";
 
     const validate = () => {
-        if (!name.trim())    return "Name is required.";
+        if (!name.trim()) return "Name is required.";
         if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Valid email is required.";
         if (!message.trim()) return "Message cannot be empty.";
         return "";
@@ -450,7 +450,6 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
         setError(""); setStatus("sending");
 
         try {
-            // Using Formspree — replace YOUR_FORM_ID with your actual Formspree endpoint
             const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -553,8 +552,8 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                         {status === "sending"
                             ? <><Loader2 className="w-3 h-3 animate-spin" /> SENDING…</>
                             : status === "done"
-                            ? <><Check className="w-3 h-3" /> SENT</>
-                            : <><Send className="w-3 h-3" /> SEND MESSAGE</>
+                                ? <><Check className="w-3 h-3" /> SENT</>
+                                : <><Send className="w-3 h-3" /> SEND MESSAGE</>
                         }
                     </button>
 
@@ -578,22 +577,23 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
 }
 
 // ─── Main Terminal ────────────────────────────────────────────────────────────
-export default function Terminal({ onClose }: TerminalProps) {
-    const [input,        setInput]        = useState("");
-    const [isTyping,     setIsTyping]     = useState(false);
-    const [copied,       setCopied]       = useState(false);
-    const [theme,        setTheme]        = useState<ThemeName>("onedark");
+export default function Terminal({ onClose, initialCommand }: TerminalProps) {
+    const [input, setInput] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [theme, setTheme] = useState<ThemeName>("onedark");
     const [matrixActive, setMatrixActive] = useState(false);
-    const [soundOn,      setSoundOn]      = useState(true);
-    const [suggestions,  setSuggestions]  = useState<string[]>([]);
-    const [showDmForm,   setShowDmForm]   = useState(false);
+    const [soundOn, setSoundOn] = useState(true);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showDmForm, setShowDmForm] = useState(false);
 
-    const scrollRef   = useRef<HTMLDivElement>(null);
-    const inputRef    = useRef<HTMLInputElement>(null);
-    const bottomRef   = useRef<HTMLDivElement>(null);
-    const commandHistoryRef      = useRef<string[]>([]);
-    const inputBeforeHistoryRef  = useRef<string>("");
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const commandHistoryRef = useRef<string[]>([]);
+    const inputBeforeHistoryRef = useRef<string>("");
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const initialCommandExecuted = useRef(false);
 
     C = THEMES[theme];
 
@@ -664,7 +664,7 @@ export default function Terminal({ onClose }: TerminalProps) {
         setHistory((prev) => [...prev, { id: `spacer-${Date.now()}`, type: "system", segments: [s(" ")] }]);
     };
 
-    const processCommand = async (cmd: string) => {
+    const processCommand = useCallback(async (cmd: string) => {
         const trimmed = cmd.trim();
         if (!trimmed) return;
 
@@ -679,23 +679,23 @@ export default function Terminal({ onClose }: TerminalProps) {
 
         let rows: Segment[][] = [];
         let type: LogType = "output";
-        const parts   = trimmed.split(/\s+/);
+        const parts = trimmed.split(/\s+/);
         const baseCmd = parts[0].toLowerCase();
-        const args    = parts.slice(1).join(" ");
+        const args = parts.slice(1).join(" ");
 
         switch (baseCmd) {
-            case "help":     rows = buildHelp();     break;
-            case "about":    rows = buildAbout();    break;
-            case "contact":  rows = buildContact();  break;
-            case "stack":    rows = buildStack();    break;
+            case "help": rows = buildHelp(); break;
+            case "about": rows = buildAbout(); break;
+            case "contact": rows = buildContact(); break;
+            case "stack": rows = buildStack(); break;
             case "projects": rows = buildProjects(); break;
-            case "whoami":   rows = buildWhoami();   break;
+            case "whoami": rows = buildWhoami(); break;
             case "neofetch": rows = buildNeofetch(); break;
-            case "date":     rows = buildDate();     break;
-            case "ls":       rows = buildLs();       break;
-            case "cat":      rows = buildCat(args);  break;
-            case "echo":     rows = buildEcho(args); break;
-            case "resume":   rows = buildResumeDownload(); break;
+            case "date": rows = buildDate(); break;
+            case "ls": rows = buildLs(); break;
+            case "cat": rows = buildCat(args); break;
+            case "echo": rows = buildEcho(args); break;
+            case "resume": rows = buildResumeDownload(); break;
             case "theme":
                 if (args && THEMES[args as ThemeName]) {
                     setTheme(args as ThemeName); rows = buildThemeApplied(args as ThemeName);
@@ -726,7 +726,45 @@ export default function Terminal({ onClose }: TerminalProps) {
         await appendOutput(rows, type);
         setIsTyping(false);
         setTimeout(() => inputRef.current?.focus(), 10);
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [matrixActive, soundOn, onClose]);
+
+    useEffect(() => {
+        // RESET the ref when the component mounts or initialCommand changes
+        initialCommandExecuted.current = false;
+    }, []); // This ensures the command can run again every time the terminal is opened
+
+
+    // ─── Auto-type and execute initialCommand ─────────────────────────────────
+    useEffect(() => {
+        if (!initialCommand || initialCommandExecuted.current) return;
+        initialCommandExecuted.current = true;
+
+        const command = initialCommand;
+        let currentIndex = 0;
+
+        // Start typing after a short delay to let the terminal mount
+        const startDelay = setTimeout(() => {
+            const typeInterval = setInterval(() => {
+                currentIndex++;
+                setInput(command.slice(0, currentIndex));
+                playTick();
+
+                if (currentIndex >= command.length) {
+                    clearInterval(typeInterval);
+                    // After finishing typing, wait a beat then "submit"
+                    setTimeout(() => {
+                        setInput("");
+                        processCommand(command);
+                    }, 400);
+                }
+            }, 80); // 80ms per character for a nice typing effect
+        }, 600);
+
+        return () => {
+            clearTimeout(startDelay);
+        };
+    }, [initialCommand, processCommand]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -787,7 +825,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             ? [
                 [s("✓ ", C.green), s("Message delivered successfully!", C.green, true)],
                 [s("  I'll get back to you soon. ", C.dim), s("— Sarthak", C.cyan)],
-              ]
+            ]
             : [[s("✗ ", C.red), s("Delivery failed. Please email directly.", C.red)]];
         setHistory((prev) => [...prev, ...rows.map((segments, i) => ({ id: `dm-res-${i}`, type: "output" as LogType, segments }))]);
         setTimeout(() => inputRef.current?.focus(), 50);
@@ -804,7 +842,6 @@ export default function Terminal({ onClose }: TerminalProps) {
         setCopied(true); setTimeout(() => setCopied(false), 2000);
     };
 
-    // Suggestions height in pixels (approx) so we can pad the bottom accordingly
     const suggestionVisible = suggestions.length > 0 && input && !showDmForm;
 
     return (
@@ -820,7 +857,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-3xl h-[65vh] min-h-[420px] rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
+                className="relative w-full max-w-3xl h-[65vh] min-h-105 rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
                 style={{
                     background: THEMES[theme].bg,
                     borderColor: `rgba(${THEMES[theme].border},0.1)`,
@@ -850,7 +887,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                             <span style={{ color: C.dim }}>:~</span>
                         </span>
                         {matrixActive && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.green }}>⬡ MATRIX</span>}
-                        {showDmForm  && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan  }}>✉ DM MODE</span>}
+                        {showDmForm && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan }}>✉ DM MODE</span>}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -881,7 +918,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                     className="flex-1 overflow-y-auto relative z-30"
                     style={{ scrollbarWidth: "thin", scrollbarColor: `${C.dim} transparent` }}
                 >
-                    <div className="px-5 py-4 space-y-[3px]">
+                    <div className="px-5 py-4 space-y-0.75">
                         {/* History logs */}
                         {history.map((log) =>
                             log.type === "input" ? (
@@ -923,7 +960,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                             </form>
                         )}
 
-                        {/* ── Suggestions — rendered below the input, always visible ── */}
+                        {/* ── Suggestions ── */}
                         <AnimatePresence>
                             {suggestionVisible && (
                                 <motion.div
@@ -932,7 +969,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -4 }}
                                     transition={{ duration: 0.15 }}
-                                    className="pl-[7.5rem] mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
+                                    className="pl-30 mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
                                     style={{ color: C.dim }}
                                 >
                                     <span>Did you mean:</span>
@@ -954,12 +991,6 @@ export default function Terminal({ onClose }: TerminalProps) {
                             )}
                         </AnimatePresence>
 
-                        {/*
-                         * Spacer div — ensures there is always breathing room below
-                         * the input + suggestions so nothing is clipped by the footer.
-                         * The extra height when suggestions are shown prevents them
-                         * from being obscured.
-                         */}
                         <div
                             ref={bottomRef}
                             style={{ height: suggestionVisible ? "5rem" : "3rem" }}

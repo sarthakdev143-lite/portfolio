@@ -1,5 +1,5 @@
 ================================================================================
-CODE EXPORT - Generated on 26/5/2026, 11:15:19 am
+CODE EXPORT - Generated on 29/5/2026, 10:49:01 am
 Total files: 15
 ================================================================================
 
@@ -487,10 +487,11 @@ FILE: components\HeroSection.tsx
 ================================================================================
 
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { HERO_PANELS } from "@/lib/config";
+import { HERO_PANELS } from "../lib/config";
 import { AnimatePresence } from "motion/react";
 import Terminal from "./Terminal";
 
@@ -504,12 +505,23 @@ export default function Hero() {
     const panelGridRef = useRef<HTMLDivElement>(null);
     const navRef = useRef<HTMLDivElement>(null);
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+    const [terminalInitialCommand, setTerminalInitialCommand] = useState<string | undefined>(undefined);
+
+    const openTerminalWithDm = () => {
+        setTerminalInitialCommand("dm");
+        setIsTerminalOpen(true);
+    };
+
+    const closeTerminal = () => {
+        setIsTerminalOpen(false);
+        setTerminalInitialCommand(undefined);
+    };
 
     useEffect(() => {
         const ctx = gsap.context(() => {
             const mm = gsap.matchMedia();
 
-            // 💻 DESKTOP: Full kinetic explosion and pinning
+            // DESKTOP: Full kinetic explosion and pinning
             mm.add("(min-width: 768px)", () => {
                 // 1. Initial Intro
                 const introTimeline = gsap.timeline();
@@ -537,7 +549,7 @@ export default function Hero() {
                     .to(navRef.current, { opacity: 0, y: -30, ease: "none" }, 0);
             });
 
-            // 📱 MOBILE: Clean static fade-ins, no scroll-jacking
+            // MOBILE: Clean static fade-ins, no scroll-jacking
             mm.add("(max-width: 767px)", () => {
                 const mobileTimeline = gsap.timeline();
                 mobileTimeline.to(navRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" })
@@ -551,7 +563,7 @@ export default function Hero() {
 
     return (
         <>
-            <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden perspective-1000">
+            <div ref={containerRef} className="relative w-full h-screen bg-[#0f0f11] text-[#f3f3f3] overflow-hidden" style={{ perspective: "1000px" }}>
                 {/* HEADLINE */}
                 <div ref={titleContainerRef} className="absolute inset-0 flex flex-col items-center justify-center z-10 select-none pointer-events-none">
                     <h1 className="text-7xl md:text-[8vw] font-black tracking-tighter leading-[0.85] uppercase text-center w-full max-w-7xl mx-auto">
@@ -559,7 +571,7 @@ export default function Hero() {
                             <span className="intro-mask-line block will-change-transform translate-y-[110%]">DISRUPTIVE</span>
                         </div>
                         <div className="overflow-hidden block py-2">
-                            <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%] bg-clip-text bg-linear-to-r from-gray-500 via-gray-300 to-white">
+                            <span className="intro-mask-line block will-change-transform text-transparent translate-y-[110%]" style={{ backgroundClip: "text", WebkitBackgroundClip: "text", backgroundImage: "linear-gradient(to right, #6b7280, #d1d5db, #ffffff)" }}>
                                 ARCHITECT
                             </span>
                         </div>
@@ -574,9 +586,9 @@ export default function Hero() {
                     <div className="flex flex-row gap-6 w-full items-stretch">
 
                         {/* PANEL 2 */}
-                        <div className="f-panel-2 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-8 flex-1 flex flex-col justify-between transform translate-x-[-120vw] translate-y-[-20vh] rotate-[-25deg] scale-150 pointer-events-auto backdrop-blur-md shadow-2xl">
+                        <div className="f-panel-2 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-8 flex-1 flex flex-col justify-between pointer-events-auto backdrop-blur-md shadow-2xl" style={{ transform: "translateX(-120vw) translateY(-20vh) rotate(-25deg) scale(1.5)" }}>
                             <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                                <span className="font-mono text-xs text-brand">{panel2.tag}</span>
+                                <span className="font-mono text-xs" style={{ color: "#c678dd" }}>{panel2.tag}</span>
                                 <span className="font-mono text-xs text-gray-500">{panel2.meta}</span>
                             </div>
                             <div className="my-auto">
@@ -591,7 +603,7 @@ export default function Hero() {
                         </div>
 
                         {/* PANEL 1 */}
-                        <div className="f-panel-1 floating-panel-initial bg-brand text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between transform translate-x-[120vw] translate-y-[30vh] rotate-35 scale-125 pointer-events-auto shadow-2xl">
+                        <div className="f-panel-1 floating-panel-initial bg-[#c678dd] text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateX(120vw) translateY(30vh) rotate(35deg) scale(1.25)" }}>
                             <div className="flex justify-between items-start border-b border-black/10 pb-4">
                                 <span className="font-mono text-xs font-bold">{panel1.tag}</span>
                                 <span className="font-mono text-xs font-bold opacity-60">{panel1.meta}</span>
@@ -612,7 +624,7 @@ export default function Hero() {
                         </div>
 
                         {/* PANEL 3 */}
-                        <div className="f-panel-3 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-6 flex-1 flex flex-col justify-between transform translate-y-[150vh] rotate-[-15deg] pointer-events-auto shadow-2xl">
+                        <div className="f-panel-3 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-6 flex-1 flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateY(150vh) rotate(-15deg)" }}>
                             <div className="flex justify-between items-center">
                                 <span className="font-mono text-[10px] text-gray-500">{panel3.tag}</span>
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -627,9 +639,9 @@ export default function Hero() {
                     </div>
 
                     <div className="flex justify-center w-full">
-                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 transform translate-y-[60vh] rotate-3 scale-125 pointer-events-auto shadow-2xl hover:border-brand transition-colors duration-300">
+                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 pointer-events-auto shadow-2xl hover:border-[#c678dd] transition-colors duration-300" style={{ transform: "translateY(60vh) rotate(3deg) scale(1.25)" }}>
                             <p className="font-mono text-[10px] text-gray-500 tracking-widest uppercase">{panel4.tag}</p>
-                            <button onClick={() => setIsTerminalOpen(true)} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-brand hover:scale-105 transition-transform duration-300">
+                            <button onClick={openTerminalWithDm} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-[#c678dd] hover:scale-105 transition-transform duration-300">
                                 {panel4.cta}
                             </button>
                         </div>
@@ -638,12 +650,17 @@ export default function Hero() {
             </div>
 
             <AnimatePresence>
-                {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
+                {isTerminalOpen && (
+                    <Terminal
+                        onClose={closeTerminal}
+                        initialCommand={terminalInitialCommand}
+                    />
+                )}
             </AnimatePresence>
-
         </>
     );
 }
+
 
 ================================================================================
 FILE: components\HUD.tsx
@@ -1118,6 +1135,7 @@ import { motion, AnimatePresence } from "motion/react";
 
 interface TerminalProps {
     onClose: () => void;
+    initialCommand?: string;
 }
 
 type LogType = "input" | "output" | "error" | "system";
@@ -1179,7 +1197,6 @@ const THEMES: Record<ThemeName, ThemeColors> = {
 };
 
 const s = (text: string, color?: string, bold?: boolean, href?: string): Segment => ({ text, color, bold, href });
-const dim = (text: string, color?: string): Segment => ({ text, color: color ?? C.dim, dim: true });
 
 let C = THEMES.onedark;
 
@@ -1190,7 +1207,7 @@ let soundEnabled = true;
 function getAudioCtx(): AudioContext | null {
     if (!soundEnabled) return null;
     if (!audioCtx) {
-        try { audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)(); }
+        try { audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)(); }
         catch { return null; }
     }
     return audioCtx;
@@ -1261,21 +1278,21 @@ const NEOFETCH_ASCII = [
 // ─── Response builders ────────────────────────────────────────────────────────
 function buildHelp(): Segment[][] {
     const cmds: [string, string][] = [
-        ["about",       "System bio and mission parameters"],
-        ["contact",     "Initialize communication protocols"],
-        ["dm",          "Send a direct message to the developer"],
-        ["stack",       "Core engineering technologies"],
-        ["projects",    "List portfolio projects"],
-        ["neofetch",    "Display system information"],
-        ["whoami",      "Current user identity"],
-        ["date",        "Print system date/time"],
-        ["echo <txt>",  "Echo text back"],
-        ["ls",          "List directory contents"],
-        ["theme <name>","Switch color scheme"],
-        ["matrix",      "Toggle Matrix rain"],
-        ["sound",       "Toggle keyboard sounds"],
-        ["clear",       "Wipe terminal history"],
-        ["exit",        "Terminate session"],
+        ["about", "System bio and mission parameters"],
+        ["contact", "Initialize communication protocols"],
+        ["dm", "Send a direct message to the developer"],
+        ["stack", "Core engineering technologies"],
+        ["projects", "List portfolio projects"],
+        ["neofetch", "Display system information"],
+        ["whoami", "Current user identity"],
+        ["date", "Print system date/time"],
+        ["echo <txt>", "Echo text back"],
+        ["ls", "List directory contents"],
+        ["theme <name>", "Switch color scheme"],
+        ["matrix", "Toggle Matrix rain"],
+        ["sound", "Toggle keyboard sounds"],
+        ["clear", "Wipe terminal history"],
+        ["exit", "Terminate session"],
     ];
     return [
         [s("AVAILABLE COMMANDS", C.yellow, true)],
@@ -1299,9 +1316,9 @@ function buildAbout(): Segment[][] {
 function buildContact(): Segment[][] {
     return [
         [s("INITIALIZING CONTACT PROTOCOL", C.cyan, true), s(" ···", C.dim)],
-        [s("  ✉  ", C.green),  s("Email     ", C.dim), s("sarthakdev143.official@gmail.com", C.green)],
-        [s("  ⬡  ", C.blue),   s("LinkedIn  ", C.dim), s("linkedin.com/in/sarthak-parulekar", C.blue,   false, "https://www.linkedin.com/in/sarthak-parulekar")],
-        [s("  ⌥  ", C.purple), s("GitHub    ", C.dim), s("github.com/sarthakdev143-lite",     C.purple, false, "https://github.com/sarthakdev143-lite")],
+        [s("  ✉  ", C.green), s("Email     ", C.dim), s("sarthakdev143.official@gmail.com", C.green)],
+        [s("  ⬡  ", C.blue), s("LinkedIn  ", C.dim), s("linkedin.com/in/sarthak-parulekar", C.blue, false, "https://www.linkedin.com/in/sarthak-parulekar")],
+        [s("  ⌥  ", C.purple), s("GitHub    ", C.dim), s("github.com/sarthakdev143-lite", C.purple, false, "https://github.com/sarthakdev143-lite")],
         [s("")],
         [s("  💬 ", C.cyan), s("Type ", C.dim), s("dm", C.cyan, true), s(" to send me a message directly from this terminal.", C.dim)],
     ];
@@ -1319,10 +1336,10 @@ function buildStack(): Segment[][] {
 
 function buildProjects(): Segment[][] {
     const projects = [
-        { name: "Portfolio 3D",  tech: "Next.js · Three.js · GSAP",   desc: "Immersive 3D portfolio with physics-based interactions" },
-        { name: "DevFlow",       tech: "React · Node.js · MongoDB",    desc: "Developer workflow automation & CI/CD dashboard" },
-        { name: "PixelForge",    tech: "TypeScript · Canvas API",      desc: "Browser-based pixel art editor with layer support" },
-        { name: "API Nexus",     tech: "Spring Boot · PostgreSQL",     desc: "High-throughput REST API gateway with rate limiting" },
+        { name: "Portfolio 3D", tech: "Next.js · Three.js · GSAP", desc: "Immersive 3D portfolio with physics-based interactions" },
+        { name: "DevFlow", tech: "React · Node.js · MongoDB", desc: "Developer workflow automation & CI/CD dashboard" },
+        { name: "PixelForge", tech: "TypeScript · Canvas API", desc: "Browser-based pixel art editor with layer support" },
+        { name: "API Nexus", tech: "Spring Boot · PostgreSQL", desc: "High-throughput REST API gateway with rate limiting" },
     ];
     return [
         [s("PORTFOLIO PROJECTS", C.yellow, true)],
@@ -1343,14 +1360,14 @@ function buildWhoami(): Segment[][] {
 function buildNeofetch(): Segment[][] {
     const rows: Segment[][] = [];
     const info: [string, string][] = [
-        ["OS",         "SarthakOS 18.04 LTS"],
-        ["Host",       "MacBook Pro (18,3) · Apple M4 Pro"],
-        ["Kernel",     "18.5.4-generic"],
-        ["Shell",      "bash 5.2.15"],
-        ["Uptime",     `${Math.floor(Math.random() * 168) + 1} hours`],
-        ["Packages",   `${Math.floor(Math.random() * 2000) + 500} (npm)`],
+        ["OS", "SarthakOS 18.04 LTS"],
+        ["Host", "MacBook Pro (18,3) · Apple M4 Pro"],
+        ["Kernel", "18.5.4-generic"],
+        ["Shell", "bash 5.2.15"],
+        ["Uptime", `${Math.floor(Math.random() * 168) + 1} hours`],
+        ["Packages", `${Math.floor(Math.random() * 2000) + 500} (npm)`],
         ["Resolution", "1728x1117 @ 120Hz"],
-        ["Terminal",   "Sarthak_Engine v3.2.1"],
+        ["Terminal", "Sarthak_Engine v3.2.1"],
     ];
     const colors = [C.red, C.orange, C.yellow, C.green, C.cyan, C.blue, C.purple, C.red, C.orange];
     const maxLen = Math.max(NEOFETCH_ASCII.length, info.length);
@@ -1389,10 +1406,10 @@ function buildLs(): Segment[][] {
 function buildCat(args: string): Segment[][] {
     const file = args.trim().toLowerCase();
     switch (file) {
-        case "about.txt":   return [[s("Sarthak Parulekar — Creative Software Engineer", C.bright, true)], [s("Based in Indore, MP, India.", C.white)], [s("Building high-performance web apps with modern tooling.", C.white)]];
-        case "resume.pdf":  return [[s("⚠  Binary file. Use ", C.yellow), s("resume", C.green, true), s(" command to download.", C.yellow)]];
-        case "stack.json":  return [[s("{", C.dim)], [s('  "frontend": ["Next.js","React","TypeScript","Tailwind"],', C.white)], [s('  "backend":  ["Spring Boot","Node.js","REST"],', C.white)], [s('  "motion":   ["GSAP","Lenis","Framer Motion"],', C.white)], [s('  "systems":  ["Git","CI/CD","Docker"]', C.white)], [s("}", C.dim)]];
-        default:            return [[s(`cat: ${file}: No such file or directory`, C.red)]];
+        case "about.txt": return [[s("Sarthak Parulekar — Creative Software Engineer", C.bright, true)], [s("Based in Indore, MP, India.", C.white)], [s("Building high-performance web apps with modern tooling.", C.white)]];
+        case "resume.pdf": return [[s("⚠  Binary file. Use ", C.yellow), s("resume", C.green, true), s(" command to download.", C.yellow)]];
+        case "stack.json": return [[s("{", C.dim)], [s('  "frontend": ["Next.js","React","TypeScript","Tailwind"],', C.white)], [s('  "backend":  ["Spring Boot","Node.js","REST"],', C.white)], [s('  "motion":   ["GSAP","Lenis","Framer Motion"],', C.white)], [s('  "systems":  ["Git","CI/CD","Docker"]', C.white)], [s("}", C.dim)]];
+        default: return [[s(`cat: ${file}: No such file or directory`, C.red)]];
     }
 }
 
@@ -1411,9 +1428,9 @@ function buildResumeDownload(): Segment[][] {
 function buildThemeList(): Segment[][] {
     const themes: [ThemeName, string][] = [
         ["onedark", "One Dark (default)"],
-        ["matrix",  "Matrix"],
+        ["matrix", "Matrix"],
         ["dracula", "Dracula"],
-        ["nord",    "Nord"],
+        ["nord", "Nord"],
         ["monokai", "Monokai"],
     ];
     return [
@@ -1529,11 +1546,11 @@ interface DmFormProps {
 
 function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const T = THEMES[theme];
-    const [name,    setName]    = useState("");
-    const [email,   setEmail]   = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
-    const [status,  setStatus]  = useState<"idle" | "sending" | "done">("idle");
-    const [error,   setError]   = useState("");
+    const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
+    const [error, setError] = useState("");
     const nameRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => { nameRef.current?.focus(); }, []);
@@ -1550,7 +1567,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const inputClass = "w-full rounded px-3 py-2 text-sm font-mono placeholder:opacity-30 focus:ring-0 transition-colors";
 
     const validate = () => {
-        if (!name.trim())    return "Name is required.";
+        if (!name.trim()) return "Name is required.";
         if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Valid email is required.";
         if (!message.trim()) return "Message cannot be empty.";
         return "";
@@ -1564,7 +1581,6 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
         setError(""); setStatus("sending");
 
         try {
-            // Using Formspree — replace YOUR_FORM_ID with your actual Formspree endpoint
             const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -1667,8 +1683,8 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                         {status === "sending"
                             ? <><Loader2 className="w-3 h-3 animate-spin" /> SENDING…</>
                             : status === "done"
-                            ? <><Check className="w-3 h-3" /> SENT</>
-                            : <><Send className="w-3 h-3" /> SEND MESSAGE</>
+                                ? <><Check className="w-3 h-3" /> SENT</>
+                                : <><Send className="w-3 h-3" /> SEND MESSAGE</>
                         }
                     </button>
 
@@ -1692,22 +1708,23 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
 }
 
 // ─── Main Terminal ────────────────────────────────────────────────────────────
-export default function Terminal({ onClose }: TerminalProps) {
-    const [input,        setInput]        = useState("");
-    const [isTyping,     setIsTyping]     = useState(false);
-    const [copied,       setCopied]       = useState(false);
-    const [theme,        setTheme]        = useState<ThemeName>("onedark");
+export default function Terminal({ onClose, initialCommand }: TerminalProps) {
+    const [input, setInput] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [theme, setTheme] = useState<ThemeName>("onedark");
     const [matrixActive, setMatrixActive] = useState(false);
-    const [soundOn,      setSoundOn]      = useState(true);
-    const [suggestions,  setSuggestions]  = useState<string[]>([]);
-    const [showDmForm,   setShowDmForm]   = useState(false);
+    const [soundOn, setSoundOn] = useState(true);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showDmForm, setShowDmForm] = useState(false);
 
-    const scrollRef   = useRef<HTMLDivElement>(null);
-    const inputRef    = useRef<HTMLInputElement>(null);
-    const bottomRef   = useRef<HTMLDivElement>(null);
-    const commandHistoryRef      = useRef<string[]>([]);
-    const inputBeforeHistoryRef  = useRef<string>("");
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const bottomRef = useRef<HTMLDivElement>(null);
+    const commandHistoryRef = useRef<string[]>([]);
+    const inputBeforeHistoryRef = useRef<string>("");
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const initialCommandExecuted = useRef(false);
 
     C = THEMES[theme];
 
@@ -1778,7 +1795,7 @@ export default function Terminal({ onClose }: TerminalProps) {
         setHistory((prev) => [...prev, { id: `spacer-${Date.now()}`, type: "system", segments: [s(" ")] }]);
     };
 
-    const processCommand = async (cmd: string) => {
+    const processCommand = useCallback(async (cmd: string) => {
         const trimmed = cmd.trim();
         if (!trimmed) return;
 
@@ -1793,23 +1810,23 @@ export default function Terminal({ onClose }: TerminalProps) {
 
         let rows: Segment[][] = [];
         let type: LogType = "output";
-        const parts   = trimmed.split(/\s+/);
+        const parts = trimmed.split(/\s+/);
         const baseCmd = parts[0].toLowerCase();
-        const args    = parts.slice(1).join(" ");
+        const args = parts.slice(1).join(" ");
 
         switch (baseCmd) {
-            case "help":     rows = buildHelp();     break;
-            case "about":    rows = buildAbout();    break;
-            case "contact":  rows = buildContact();  break;
-            case "stack":    rows = buildStack();    break;
+            case "help": rows = buildHelp(); break;
+            case "about": rows = buildAbout(); break;
+            case "contact": rows = buildContact(); break;
+            case "stack": rows = buildStack(); break;
             case "projects": rows = buildProjects(); break;
-            case "whoami":   rows = buildWhoami();   break;
+            case "whoami": rows = buildWhoami(); break;
             case "neofetch": rows = buildNeofetch(); break;
-            case "date":     rows = buildDate();     break;
-            case "ls":       rows = buildLs();       break;
-            case "cat":      rows = buildCat(args);  break;
-            case "echo":     rows = buildEcho(args); break;
-            case "resume":   rows = buildResumeDownload(); break;
+            case "date": rows = buildDate(); break;
+            case "ls": rows = buildLs(); break;
+            case "cat": rows = buildCat(args); break;
+            case "echo": rows = buildEcho(args); break;
+            case "resume": rows = buildResumeDownload(); break;
             case "theme":
                 if (args && THEMES[args as ThemeName]) {
                     setTheme(args as ThemeName); rows = buildThemeApplied(args as ThemeName);
@@ -1840,7 +1857,45 @@ export default function Terminal({ onClose }: TerminalProps) {
         await appendOutput(rows, type);
         setIsTyping(false);
         setTimeout(() => inputRef.current?.focus(), 10);
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [matrixActive, soundOn, onClose]);
+
+    useEffect(() => {
+        // RESET the ref when the component mounts or initialCommand changes
+        initialCommandExecuted.current = false;
+    }, []); // This ensures the command can run again every time the terminal is opened
+
+
+    // ─── Auto-type and execute initialCommand ─────────────────────────────────
+    useEffect(() => {
+        if (!initialCommand || initialCommandExecuted.current) return;
+        initialCommandExecuted.current = true;
+
+        const command = initialCommand;
+        let currentIndex = 0;
+
+        // Start typing after a short delay to let the terminal mount
+        const startDelay = setTimeout(() => {
+            const typeInterval = setInterval(() => {
+                currentIndex++;
+                setInput(command.slice(0, currentIndex));
+                playTick();
+
+                if (currentIndex >= command.length) {
+                    clearInterval(typeInterval);
+                    // After finishing typing, wait a beat then "submit"
+                    setTimeout(() => {
+                        setInput("");
+                        processCommand(command);
+                    }, 400);
+                }
+            }, 80); // 80ms per character for a nice typing effect
+        }, 600);
+
+        return () => {
+            clearTimeout(startDelay);
+        };
+    }, [initialCommand, processCommand]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -1901,7 +1956,7 @@ export default function Terminal({ onClose }: TerminalProps) {
             ? [
                 [s("✓ ", C.green), s("Message delivered successfully!", C.green, true)],
                 [s("  I'll get back to you soon. ", C.dim), s("— Sarthak", C.cyan)],
-              ]
+            ]
             : [[s("✗ ", C.red), s("Delivery failed. Please email directly.", C.red)]];
         setHistory((prev) => [...prev, ...rows.map((segments, i) => ({ id: `dm-res-${i}`, type: "output" as LogType, segments }))]);
         setTimeout(() => inputRef.current?.focus(), 50);
@@ -1918,7 +1973,6 @@ export default function Terminal({ onClose }: TerminalProps) {
         setCopied(true); setTimeout(() => setCopied(false), 2000);
     };
 
-    // Suggestions height in pixels (approx) so we can pad the bottom accordingly
     const suggestionVisible = suggestions.length > 0 && input && !showDmForm;
 
     return (
@@ -1934,7 +1988,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative w-full max-w-3xl h-[65vh] min-h-[420px] rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
+                className="relative w-full max-w-3xl h-[65vh] min-h-105 rounded-xl shadow-2xl flex flex-col overflow-hidden will-change-transform cursor-default"
                 style={{
                     background: THEMES[theme].bg,
                     borderColor: `rgba(${THEMES[theme].border},0.1)`,
@@ -1964,7 +2018,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                             <span style={{ color: C.dim }}>:~</span>
                         </span>
                         {matrixActive && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.green }}>⬡ MATRIX</span>}
-                        {showDmForm  && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan  }}>✉ DM MODE</span>}
+                        {showDmForm && <span className="text-[10px] font-mono animate-pulse" style={{ color: C.cyan }}>✉ DM MODE</span>}
                     </div>
 
                     <div className="flex items-center gap-2">
@@ -1995,7 +2049,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                     className="flex-1 overflow-y-auto relative z-30"
                     style={{ scrollbarWidth: "thin", scrollbarColor: `${C.dim} transparent` }}
                 >
-                    <div className="px-5 py-4 space-y-[3px]">
+                    <div className="px-5 py-4 space-y-0.75">
                         {/* History logs */}
                         {history.map((log) =>
                             log.type === "input" ? (
@@ -2037,7 +2091,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                             </form>
                         )}
 
-                        {/* ── Suggestions — rendered below the input, always visible ── */}
+                        {/* ── Suggestions ── */}
                         <AnimatePresence>
                             {suggestionVisible && (
                                 <motion.div
@@ -2046,7 +2100,7 @@ export default function Terminal({ onClose }: TerminalProps) {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -4 }}
                                     transition={{ duration: 0.15 }}
-                                    className="pl-[7.5rem] mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
+                                    className="pl-30 mt-1 text-[11px] font-mono flex items-center gap-1 flex-wrap"
                                     style={{ color: C.dim }}
                                 >
                                     <span>Did you mean:</span>
@@ -2068,12 +2122,6 @@ export default function Terminal({ onClose }: TerminalProps) {
                             )}
                         </AnimatePresence>
 
-                        {/*
-                         * Spacer div — ensures there is always breathing room below
-                         * the input + suggestions so nothing is clipped by the footer.
-                         * The extra height when suggestions are shown prevents them
-                         * from being obscured.
-                         */}
                         <div
                             ref={bottomRef}
                             style={{ height: suggestionVisible ? "5rem" : "3rem" }}
@@ -2095,6 +2143,7 @@ export default function Terminal({ onClose }: TerminalProps) {
         </motion.div>
     );
 }
+
 
 ================================================================================
 FILE: app\globals.css
@@ -2347,9 +2396,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 FILE: app\page.tsx
 ================================================================================
 
+
 import Hero from "@/components/HeroSection";
 import CurvedLoop from "@/components/CurvedLoop";
-import ScrollReveal from "@/components/ScrollReveal";
+// import ScrollReveal from "@/components/ScrollReveal";
 import ProjectGallery from "@/components/ProjectGallery";
 import ExperienceShowcase from "@/components/ExperienceShowcase";
 
@@ -2368,22 +2418,10 @@ export default function Home() {
         />
       </div>
 
-      {/* 3. Narrative Cinematic Manifest Segment */}
-      <section className="max-w-6xl mx-auto px-6 pt-32 md:pt-48">
-        <ScrollReveal
-          baseOpacity={0.05}
-          baseRotation={4}
-          blurStrength={12}
-          wordAnimationEnd="top 30%"
-        >
-          I ARCHITECT HIGH PERFORMANCE APPLICATIONS BY INTEGRATING INTERACTIVE PHYSICS INTERFACES DIRECTLY INTO THE DATA PIPELINE, WE ERASE THE SEAMS BETWEEN RAW LOGIC AND KINETIC BEAUTY.
-        </ScrollReveal>
-      </section>
-
-      {/* 4. Active Experience Showcase Circuit Pipeline */}
+      {/* 3. Active Experience Showcase Circuit Pipeline */}
       <ExperienceShowcase />
 
-      {/* 5. Production Application Showcases & Interactive Console Terminal */}
+      {/* 4. Production Application Showcases & Interactive Console Terminal */}
       <ProjectGallery />
     </div>
   );
