@@ -13,6 +13,7 @@ interface Log {
     id: string;
     type: LogType;
     segments: Segment[];
+    isDmCommand?: boolean;
 }
 
 interface Segment {
@@ -590,6 +591,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const lastDmRef = useRef<HTMLDivElement>(null);
     const commandHistoryRef = useRef<string[]>([]);
     const inputBeforeHistoryRef = useRef<string>("");
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -644,7 +646,11 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
 
     // Auto-scroll — always scroll to the very bottom
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        if (showDmForm && lastDmRef.current) {
+            lastDmRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
     }, [history, isTyping, showDmForm, suggestions]);
 
     useEffect(() => { soundEnabled = soundOn; }, [soundOn]);
@@ -668,10 +674,19 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
         const trimmed = cmd.trim();
         if (!trimmed) return;
 
+        const parts = trimmed.split(/\s+/);
+        const baseCmd = parts[0].toLowerCase();
+        const args = parts.slice(1).join(" ");
+
         commandHistoryRef.current = [trimmed, ...commandHistoryRef.current.filter((c) => c !== trimmed)].slice(0, 100);
         setHistoryIndex(-1);
 
-        const inputLog: Log = { id: `inp-${Date.now()}`, type: "input", segments: [s(trimmed, C.bright)] };
+        const inputLog: Log = { 
+            id: `inp-${Date.now()}`, 
+            type: "input", 
+            segments: [s(trimmed, C.bright)],
+            isDmCommand: baseCmd === "dm"
+        };
         setHistory((prev) => [...prev, inputLog]);
         setInput(""); setIsTyping(true); setSuggestions([]);
         playReturn();
@@ -679,9 +694,6 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
 
         let rows: Segment[][] = [];
         let type: LogType = "output";
-        const parts = trimmed.split(/\s+/);
-        const baseCmd = parts[0].toLowerCase();
-        const args = parts.slice(1).join(" ");
 
         switch (baseCmd) {
             case "help": rows = buildHelp(); break;
@@ -922,7 +934,9 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                         {/* History logs */}
                         {history.map((log) =>
                             log.type === "input" ? (
-                                <div key={log.id} className="flex items-center gap-1 mt-2">
+                                <div key={log.id} 
+                                     ref={log.isDmCommand ? lastDmRef : null}
+                                     className="flex items-center gap-1 mt-2">
                                     {getPrompt()}
                                     <SegmentRow segments={log.segments} />
                                 </div>
