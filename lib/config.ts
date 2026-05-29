@@ -15,11 +15,23 @@ export const SITE_CONFIG = {
 
 export const EXPERIENCE_DATA = [
     {
+        role: "Contractor / Freelancer",
+        company: "Global Tech Solutions & Remote Startups",
+        location: "Remote / International",
+        period: "June 2024 — Present",
+        techStack: ["React/Next.js", "Spring Boot", "Python", "FastAPI", "PostgreSQL", "Docker", "AWS", "CI/CD Pipelines"],
+        highlights: [
+            "Architected and deployed production-ready web applications for international clients across North America, Europe, and APAC, ensuring seamless cross-border delivery.",
+            "Managed end-to-end project life cycles, from initial scope definition and technical architecture to final deployment, performance tuning, and ongoing support.",
+            "Established robust communication pipelines across asynchronous, multicultural remote teams using modern collaboration ecosystems, maintaining a 100% on-time milestone milestone delivery rate."
+        ]
+    },
+    {
         role: "Full Stack Developer",
         company: "Augment Infotech Private Limited",
         location: "Indore",
-        period: "April 2026 — Present",
-        techStack: ["Next.js", "Spring Boot", "REST APIs", "Deployment Pipelines"],
+        period: "March 2026 — Present",
+        techStack: ["React/Next.js", "Spring Boot", "Python", "FastAPI", "PostgreSQL", "Docker", "AWS", "CI/CD Pipelines"],
         highlights: [
             "Developing and deploying production systems serving international and domestic clients.",
             "Debugging and optimizing AI-generated code.",
@@ -79,7 +91,7 @@ export const HERO_PANELS = {
         meta: "01 // STACK",
         title: "FULL STACK ENGINEER",
         desc: "I engineer experiences from API contracts to pixel-perfect motion, shipped to production and built to last.",
-        stack: ["React/Next.js", "Spring Boot", "Node.js", "TypeScript", "MongoDB", "PostgreSQL", "Redis", "Docker", "AWS", "Git"],
+        stack: ["React/Next.js", "Spring Boot", "Node.js", "TypeScript", "Python", "MongoDB", "PostgreSQL", "Redis", "Docker", "AWS", "Git"],
     },
     panel2: {
         tag: "[ MISSION ]",

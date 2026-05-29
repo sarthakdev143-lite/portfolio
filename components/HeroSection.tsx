@@ -100,7 +100,7 @@ export default function Hero() {
                         {/* PANEL 2 */}
                         <div className="f-panel-2 floating-panel-initial bg-[#16161a] border border-white/5 rounded-2xl p-8 flex-1 flex flex-col justify-between pointer-events-auto backdrop-blur-md shadow-2xl" style={{ transform: "translateX(-120vw) translateY(-20vh) rotate(-25deg) scale(1.5)" }}>
                             <div className="flex justify-between items-start border-b border-white/5 pb-4">
-                                <span className="font-mono text-xs" style={{ color: "#c678dd" }}>{panel2.tag}</span>
+                                <span className="font-mono text-xs" style={{ color: "#00BFFF" }}>{panel2.tag}</span>
                                 <span className="font-mono text-xs text-gray-500">{panel2.meta}</span>
                             </div>
                             <div className="my-auto">
@@ -115,7 +115,7 @@ export default function Hero() {
                         </div>
 
                         {/* PANEL 1 */}
-                        <div className="f-panel-1 floating-panel-initial bg-[#c678dd] text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateX(120vw) translateY(30vh) rotate(35deg) scale(1.25)" }}>
+                        <div className="f-panel-1 floating-panel-initial bg-brand text-black rounded-2xl p-8 flex-[1.3] flex flex-col justify-between pointer-events-auto shadow-2xl" style={{ transform: "translateX(120vw) translateY(30vh) rotate(35deg) scale(1.25)" }}>
                             <div className="flex justify-between items-start border-b border-black/10 pb-4">
                                 <span className="font-mono text-xs font-bold">{panel1.tag}</span>
                                 <span className="font-mono text-xs font-bold opacity-60">{panel1.meta}</span>
@@ -151,9 +151,9 @@ export default function Hero() {
                     </div>
 
                     <div className="flex justify-center w-full">
-                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 pointer-events-auto shadow-2xl hover:border-[#c678dd] transition-colors duration-300" style={{ transform: "translateY(60vh) rotate(3deg) scale(1.25)" }}>
+                        <div className="f-panel-4 floating-panel-initial bg-zinc-900 border border-white/10 rounded-2xl px-10 py-6 flex flex-col items-center justify-center gap-4 pointer-events-auto shadow-2xl hover:border-brand transition-colors duration-300" style={{ transform: "translateY(60vh) rotate(3deg) scale(1.25)" }}>
                             <p className="font-mono text-[10px] text-gray-500 tracking-widest uppercase">{panel4.tag}</p>
-                            <button onClick={openTerminalWithDm} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-[#c678dd] hover:scale-105 transition-transform duration-300">
+                            <button onClick={openTerminalWithDm} className="text-black cursor-pointer font-mono text-xs font-bold py-3 px-8 rounded-full bg-brand hover:scale-105 transition-transform duration-300">
                                 {panel4.cta}
                             </button>
                         </div>
