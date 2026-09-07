@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import Lenis from "@studio-freight/lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { setLenis } from "@/lib/lenis";
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -16,6 +17,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       gestureOrientation: "vertical",
       smoothWheel: true,
     });
+
+    // Expose the instance so overlays can pause/resume page scroll.
+    setLenis(lenis);
 
     const tickerCallback = (time: number) => lenis.raf(time * 1000);
 
@@ -30,8 +34,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     gsap.ticker.lagSmoothing(0);
 
     return () => {
+      setLenis(null);
       lenis.destroy();
-      gsap.ticker.remove(tickerCallback); 
+      gsap.ticker.remove(tickerCallback);
     };
   }, []);
 
