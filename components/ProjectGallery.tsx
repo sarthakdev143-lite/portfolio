@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Terminal from "./Terminal";
 import { AnimatePresence } from "motion/react";
 import { PROJECTS } from "@/lib/config";
-import Link from "next/link";
+import ProjectCard, { type Project } from "./ProjectCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -105,70 +105,16 @@ export default function ProjectGallery() {
                 <span className="text-[10px] sm:text-xs font-mono text-white/40 uppercase tracking-[0.24em] sm:tracking-[0.4em] mb-3">
                     {"// COMPILED ARTIFACTS"}
                 </span>
-                <h3 className="text-[clamp(2.1rem,12vw,3.75rem)] md:text-6xl flex-wrap font-bold font-mono text-white uppercase tracking-tighter leading-none">
+                <h2 className="text-[clamp(2.1rem,12vw,3.75rem)] md:text-6xl flex-wrap font-bold font-mono text-white uppercase tracking-tighter leading-none">
                     PROJECTS <span className="text-brand/30">BUILD LOG</span>
-                </h3>
+                </h2>
             </div>
             <div ref={scrollContainerRef} className="relative w-full md:h-screen bg-[#0f0f11] overflow-hidden" style={{ "--projects-count": PROJECTS.length } as React.CSSProperties}>
                 <div ref={trackRef} className="relative md:absolute top-0 left-0 h-full flex flex-col md:flex-row items-center will-change-transform md:w-[calc((var(--projects-count)+1)*100vw)] w-full">
 
                     {/* PROJECT LAYOUT CAPSULES */}
                     {PROJECTS.map((project) => (
-                        <section
-                            key={project.id}
-                            className="project-panel w-full min-h-0 md:min-h-screen md:w-screen md:h-screen flex items-center justify-center px-4 sm:px-5 md:px-24 py-3 md:py-0 shrink-0 perspective-1000 select-none"
-                        // style={{ backgroundColor: project.bg }}
-                        >
-                            <div className="panel-content w-full max-w-6xl min-h-0 md:h-[70vh] bg-[#151519] border border-white/8 rounded-lg md:rounded-3xl p-5 sm:p-6 md:p-16 flex flex-col justify-between gap-12 md:gap-0 transform-style-3d shadow-2xl backdrop-blur-sm">
-
-                                {/* Card Top Information Data Header */}
-                                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 border-b border-white/8 pb-4 md:pb-6">
-                                    <div className="flex items-center gap-3 md:gap-4 min-w-0">
-                                        <span className="font-mono text-sm text-gray-500">[{project.id}]</span>
-                                        <h4 className="font-mono text-[10px] sm:text-xs tracking-widest uppercase wrap-break-word" style={{ color: project.accent }}>
-                                            {"// "}{project.tagline}
-                                        </h4>
-                                    </div>
-                                    <span className="font-mono text-[10px] sm:text-xs text-gray-600 tracking-tighter">STATUS: PRODUCTION_READY</span>
-                                </div>
-
-                                {/* Center Identity Core */}
-                                <div className="my-auto max-w-4xl">
-                                    <h2 className="text-[clamp(2.15rem,12vw,4rem)] md:text-7xl font-black tracking-tighter text-white uppercase mb-5 md:mb-6 leading-none wrap-break-word">
-                                        {project.title}
-                                    </h2>
-                                    <p className="text-[0.95rem] md:text-lg text-gray-400 font-light leading-relaxed max-w-2xl">
-                                        {project.desc}
-                                    </p>
-                                </div>
-
-                                {/* Footer Integration & CTA Row */}
-                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 pt-6 border-t border-white/5">
-                                    <div className="flex flex-wrap gap-1.5 md:gap-2">
-                                        {project.tech.map((t) => (
-                                            <span key={t} className="font-mono text-[10px] md:text-[11px] bg-white/5 border border-white/10 px-2.5 md:px-3 py-1 rounded text-gray-300">
-                                                {t}
-                                            </span>
-                                        ))}
-                                    </div>
-
-                                    <Link
-                                        href={project.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="magnetic-target group h-12 md:h-14 w-full sm:w-auto px-5 md:px-8 rounded-md md:rounded-full flex items-center justify-center text-[11px] md:text-xs font-mono font-bold tracking-wider transition-all duration-300 shadow-lg border"
-                                        style={{
-                                            backgroundColor: project.accent === "#ffffff" ? "#ffffff" : "transparent",
-                                            color: project.accent === "#ffffff" ? "#000000" : project.accent,
-                                            borderColor: project.accent === "#ffffff" ? "transparent" : "color-mix(in srgb, var(--color-brand) 19%, transparent)"
-                                        }}
-                                    >
-                                        INSPECT_REPOS_ →
-                                    </Link>
-                                </div>
-
-                            </div>
-                        </section>
+                        <ProjectCard key={project.id} project={project as Project} />
                     ))}
 
                     {/* THE VOID / BLACK HOLE CLOSING TERMINAL FOOTER */}

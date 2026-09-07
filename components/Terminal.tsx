@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, FormEvent, useCallback } from "react";
+import { useState, useEffect, useRef, FormEvent, useCallback, ReactNode } from "react";
 import { X, Copy, Check, Terminal as TerminalIcon, Volume2, VolumeX, Send, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -13,6 +13,7 @@ interface Log {
     id: string;
     type: LogType;
     segments: Segment[];
+    node?: ReactNode;
     isDmCommand?: boolean;
 }
 
@@ -341,12 +342,31 @@ function buildSoundToggled(enabled: boolean): Segment[][] {
     return [[s(enabled ? "🔊 Sound ON" : "🔇 Sound OFF", enabled ? C.green : C.red, true)]];
 }
 
-function buildDmIntro(): Segment[][] {
+// The mono face is loaded with the "latin" subset only, which has no box-drawing
+// glyphs (U+2500-257F). Those fall back to another font at a different advance
+// width, so an ASCII-art frame can never line up here — draw it with CSS instead.
+function DmIntroBox({ theme }: { theme: ThemeName }) {
+    const c = THEMES[theme];
+    return (
+        <div className="relative my-2 mr-auto inline-block max-w-full">
+            <div
+                className="rounded-sm px-4 py-2.5 font-mono text-sm"
+                style={{ border: `1px solid ${c.cyan}`, color: c.white }}
+            >
+                Send a message directly to Sarthak&apos;s inbox.
+            </div>
+            <span
+                className="absolute -top-2 left-3 px-1.5 font-mono text-[11px] font-bold tracking-wider"
+                style={{ background: c.bg, color: c.cyan }}
+            >
+                DIRECT MESSAGE
+            </span>
+        </div>
+    );
+}
+
+function buildDmOutro(): Segment[][] {
     return [
-        [s("╔══ ", C.cyan), s("DIRECT MESSAGE", C.cyan, true), s(" ═════════════╗", C.cyan)],
-        [s("║  ", C.cyan), s("Send a message directly to Sarthak's inbox.   ", C.white), s("  ║", C.cyan)],
-        [s("╚════════════════════════════╝", C.cyan)],
-        [s("")],
         [s("  Fill in the form below and hit ", C.dim), s("Send", C.green, true), s(".", C.dim)],
     ];
 }
@@ -477,7 +497,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                 transition={{ duration: 0.25 }}
                 onSubmit={handleSend}
                 onClick={(e) => e.stopPropagation()}
-                className="ml-1 mt-3 mb-1 rounded-lg p-4 space-y-3"
+                className="ml-1 mt-2 mb-1 rounded-lg p-4 space-y-3"
                 style={{
                     background: `rgba(255,255,255,0.025)`,
                     border: `1px solid rgba(${T.border},0.12)`,
@@ -662,12 +682,14 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
         </span>
     );
 
-    const appendOutput = async (rows: Segment[][], type: LogType) => {
+    // `spacer` adds a blank trailing line so the next prompt breathes. Skip it when
+    // something with its own top margin follows immediately (e.g. the DM form).
+    const appendOutput = async (rows: Segment[][], type: LogType, spacer = true) => {
         for (let i = 0; i < rows.length; i++) {
             await new Promise((r) => setTimeout(r, 80));
             setHistory((prev) => [...prev, { id: `out-${Date.now()}-${i}`, type, segments: rows[i] }]);
         }
-        setHistory((prev) => [...prev, { id: `spacer-${Date.now()}`, type: "system", segments: [s(" ")] }]);
+        if (spacer) setHistory((prev) => [...prev, { id: `spacer-${Date.now()}`, type: "system", segments: [s(" ")] }]);
     };
 
     const processCommand = useCallback(async (cmd: string) => {
@@ -722,8 +744,11 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
             case "sudo": case "sudo su":
                 rows = buildSudo(); type = "error"; break;
             case "dm":
-                rows = buildDmIntro();
-                await appendOutput(rows, type);
+                setHistory((prev) => [...prev, {
+                    id: `dmbox-${Date.now()}`, type, segments: [],
+                    node: <DmIntroBox theme={theme} />,
+                }]);
+                await appendOutput(buildDmOutro(), type, false);
                 setIsTyping(false);
                 setShowDmForm(true);
                 return;
@@ -738,8 +763,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
         await appendOutput(rows, type);
         setIsTyping(false);
         setTimeout(() => inputRef.current?.focus(), 10);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matrixActive, soundOn, onClose]);
+    }, [matrixActive, soundOn, onClose, theme]);
 
     useEffect(() => {
         // RESET the ref when the component mounts or initialCommand changes
@@ -942,7 +966,7 @@ export default function Terminal({ onClose, initialCommand }: TerminalProps) {
                                 </div>
                             ) : (
                                 <div key={log.id} className="pl-1">
-                                    <SegmentRow segments={log.segments} />
+                                    {log.node ?? <SegmentRow segments={log.segments} />}
                                 </div>
                             )
                         )}

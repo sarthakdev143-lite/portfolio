@@ -7,6 +7,17 @@ import { EXPERIENCE_DATA } from "@/lib/config";
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface ClientEngagement {
+  name: string;
+  role: string;
+  signature: string;
+}
+
+interface ProofMetric {
+  value: string;
+  label: string;
+}
+
 interface WorkExperience {
   role: string;
   company: string;
@@ -14,6 +25,10 @@ interface WorkExperience {
   period: string;
   techStack: string[];
   highlights: string[];
+  /** Headline numbers, rendered large — proof rather than prose. */
+  metrics?: ProofMetric[];
+  /** Enterprise accounts, rendered as a name wall with a one-line caption each. */
+  clients?: ClientEngagement[];
 }
 
 const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
@@ -74,9 +89,9 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
           <span className="text-xs font-mono text-white/40 font-bold tracking-[0.2em] uppercase mb-2">
             {exp.period}
           </span>
-          <h4 className="text-lg md:text-xl font-bold font-mono text-white leading-tight uppercase tracking-tight">
+          <h3 className="text-lg md:text-xl font-bold font-mono text-white leading-tight uppercase tracking-tight">
             {exp.role}
-          </h4>
+          </h3>
           <span className="text-sm font-sans text-white/70 mt-1.5 font-medium">
             {exp.company}
           </span>
@@ -106,6 +121,22 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
               ))}
             </ul>
 
+            {/* Proof Numbers — the visual anchor of the card */}
+            {exp.metrics && exp.metrics.length > 0 && (
+              <div className="grid grid-cols-3 gap-3 md:gap-5 mb-7 md:mb-8 -mt-2">
+                {exp.metrics.map((metric) => (
+                  <div key={metric.label} className="flex flex-col">
+                    <span className="text-[1.75rem] min-[380px]:text-[2.1rem] md:text-[2.75rem] font-black font-mono text-brand leading-none tracking-tighter tabular-nums">
+                      {metric.value}
+                    </span>
+                    <span className="mt-1.5 text-[8px] md:text-[9px] font-mono text-white/35 uppercase tracking-[0.16em] leading-tight">
+                      {metric.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Hardware Architecture Badges */}
             <div className="flex flex-wrap gap-1.5 md:gap-2 pt-5 border-t border-white/4">
               {exp.techStack.map((tech, tIdx) => (
@@ -117,6 +148,33 @@ const ExperienceCard = ({ exp }: { exp: WorkExperience; }) => {
                 </span>
               ))}
             </div>
+
+            {/* Client Account Wall — the set is the proof, not the per-account detail */}
+            {exp.clients && exp.clients.length > 0 && (
+              <div className="mt-7 md:mt-8 pt-6 border-t border-white/8">
+                <span className="block text-[9px] md:text-[10px] font-mono text-white/30 uppercase tracking-[0.3em] mb-5">
+                  {"// SHIPPED FOR"}
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 md:gap-y-6">
+                  {exp.clients.map((client) => (
+                    <div key={client.name} className="group/client">
+                      <div className="flex items-baseline gap-2 flex-wrap">
+                        <h4 className="text-[0.95rem] md:text-[1.05rem] font-bold font-mono text-white/90 tracking-tight leading-tight transition-colors duration-300 group-hover/client:text-white">
+                          {client.name}
+                        </h4>
+                        <span className="text-[9px] md:text-[10px] font-mono text-brand/60 uppercase tracking-[0.15em] shrink-0">
+                          {client.role}
+                        </span>
+                      </div>
+                      <p className="mt-1.5 text-[0.78rem] md:text-[0.82rem] text-neutral-500 leading-snug font-sans transition-colors duration-300 group-hover/client:text-neutral-400">
+                        {client.signature}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -164,9 +222,9 @@ export default function ExperienceShowcase() {
         <span className="text-[10px] sm:text-xs font-mono text-white/40 uppercase tracking-[0.24em] sm:tracking-[0.4em] mb-3">
           {"// CHRONOLOGICAL PIPELINE"}
         </span>
-        <h3 className="text-[clamp(2.1rem,12vw,3.75rem)] md:text-6xl font-bold font-mono text-white uppercase tracking-tighter leading-none">
+        <h2 className="text-[clamp(2.1rem,12vw,3.75rem)] md:text-6xl font-bold font-mono text-white uppercase tracking-tighter leading-none">
           EXPERIENCE <span className="text-brand/30">CIRCUITS</span>
-        </h3>
+        </h2>
       </div>
 
       <div className="relative pl-8.5 md:pl-16">

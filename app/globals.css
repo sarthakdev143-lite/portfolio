@@ -191,4 +191,38 @@
       display: none;
     }
   }
+
+  /* Project architecture schematics: the flow connectors pulse gently in the
+     direction of data. Motion is opt-out — only when reduced motion isn't requested. */
+  @media (prefers-reduced-motion: no-preference) {
+    .sch-pulse {
+      animation: sch-pulse 1.6s ease-in-out infinite;
+    }
+  }
+
+  @keyframes sch-pulse {
+    0%, 100% {
+      opacity: 0.35;
+      transform: translateY(-1px);
+    }
+    50% {
+      opacity: 1;
+      transform: translateY(1px);
+    }
+  }
+}
+
+/* Global reduced-motion safety net. Anyone with the OS setting enabled gets a calm,
+   static site instead of scroll-jacking, marquees and flowing diagrams — this is a
+   vestibular-safety concern, not just a preference. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

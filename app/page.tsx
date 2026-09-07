@@ -4,6 +4,7 @@ import CurvedLoop from "@/components/CurvedLoop";
 // import ScrollReveal from "@/components/ScrollReveal";
 import ProjectGallery from "@/components/ProjectGallery";
 import ExperienceShowcase from "@/components/ExperienceShowcase";
+import { SITE_CONFIG } from "@/lib/config";
 
 export default function Home() {
   return (
@@ -14,7 +15,7 @@ export default function Home() {
       {/* 2. Interactive Ambient Separator Belt */}
       <div className="hidden md:block py-8 bg-[#0f0f11] overflow-hidden">
         <CurvedLoop
-          marqueeText="INGENIOUS BUILDER // SARTHAK PARULEKAR // "
+          marqueeText={SITE_CONFIG.marqueeText}
           speed={2.5}
           interactive={true}
         />

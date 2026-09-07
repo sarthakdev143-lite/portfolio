@@ -13,28 +13,24 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
+  // Required so relative OG/Twitter image URLs resolve to the real origin.
+  // Without it Next falls back to http://localhost:3000 on non-Vercel builds.
+  metadataBase: new URL(SITE_CONFIG.url),
   title: SITE_CONFIG.title,
   description: SITE_CONFIG.description,
+  alternates: { canonical: "/" },
   openGraph: {
     title: SITE_CONFIG.title,
     description: SITE_CONFIG.description,
-    url: "https://sarthakdev.vercel.app", 
+    url: "/",
     siteName: SITE_CONFIG.name,
-    images: [
-      {
-        url: "/og-image.png", // add a 1200×630 image to /public
-        width: 1200,
-        height: 630,
-        alt: SITE_CONFIG.title,
-      },
-    ],
+    // Images come from app/opengraph-image.tsx via the file convention.
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_CONFIG.title,
     description: SITE_CONFIG.description,
-    images: ["/og-image.png"],
   },
 };
 
