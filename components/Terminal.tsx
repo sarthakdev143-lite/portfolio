@@ -471,7 +471,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
         setError(""); setStatus("sending");
 
         try {
-            const res = await fetch(`https://formspree.io/f/mjgzlqok`, {
+            const res = await fetch(`https://formspree.io/f/maeyabko`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
                 body: JSON.stringify({ name, email, message, _subject: `Terminal DM from ${name}` }),
