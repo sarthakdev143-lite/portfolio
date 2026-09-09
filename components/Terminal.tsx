@@ -439,9 +439,14 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
+    const [honeypot, setHoneypot] = useState("");
     const [status, setStatus] = useState<"idle" | "sending" | "done">("idle");
     const [error, setError] = useState("");
     const nameRef = useRef<HTMLInputElement>(null);
+    const NAME_MAX = 80;
+    const EMAIL_MAX = 254;
+    const MESSAGE_MIN = 2;
+    const MESSAGE_MAX = 500;
 
     useEffect(() => { nameRef.current?.focus(); }, []);
 
@@ -457,9 +462,17 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
     const inputClass = "w-full rounded px-3 py-2 text-sm font-mono placeholder:opacity-30 focus:ring-0 transition-colors";
 
     const validate = () => {
-        if (!name.trim()) return "Name is required.";
-        if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Valid email is required.";
-        if (!message.trim()) return "Message cannot be empty.";
+        const trimmedName = name.trim();
+        const trimmedEmail = email.trim();
+        const trimmedMessage = message.trim();
+
+        if (!trimmedName) return "Name is required.";
+        if (trimmedName.length > NAME_MAX) return `Name must be ${NAME_MAX} characters or fewer.`;
+        if (!trimmedEmail) return "Email is required.";
+        if (trimmedEmail.length > EMAIL_MAX) return `Email must be ${EMAIL_MAX} characters or fewer.`;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) return "Enter a valid email address.";
+        if (trimmedMessage.length < MESSAGE_MIN) return `Message must be at least ${MESSAGE_MIN} characters.`;
+        if (trimmedMessage.length > MESSAGE_MAX) return `Message must be ${MESSAGE_MAX} characters or fewer.`;
         return "";
     };
 
@@ -474,16 +487,35 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
             const res = await fetch(`https://formspree.io/f/maeyabko`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
-                body: JSON.stringify({ name, email, message, _subject: `Terminal DM from ${name}` }),
+                body: JSON.stringify({
+                    name: name.trim(),
+                    email: email.trim(),
+                    message: message.trim(),
+                    _subject: `Terminal DM from ${name.trim()}`,
+                    _gotcha: honeypot,
+                }),
             });
+
             if (res.ok) {
                 setStatus("done");
                 setTimeout(() => onSent(true), 1200);
-            } else {
-                throw new Error("Server error");
+                return;
             }
+
+            if (res.status === 429) {
+                setError("Too many messages sent recently. Please try again in a bit.");
+            } else {
+                let message = "Something went wrong. Please try emailing directly.";
+                try {
+                    const data = await res.json();
+                    if (data?.errors?.length) message = data.errors.map((fe: { message: string }) => fe.message).join(" ");
+                    else if (data?.error) message = data.error;
+                } catch { /* response wasn't JSON, fall back to default message */ }
+                setError(message);
+            }
+            setStatus("idle");
         } catch {
-            setError("Failed to send. Please try emailing directly.");
+            setError("Network error. Check your connection and try again, or email me directly.");
             setStatus("idle");
         }
     };
@@ -512,6 +544,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                         type="text" value={name}
                         onChange={(e) => { setName(e.target.value); setError(""); }}
                         placeholder="Your name"
+                        maxLength={NAME_MAX}
                         style={fieldStyle} className={inputClass}
                         disabled={status !== "idle"}
                     />
@@ -524,6 +557,7 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                         type="email" value={email}
                         onChange={(e) => { setEmail(e.target.value); setError(""); }}
                         placeholder="your@email.com"
+                        maxLength={EMAIL_MAX}
                         style={fieldStyle} className={inputClass}
                         disabled={status !== "idle"}
                     />
@@ -537,14 +571,27 @@ function DmForm({ theme, onSent, onCancel }: DmFormProps) {
                         onChange={(e) => { setMessage(e.target.value); setError(""); }}
                         placeholder="What's on your mind?"
                         rows={4}
+                        maxLength={MESSAGE_MAX}
                         style={{ ...fieldStyle, resize: "vertical" }}
                         className={inputClass}
                         disabled={status !== "idle"}
                     />
                     <div className="text-right font-mono" style={{ color: T.dim, fontSize: "10px" }}>
-                        {message.length} / 500
+                        {message.length} / {MESSAGE_MAX}
                     </div>
                 </div>
+
+                {/* Honeypot — hidden from real users, silently discarded by Formspree if filled by a bot */}
+                <input
+                    type="text"
+                    name="_gotcha"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    style={{ position: "absolute", width: 0, height: 0, opacity: 0, overflow: "hidden", pointerEvents: "none" }}
+                />
 
                 {/* Error */}
                 {error && (
